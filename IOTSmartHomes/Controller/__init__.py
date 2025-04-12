@@ -1,0 +1,4 @@
+from Controller.PersonController import PersonController
+from Controller.HomeController import HomeController
+from Controller.ApplianceController import ApplianceController
+from Controller.HardwareController import HardwareController
