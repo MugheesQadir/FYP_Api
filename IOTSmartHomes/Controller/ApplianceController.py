@@ -20,7 +20,7 @@ class ApplianceController:
     def list_appliance():
         try:
             appliances = Appliance.query.where(Appliance.validate == 1).all()
-            return [{"id": a.id, "name": a.name, "type": a.type,
+            return [{"id": a.id, "type": a.type,
                      "power": a.power, "catagory":a.catagory} for a in appliances]
         except Exception as e:
             return str(e)
@@ -29,7 +29,7 @@ class ApplianceController:
     def list_deleted_appliance():
         try:
             appliances = Appliance.query.where(Appliance.validate == 0).all()
-            return [{"id": a.id, "name": a.name, "type": a.type,
+            return [{"id": a.id,  "type": a.type,
                      "power": a.power, "catagory":a.catagory} for a in appliances]
         except Exception as e:
             return str(e)
@@ -40,7 +40,7 @@ class ApplianceController:
             appliances = Appliance.query.filter_by(id=id,validate=1).first()
             if not appliances:
                 return {'error': f'Appliance with id {id} not found'}
-            return [{"id": appliances.id, "name": appliances.name
+            return [{"id": appliances.id
                         , "type": appliances.type, "power": appliances.power,
                      "catagory": appliances.catagory}]
         except Exception as e:
@@ -52,46 +52,19 @@ class ApplianceController:
             appliances = Appliance.query.filter_by(id=id, validate=0).first()
             if not appliances:
                 return {'error': f'Deleted Appliance with id {id} not found'}
-            return [{"id": appliances.id, "name": appliances.name
-                        , "type": appliances.type, "power": appliances.power,
+            return [{"id": appliances.id,"type": appliances.type, "power": appliances.power,
                      "catagory": appliances.catagory}]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_appliance_by_name(name):
-        try:
-            appliances = Appliance.query.filter_by(name=name,validate=1).first()
-            if not appliances:
-                return {'error': f'Appliance ({name}) not found'}
-            if appliances:
-                return [{"id": appliances.id, "name": appliances.name
-                        , "type": appliances.type, "power": appliances.power,
-                     "catagory": appliances.catagory}]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_deleted_appliance_by_name(name):
-        try:
-            appliances = Appliance.query.filter_by(name=name,validate=0).first()
-            if not appliances:
-                return {'error': f'Deleted Appliance ({name}) not found'}
-            if appliances:
-                return [{"id": appliances.id, "name": appliances.name
-                            , "type": appliances.type, "power": appliances.power,
-                         "catagory": appliances.catagory}]
         except Exception as e:
             return str(e)
 
     @staticmethod
     def add_appliance(data):
         try:
-            appliances = Appliance(name=data['name'], type=data['type'], power=data['power'],
+            appliances = Appliance(type=data['type'], power=data['power'],
                                    catagory=data['catagory'],validate=1)
             db.session.add(appliances)
             db.session.commit()
-            return {'success':f"{data['name']} added successfully"}
+            return {'success':f"{data['catagory']} added successfully"}
         except Exception as e:
             return str(e)
 
@@ -103,13 +76,12 @@ class ApplianceController:
                 return {'error':f"Appliance not found"}
 
             if appliances is not None:
-                appliances.name = data['name']
                 appliances.type = data['type']
                 appliances.power = data['power']
                 appliances.catagory = data['catagory']
                 appliances.validate = 1
                 db.session.commit()
-                return {'success':f"{data['name']} added successfully"}
+                return {'success':f"{data['catagory']} added successfully"}
         except Exception as a:
             return str(a)
 
@@ -157,8 +129,9 @@ class ApplianceController:
                 .all()
             )
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name":compartmentappliance.name,
                      "compartment_id": compartment.id, "compartment_name": compartment.name,
-                     "appliance_id": appliance.id, "appliance_name": appliance.name}
+                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -174,8 +147,9 @@ class ApplianceController:
                 .all()
             )
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
                      "compartment_id": compartment.id, "compartment_name": compartment.name,
-                     "appliance_id": appliance.id, "appliance_name": appliance.name}
+                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -194,8 +168,9 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
             return {
                 "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
+                "name": CompartmentAppliance.name,
                      "compartment_name": result.Compartment.name,
-                     "appliance_name": result.Appliance.name
+                     "appliance_catagory": result.Appliance.catagory
             }
         except Exception as e:
             return str(e)
@@ -215,8 +190,9 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
             return {
                 "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
+                "name": CompartmentAppliance.name,
                 "compartment_name": result.Compartment.name,
-                "appliance_name": result.Appliance.name
+                "appliance_catagory": result.Appliance.catagory
             }
         except Exception as e:
             return str(e)
@@ -235,8 +211,9 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
                      "compartment_name": compartment.name,
-                     "appliance_name": appliance.name}
+                     "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -255,8 +232,9 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
                      "compartment_name": compartment.name,
-                     "appliance_name": appliance.name}
+                     "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -277,8 +255,9 @@ class ApplianceController:
                 return {'error': f"Compartment Appliance not found"}
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
                      "compartment_name": compartment.name,
-                     "appliance_name": appliance.name}
+                     "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -299,8 +278,9 @@ class ApplianceController:
                 return {'error': f"Compartment Appliance not found"}
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
                      "compartment_name": compartment.name,
-                     "appliance_name": appliance.name}
+                     "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -317,7 +297,8 @@ class ApplianceController:
                 return {'error':f"Compartment not found"}
 
             compartment_appliances = CompartmentAppliance(status=data['status'],
-                compartment_id=data['compartment_id'], appliance_id=data['appliance_id'],validate=1)
+                                            name=data['name'],compartment_id=data['compartment_id'],
+                                                appliance_id=data['appliance_id'],validate=1)
 
             db.session.add(compartment_appliances)
             db.session.commit()
@@ -341,6 +322,7 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
 
             if compartment_appliances is not None:
+                compartment_appliances.name = data['name']
                 compartment_appliances.status = data['status']
                 compartment_appliances.compartment_id = data['compartment_id']
                 compartment_appliances.appliance_id = data['appliance_id']
@@ -400,7 +382,7 @@ class ApplianceController:
                                      )
                 return [{"id": applianceSchedule.id,
                          "compartment_name": compartment.name,
-                         "appliance_name": appliance.name,
+                         "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
                          "end_time": applianceSchedule.end_time,
                          "days": applianceSchedule.days
@@ -445,7 +427,7 @@ class ApplianceController:
 
                 return {"id": applianceSchedule.id,
                          "compartment_name": compartment.name,
-                         "appliance_name": appliance.name,
+                         "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
                          "end_time": applianceSchedule.end_time,
                          "days": applianceSchedule.days
@@ -491,7 +473,7 @@ class ApplianceController:
 
                 return {"id": applianceSchedule.id,
                         "compartment_name": compartment.name,
-                        "appliance_name": appliance.name,
+                        "appliance_catagory": appliance.catagory,
                         "start_time": applianceSchedule.start_time,
                         "end_time": applianceSchedule.end_time,
                         "days": applianceSchedule.days
@@ -532,7 +514,7 @@ class ApplianceController:
                                      )
                 return [{"id": applianceSchedule.id,
                          "compartment_name": compartment.name,
-                         "appliance_name": appliance.name,
+                         "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
                          "end_time": applianceSchedule.end_time,
                          "days": applianceSchedule.days
@@ -572,7 +554,7 @@ class ApplianceController:
                                      )
                 return [{"id": applianceSchedule.id,
                          "compartment_name": compartment.name,
-                         "appliance_name": appliance.name,
+                         "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
                          "end_time": applianceSchedule.end_time,
                          "days": applianceSchedule.days

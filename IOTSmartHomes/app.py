@@ -316,16 +316,6 @@ def getDeletedAppliancesDetails(id):
     appliances = ApplianceController.get_deleted_appliance_by_id(id)
     return jsonify(appliances)
 
-@app.route('/GetApplianceByName/<string:name>',methods = ['GET'])
-def getAppliancesByName(name):
-    appliances = ApplianceController.get_appliance_by_name(name)
-    return jsonify(appliances)
-
-@app.route('/GetDeletedApplianceByName/<string:name>',methods = ['GET'])
-def getDeletedAppliancesByName(name):
-    appliances = ApplianceController.get_deleted_appliance_by_name(name)
-    return jsonify(appliances)
-
 @app.route('/AddAppliance',methods = ["POST"])
 def addAppliance():
     data = request.get_json()
