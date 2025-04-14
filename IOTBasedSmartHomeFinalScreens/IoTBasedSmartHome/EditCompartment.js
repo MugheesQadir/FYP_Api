@@ -68,7 +68,7 @@ const EditCompartment = ({ navigation, route }) => {
                 if (res.ok) {
                     if (data.success) {
                         Alert.alert('Successful', data.success);
-                        navigation.replace('Compartment');
+                        navigation.goBack();
                     } else {
                         Alert.alert('Failed', data.error || 'Something went wrong');
                     }
@@ -106,7 +106,7 @@ const EditCompartment = ({ navigation, route }) => {
                 if (res.ok) {
                     if (data.success) {
                         Alert.alert('Successful', data.success);
-                        navigation.replace('Compartment');
+                        navigation.goBack()
                     } else {
                         Alert.alert('Failed', data.error || 'Something went wrong');
                     }
@@ -144,7 +144,7 @@ const EditCompartment = ({ navigation, route }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => navigation.replace('Compartment')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <View

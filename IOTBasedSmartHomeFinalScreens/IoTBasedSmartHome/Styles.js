@@ -42,19 +42,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '90%',
     },
-    navbar: { 
-        backgroundColor: '', 
-        width: '100%', 
-        padding: 15, 
-        flexDirection: 'row', 
+    navbar: {
+        backgroundColor: '',
+        width: '100%',
+        padding: 15,
+        flexDirection: 'row',
         alignItems: 'center'
     },
-    navbarText: { 
-        fontSize: 20, 
-        textAlign: 'center', 
-        color: 'black', 
-        marginLeft: 0 ,
-        fontWeight:'800'
+    navbarText: {
+        fontSize: 20,
+        textAlign: 'center',
+        color: 'black',
+        marginLeft: 0,
+        fontWeight: '800'
     },
     image: {
         width: 200,
@@ -65,11 +65,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     Bottombtn: {
-        flex: 1, 
-        width: '100%', 
+        flex: 1,
+        width: '100%',
         alignItems: 'center',
-        justifyContent: 'flex-end', 
-        marginBottom: '16%', 
+        justifyContent: 'flex-end',
+        marginBottom: '16%',
         marginTop: '60%'
     },
     input: {
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         width: '100%',
         marginBottom: 10,
-        backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 
+        backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7
     },
     button: {
         backgroundColor: '#001F6D',
@@ -94,6 +94,20 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
     },
+    textView: { backgroundColor: '#001F6D', padding: 20, borderRadius: 20, flex: 1, borderWidth: 1 },
+    applianceName: { fontSize: 18, marginLeft: 10, color: 'white' },
+    switchContainer: { position: 'relative', alignItems: 'center', justifyContent: 'center', marginLeft: 25 },
+  simulatedBorder: {
+    position: 'absolute',
+    width: 50,
+    height: 26,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#001F6D',
+  },
+  switch: { marginLeft: 0 },
+    row: {flexDirection: 'row', alignItems: 'center', marginHorizontal: 25, marginTop: 0 },
     listItem: {
         backgroundColor: '#001F6D',
         paddingVertical: 20,
@@ -104,15 +118,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        outlineColor: 'darkblue',
+        outlineWidth: 2,
+        outlineStyle: 'solid', outlineOffset: 2,shadowOffset:2, shadowColor: 'darkblue', // Shadow for iOS
     },
     listText: {
         fontSize: 20,
         color: 'white',
-        fontStyle:'italic',
+        fontStyle: 'italic',
         fontWeight: '600',
-        letterSpacing:0.8,
+        letterSpacing: 0.8,
         fontFamily: 'Algerian',
-        marginLeft:15
+        marginLeft: 15
     },
     infoIcon: {
         width: 30,
@@ -144,9 +161,9 @@ const styles = StyleSheet.create({
         shadowRadius: 3.5,
         borderWidth: 3.5,
         borderColor: 'white',
-        outlineColor:'darkblue',
-        outlineWidth:2,
-        outlineStyle:'solid',
+        outlineColor: 'darkblue',
+        outlineWidth: 2,
+        outlineStyle: 'solid',
     },
     floatingButtonText: {
         fontSize: 35,

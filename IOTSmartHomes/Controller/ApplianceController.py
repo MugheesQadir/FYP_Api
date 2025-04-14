@@ -168,8 +168,9 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
             return {
                 "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
-                "name": CompartmentAppliance.name,
+                "name": result.CompartmentAppliance.name,
                      "compartment_name": result.Compartment.name,
+                     "appliance_id":result.Appliance.id,
                      "appliance_catagory": result.Appliance.catagory
             }
         except Exception as e:
@@ -210,9 +211,11 @@ class ApplianceController:
             if result is None:
                 return {'error':f"Compartment Appliance not found"}
 
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+            return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
+                     "compartment_id":compartment.id,
                      "compartment_name": compartment.name,
+                     "appliance_id":appliance.id,
                      "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
@@ -231,9 +234,11 @@ class ApplianceController:
             if result is None:
                 return {'error':f"Compartment Appliance not found"}
 
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+            return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
+                     "compartment_id":compartment.id,
                      "compartment_name": compartment.name,
+                     "appliance_id":appliance.id,
                      "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:

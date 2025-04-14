@@ -74,7 +74,7 @@ const Home = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
             <View style={styles.navbar}>
-                <TouchableOpacity onPress={() => navigation.replace('Login')}>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>

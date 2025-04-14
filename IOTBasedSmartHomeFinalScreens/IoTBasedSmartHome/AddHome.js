@@ -82,7 +82,7 @@ const AddHome = ({ navigation, route }) => {
             if (res.ok) {
                 if (data.success) {
                     Alert.alert('Successfull', data.success);
-                    navigation.replace('Home');
+                    navigation.goBack();
                 } else {
                     Alert.alert('Failed', data.error || 'Something went wrong');
                 }
@@ -109,7 +109,7 @@ const AddHome = ({ navigation, route }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => navigation.replace('Home')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <View

@@ -60,7 +60,7 @@ const Login = ({ navigation }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => navigation.replace('MainScreen')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <View style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>Login</Text></View>

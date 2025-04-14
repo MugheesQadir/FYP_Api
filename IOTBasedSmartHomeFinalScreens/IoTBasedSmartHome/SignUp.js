@@ -40,7 +40,7 @@ const SignUp = ({ navigation }) => {
                 if (res.ok) {
                     if (data.success) {
                         Alert.alert('SignUp Successful', data.success);
-                        navigation.replace('Login');
+                        navigation.goBack();
                         setConpass('')
                         setName('')
                         setPassword('')
@@ -65,7 +65,7 @@ const SignUp = ({ navigation }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => navigation.replace('Login')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <View style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>Sign Up</Text></View>

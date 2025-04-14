@@ -15,7 +15,7 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
     const [status, setstatus] = useState(null);
     const [listAppliances, setListAppliances] = useState([]);
 
-    const stat = [{id:2,name:'Off'},{id:1,name:'On'}]
+    const stat = [{id:0,name:'Off'},{id:1,name:'On'}]
 
     const [compartment_id, set_Com_id] = useState(null)
 
@@ -52,11 +52,12 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
                 Alert.alert('Error', 'Please Select Appliances')
                 return;
             }
-            if (!status) {
-                Alert.alert('Error', 'Please Select status')
+            if (status === null || status === undefined) {
+                Alert.alert('Error', 'Please Select status');
                 return;
             }
-            const payload = { name:name,compartment_id: compartment_id, appliance_id: Appliances,status:status === 1?1:0 };
+            
+            const payload = { name:name,compartment_id: compartment_id, appliance_id: Appliances,status:status };
             try {
                 const res = await fetch(`${URL}/Add_Compartment_Appliance`,
                     {
@@ -68,7 +69,7 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
                 if (res.ok) {
                     if (data.success) {
                         Alert.alert('Successfull', data.success);
-                        navigation.replace('CompartmentAppliance');
+                        navigation.goBack()
                     } else {
                         Alert.alert('Failed', data.error || 'Something went wrong');
                     }
@@ -89,24 +90,18 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => navigation.replace('CompartmentAppliance')}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
                     <View
                         style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>
-                            Add Appliance-{status}</Text></View>
+                            Add Appliance</Text></View>
 
                 </View>
                 <View style={styles.innerContainer}>
-                    <View style={styles.formContainer}>
-                        <TextInput
-                            style={[styles.input, { backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 }]}
-                            placeholder='Name'
-                            placeholderTextColor='gray'
-                            onChangeText={setName}
-                        />
+                    <View style={styles.formContainer}>                        
 
-                        <View style={{ position: 'absolute', width: '100%', marginTop: '20%' }}>
+                        <View style={{ position: 'absolute', width: '100%', marginTop: '' }}>
                             <Dropdown
                                 style={styles.select}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
@@ -123,6 +118,13 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
                             />
 
                         </View>
+
+                        <TextInput
+                            style={[styles.input, {position:'absolute', backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7,marginTop:'19%' }]}
+                            placeholder='Name'
+                            placeholderTextColor='gray'
+                            onChangeText={setName}
+                        />
 
                         <View style={{ position: 'absolute', width: '100%', marginTop: '40%' }}>
                             <Dropdown
