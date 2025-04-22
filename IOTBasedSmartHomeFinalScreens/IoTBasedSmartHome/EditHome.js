@@ -202,7 +202,7 @@ const EditHome = ({ navigation, route }) => {
                             Edit Home</Text></View>
 
                 </View>
-                <View style={styles.innerContainer}>
+                <View style={[styles.innerContainer, { flex: 1, position: 'relative' }]}>
                     <View style={styles.formContainer}>
                         <TextInput
                             style={[styles.input, { backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 }]}
@@ -249,7 +249,8 @@ const EditHome = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '190%', flexDirection: 'row', justifyContent: 'space-around' }]}>
+
+                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%', flexDirection: 'row', justifyContent: 'space-around' }]}>
                         <View style={{ position: '', backgroundColor: 'maroon', padding: 10, marginLeft: 31, width: '35%', borderRadius: 10, }}>
                             <TouchableOpacity onPress={DeleteHome}
                             >

@@ -66,7 +66,7 @@ const Login = ({ navigation }) => {
                     <View style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>Login</Text></View>
 
                 </View>
-                <View style={[styles.innerContainer, { marginTop: '10%' }]}>
+                <View style={[styles.innerContainer, { flex:1,position:'relative', marginTop: '10%' }]}>
                     <Image source={require('../Images/Iot4.png')} style={styles.image} />
 
                     <TextInput
@@ -101,7 +101,7 @@ const Login = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
-                    <View style={styles.Bottombtn}>
+                    <View style={[styles.Bottombtn,{justifyContent:'center',alignItems:'center',flexDirection:'',marginBottom:25}]}>
                         <View style={{ backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10, marginBottom: 10 }}>
                             <TouchableOpacity onPress={Login_method}
                             >

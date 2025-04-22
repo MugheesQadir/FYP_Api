@@ -85,10 +85,15 @@ const Home = ({ navigation, route }) => {
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
                     <FlatList
-                        data={data}
-                        renderItem={FlatListData}
-                        contentContainerStyle={{ paddingBottom: 100 }}
-                    />
+                    data={data}
+                    renderItem={FlatListData}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    removeClippedSubviews={true}
+                  />
+                  
                     :
                     <View>
                     <View style={[styles.listItem]}>

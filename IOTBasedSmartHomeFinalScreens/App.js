@@ -19,7 +19,8 @@ const App = () => {
   const Stack = createNativeStackNavigator();
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ 
+        headerShown: false,animation:'ios_from_right',animationEnabled: false  }}>
         <Stack.Screen name="MainScreen" component={MainScreen} />
         <Stack.Screen name='Login' component={Login} />
         <Stack.Screen name='SignUp' component={SignUp} />

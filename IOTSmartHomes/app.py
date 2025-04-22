@@ -916,5 +916,11 @@ def get_relay_state():
     res = HardwareController.get_relay_state()
     return jsonify(res), 200
 
+@app.route('/Update_Compartment_Appliance_status',methods = ["POST"])
+def Update_Compartment_Appliance_status():
+    data = request.get_json()
+    appliance = HardwareController.updateCompartmentAppliancesStatus(data)
+    return jsonify(appliance)
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

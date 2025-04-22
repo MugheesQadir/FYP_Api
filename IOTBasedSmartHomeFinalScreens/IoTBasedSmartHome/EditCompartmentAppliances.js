@@ -13,6 +13,7 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
     const [name, setName] = useState('')
     const [Appliances, setAppliances] = useState(null);
     const [status, setstatus] = useState(null);
+    const [port,setPort] = useState('')
     const [listAppliances, setListAppliances] = useState([]);
     const [items, setItems] = useState(route.params?.items || null);
     const [Com_App_id, set_Com_App_Id] = useState(null);
@@ -60,7 +61,7 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
             return;
         }
         
-        const payload = { id:Com_App_id,name: name, compartment_id: compartment_id, appliance_id: Appliances, status: status === 1 ? 1 : 0 };
+        const payload = { id:Com_App_id,name: name,port:port, compartment_id: compartment_id, appliance_id: Appliances, status: status === 1 ? 1 : 0 };
         try {
             const res = await fetch(`${URL}/Update_Compartment_Appliance`, {
                 method: 'POST',
@@ -160,7 +161,8 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
             if (data) {
                 setName(data.name);
                 setAppliances(data.appliance_id.toString())
-                setstatus(data.status)                
+                setstatus(data.status)   
+                setPort(data.port.toString())             
             }
         }, [data]);
 
@@ -181,7 +183,7 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
                             Edit Appliance</Text></View>
 
                 </View>
-                <View style={styles.innerContainer}>
+                <View style={[styles.innerContainer,{flex:1,position:'relative'}]}>
                     <View style={styles.formContainer}>
                         
 
@@ -228,9 +230,17 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
                             />
 
                         </View>
+
+                        <TextInput
+                            style={[styles.input, {position:'absolute', backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7,marginTop:'60%' }]}
+                            placeholder='Port'
+                            placeholderTextColor='gray'
+                            onChangeText={setPort}
+                            value={port}
+                        />
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '190%', flexDirection: 'row', justifyContent: 'space-around' }]}>
+                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%', flexDirection: 'row', justifyContent: 'space-around' }]}>
                         <View style={{ position: '', backgroundColor: 'maroon', padding: 10, marginLeft: 31, width: '35%', borderRadius: 10, }}>
                             <TouchableOpacity 
                             onPress={DeleteCompartmentAppliances}

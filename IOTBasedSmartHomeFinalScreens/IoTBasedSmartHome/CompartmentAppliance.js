@@ -2,15 +2,14 @@ import {
   Text, View, TouchableOpacity, Pressable,
   KeyboardAvoidingView, Platform, FlatList,
   Switch,
-  Alert
+  Alert,
+  StyleSheet,
 } from 'react-native';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,useRef  } from 'react';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
-import { useFocusEffect } from '@react-navigation/native';
 import URL from './Url';
-import EditCompartmentAppliances from './EditCompartmentAppliances';
 
 const storage = new MMKV();
 
@@ -18,24 +17,11 @@ const CompartmentAppliance = ({ navigation, route }) => {
   const [data, setData] = useState([]);
   const [toggleStates, setToggleStates] = useState({});
   const [selectAll, setSelectAll] = useState(false);
+  const [compartmentId, setCompartmentId] = useState(route.params?.items?.compartment_id || null);
+  const items = route.params?.items || {};
+  const intervalRef = useRef(null);
 
-  const [items, setItems] = useState(route.params?.items || {});
-  const [compartment_id, setCompartmentId] = useState(items?.compartment_id || null);
-
-  const setStorageData = () => {
-    if (items?.compartment_id) {
-      storage.set('compartment_id', Number(items.compartment_id));
-    }
-  };
-
-  const getStorageData = () => {
-    const storedId = storage.getNumber('compartment_id');
-    if (storedId !== undefined) {
-      setCompartmentId(storedId);
-    }
-  };
-
-  const getCompartmentApplianceByCompartmentId = async (id) => {
+  const getCompartmentApplianceByCompartmentId = useCallback(async (id) => {
     if (!id) return;
     try {
       const response = await fetch(`${URL}/get_compartment_appliance_with_compartment_id/${id}`);
@@ -54,115 +40,98 @@ const CompartmentAppliance = ({ navigation, route }) => {
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
-  };
+  }, []);
 
-  const EditAppliances = async () => {
-    if (!name) {
-      Alert.alert('Error', 'Please Enter Appliance name')
-      return;
-    }
-    if (!Appliances) {
-      Alert.alert('Error', 'Please Select Appliances')
-      return;
-    }
-    if (status === null || status === undefined) {
-      Alert.alert('Error', 'Please Select status');
-      return;
-    }
-
-    const payload = { id: Com_App_id, name: name, compartment_id: compartment_id, appliance_id: Appliances, status: status === 1 ? 1 : 0 };
-    try {
-      const res = await fetch(`${URL}/Update_Compartment_Appliance`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      let data;
-      try {
-        data = await res.json(); // Safe JSON parsing
-      } catch (jsonError) {
-        throw new Error("Invalid JSON response from server");
-      }
-
-      if (res.ok) {
-        if (data.success) {
-          Alert.alert('Successful', data.success);
-          navigation.goBack()
-        } else {
-          Alert.alert('Failed', data.error || 'Something went wrong');
-        }
-      } else {
-        Alert.alert('Failed', data?.error || 'Server error occurred');
-      }
-    } catch (error) {
-      Alert.alert('Error', error.message || 'An unexpected error occurred');
-    }
-  };
-
-  const handleToggle = async (id, Compartment_Appliance_id, name, compartment_id, appliance_id) => {
-    const newStatus = !toggleStates[id]; // status to be updated in DB (true = 1, false = 0)
-
-    // 👇 Update frontend state immediately for better UX
+  const handleToggle = useCallback(async (id, Compartment_Appliance_id) => {
+    const newStatus = !toggleStates[id];
     setToggleStates(prev => ({ ...prev, [id]: newStatus }));
 
-    // Prepare payload for backend
-    const payload = {
-      id: Compartment_Appliance_id,
-      name: name,
-      compartment_id: compartment_id,
-      appliance_id: appliance_id,
-      status: newStatus ? 1 : 0,  // convert to integer
-    };
+    const payload = { id: Compartment_Appliance_id, status: newStatus ? 1 : 0 };
 
     try {
-      const res = await fetch(`${URL}/Update_Compartment_Appliance`, {
+      const res = await fetch(`${URL}/Update_Compartment_Appliance_status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      const result = await res.json();
 
-      if (res.ok && data.success) {
-        console.log("Status updated successfully for:", name);
-      } else {
-        Alert.alert('Failed to update status', data.error || 'Unknown error');
-        // ❌ Revert toggle if update failed
-        setToggleStates(prev => ({ ...prev, [id]: !newStatus }));
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || 'Update failed');
       }
     } catch (error) {
-      Alert.alert('Network Error', error.message);
-      // ❌ Revert toggle on error
+      Alert.alert('Error', error.message);
       setToggleStates(prev => ({ ...prev, [id]: !newStatus }));
     }
-  };
+  }, [toggleStates]);
 
-
-  const handleSelectAll = () => {
-    const newState = !selectAll;
+  const handleSelectAll = useCallback(async () => {
+    const newSelectAll = !selectAll;
+    setSelectAll(newSelectAll);
+  
     const updatedToggles = {};
-    data.forEach(item => updatedToggles[item.id] = newState);
-    setToggleStates(updatedToggles);
-    setSelectAll(newState);
-  };
+    const updates = [];
+  
+    for (let item of data) {
+      const id = item.Compartment_Appliance_id;
+      if (toggleStates[id] !== newSelectAll) { // Only update if needed
+        updatedToggles[id] = newSelectAll;
+        updates.push({
+          id,
+          status: newSelectAll ? 1 : 0
+        });
+      }
+    }
+  
+    setToggleStates(prev => ({ ...prev, ...updatedToggles }));
+  
+    try {
+      await Promise.all(
+        updates.map(payload =>
+          fetch(`${URL}/Update_Compartment_Appliance_status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          })
+        )
+      );
+    } catch (error) {
+      Alert.alert('Network Error', error.message);
+    }
+  }, [data, selectAll, toggleStates]);
+  
+
 
   useEffect(() => {
+    const storedId = storage.getNumber('compartment_id');
+    if (storedId) setCompartmentId(storedId);
     if (items?.compartment_id) {
-      setStorageData();
-      getCompartmentApplianceByCompartmentId(items.compartment_id);
+      storage.set('compartment_id', Number(items.compartment_id));
+      setCompartmentId(items.compartment_id);
     }
   }, [items]);
 
-  useFocusEffect(
-    useCallback(() => {
-      getStorageData();
-      if (compartment_id) getCompartmentApplianceByCompartmentId(compartment_id);
-    }, [compartment_id])
-  );
+  // Polling with cleanup
+  useEffect(() => {
+    if (compartmentId) {
+      getCompartmentApplianceByCompartmentId(compartmentId);
+      intervalRef.current = setInterval(() => {
+        getCompartmentApplianceByCompartmentId(compartmentId);
+      }, 300);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [compartmentId, getCompartmentApplianceByCompartmentId]);
 
+  // Update Select All toggle
+  useEffect(() => {
+    if (data.length > 0) {
+      const allOn = data.every(item => toggleStates[item.Compartment_Appliance_id]);
+      setSelectAll(allOn);
+    }
+  }, [toggleStates, data]);
 
-  const FlatListData = ({ item }) => (
+  const FlatListData = useCallback(({ item }) => (
     <View style={styles.row}>
       <Pressable style={[styles.listItem, {
         flexDirection: 'row',
@@ -190,10 +159,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
           onValueChange={() =>
             handleToggle(
               item.Compartment_Appliance_id,
-              item.Compartment_Appliance_id,
-              item.name,
-              item.compartment_id,
-              item.appliance_id
+              item.Compartment_Appliance_id
             )
           }
           ios_backgroundColor="transparent"
@@ -202,7 +168,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
         />
       </View>
     </View>
-  );
+  ), [toggleStates]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
@@ -216,16 +182,35 @@ const CompartmentAppliance = ({ navigation, route }) => {
           <Text style={[styles.navbarText, { marginRight: 25 }]}>Appliances</Text>
         </View>
       </View>
-      <View style={{ marginBottom: 3 }}>
-        <Text style={{ marginLeft: 30, fontSize: 15, fontWeight: '400', fontStyle: 'italic', marginTop: 10 }}>{items.compartment_name}</Text>
+      <View style={{ marginBottom: 10, flexDirection: 'row', }}>
+        <Text style={{ marginLeft: 30, textAlign: 'center', fontSize: 15, fontWeight: '600', fontStyle: 'italic', marginTop: 3 }}>{items.compartment_name}</Text>
+        <View style={{ flexDirection: 'row', width: '59%', justifyContent: 'flex-end' }}>
+          <Text style={{ fontSize: 15, fontWeight: '400', fontStyle: 'italic', marginTop: 3, marginLeft: 20 }}>Select All</Text>
+          <View style={[styles.switchContainer, { marginBottom: 0 }]}>
+            <View style={styles.simulatedBorder} />
+            <Switch
+              trackColor={{ false: 'transparent', true: 'transparent' }}
+              thumbColor={selectAll ? '#001F6D' : '#B0B7C3'}
+              ios_backgroundColor="transparent"
+              value={selectAll}
+              onValueChange={handleSelectAll}
+              style={styles.switch}
+            />
+          </View>
+
+        </View>
       </View>
 
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, position: 'relative' }}>
         {data.length > 0 ?
-          <FlatList
+            <FlatList
             data={data}
             renderItem={FlatListData}
             contentContainerStyle={{ paddingBottom: 100 }}
+            initialNumToRender={5}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews={true}
           />
           :
           <View>
@@ -247,13 +232,27 @@ const CompartmentAppliance = ({ navigation, route }) => {
           </View>
         }
 
-        {/* Floating Button */}
-        <Pressable
-          style={styles.floatingButton}
-          onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}
-        >
-          <Text style={styles.floatingButtonText}>+</Text>
-        </Pressable>
+        <View style={[styles.Bottombtn, {
+          backgroundColor: 'white', padding: 10, bottom: 20, position: 'absolute',
+          flexDirection: 'row', justifyContent: 'space-evenly',
+        }]}>
+          <View style={{ backgroundColor: '#001F6D', padding: 10, marginLeft: 0, width: '35%', borderRadius: 10, }}>
+            <TouchableOpacity
+            // onPress={DeleteCompartmentAppliances}
+            >
+              <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, marginRight: 0, width: '35%', borderRadius: 10 }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}
+            >
+              <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
       </View>
     </KeyboardAvoidingView>
   );

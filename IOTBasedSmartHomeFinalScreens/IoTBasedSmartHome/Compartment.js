@@ -17,20 +17,20 @@ const Compartment = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params?.items || {});
     const [home_id, sethomeId] = useState(items?.home_id || null);
 
-    const setStorageData = () => {
+    const setStorageData = useCallback(() => {
         if (items?.home_id) {
             storage.set('home_id', Number(items.home_id));
         }
-    };
+    });
 
-    const getStorageData = () => {
+    const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('home_id');
         if (storedId !== undefined) {
             sethomeId(storedId);
         }
-    };
+    });
 
-    const getCompartmentByHomeId = async (home_id) => {
+    const getCompartmentByHomeId = useCallback(async (home_id) => {
         if (!home_id) return;
         try {
             const response = await fetch(`${URL}/List_Compartment_By_Home_Id/${home_id}`);
@@ -43,7 +43,7 @@ const Compartment = ({ navigation, route }) => {
         } catch (error) {
             console.error('Error fetching data: ', error);
         }
-    };
+    });
 
     useEffect(() => {
         if (items?.home_id) {
@@ -60,7 +60,7 @@ const Compartment = ({ navigation, route }) => {
         }, [home_id])
     );
 
-    const FlatListData = ({ item }) => (
+    const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]} onPress={() => navigation.navigate('CompartmentAppliance', { items: item })}>
             <Text style={styles.listText}>{item.compartment_name}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('EditCompartment', { items: item })}>
@@ -69,7 +69,7 @@ const Compartment = ({ navigation, route }) => {
                 </View>
             </TouchableOpacity>
         </Pressable>
-    );
+    ));
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
@@ -85,10 +85,16 @@ const Compartment = ({ navigation, route }) => {
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
                     <FlatList
-                        data={data}
-                        renderItem={FlatListData}
-                        contentContainerStyle={{ paddingBottom: 100 }}
-                    />
+                    data={data}
+                    // keyExtractor={(item) => item.Compartment_Appliance_id.toString()}
+                    renderItem={FlatListData}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={10}
+                    windowSize={5}
+                    removeClippedSubviews={true}
+                  />
+                  
                     :
                     <View>
                         <View style={[styles.listItem]}>

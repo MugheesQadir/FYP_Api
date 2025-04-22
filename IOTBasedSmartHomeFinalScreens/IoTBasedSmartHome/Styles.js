@@ -39,8 +39,11 @@ const styles = StyleSheet.create({
         marginBottom: 15
     },
     innerContainer: {
+        justifyContent:'center',
         alignItems: 'center',
         width: '90%',
+        flex:1,
+        position:'relative'
     },
     navbar: {
         backgroundColor: '',
@@ -69,7 +72,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        marginBottom: '16%',
         marginTop: '60%'
     },
     input: {

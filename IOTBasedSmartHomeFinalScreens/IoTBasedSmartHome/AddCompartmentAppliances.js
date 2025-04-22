@@ -13,6 +13,7 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
     const [name,setName] = useState('')
     const [Appliances, setAppliances] = useState(null);
     const [status, setstatus] = useState(null);
+    const [port,setPort] = useState('')
     const [listAppliances, setListAppliances] = useState([]);
 
     const stat = [{id:0,name:'Off'},{id:1,name:'On'}]
@@ -52,12 +53,15 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
                 Alert.alert('Error', 'Please Select Appliances')
                 return;
             }
+            if(!port){
+                Alert.alert('Error','Please insert Port')
+            }
             if (status === null || status === undefined) {
                 Alert.alert('Error', 'Please Select status');
                 return;
             }
             
-            const payload = { name:name,compartment_id: compartment_id, appliance_id: Appliances,status:status };
+            const payload = { name:name,compartment_id: compartment_id, appliance_id: Appliances,status:status ,port:port};
             try {
                 const res = await fetch(`${URL}/Add_Compartment_Appliance`,
                     {
@@ -143,10 +147,17 @@ const AddCompartmentAppliances = ({ navigation, route }) => {
                             />
 
                         </View>
+
+                        <TextInput
+                            style={[styles.input, {position:'absolute', backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7,marginTop:'60%' }]}
+                            placeholder='Port'
+                            placeholderTextColor='gray'
+                            onChangeText={setPort}
+                        />
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '203%' }]}>
-                        <View style={{ position: 'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
+                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%' }]}>
+                        <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
                             <TouchableOpacity 
                             onPress={AddAppliances}
                             >

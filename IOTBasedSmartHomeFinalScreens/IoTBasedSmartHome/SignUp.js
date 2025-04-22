@@ -108,7 +108,7 @@ const SignUp = ({ navigation }) => {
 
                     <View style={styles.Bottombtn}>
 
-                        <View style={{ position: 'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
+                        <View style={{ position:'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 ,}}>
                             <TouchableOpacity onPress={SignUp}
                             >
                                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>SignUp</Text>

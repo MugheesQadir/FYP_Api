@@ -117,7 +117,7 @@ const AddHome = ({ navigation, route }) => {
                             Add Home</Text></View>
 
                 </View>
-                <View style={styles.innerContainer}>
+                <View style={[styles.innerContainer]}>
                     <View style={styles.formContainer}>
                         <TextInput
                             style={[styles.input, { backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 }]}
@@ -163,8 +163,8 @@ const AddHome = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '203%' }]}>
-                        <View style={{ position: 'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
+                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%' }]}>
+                        <View style={{  backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
                             <TouchableOpacity onPress={AddHome}
                             >
                                 <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Save</Text>

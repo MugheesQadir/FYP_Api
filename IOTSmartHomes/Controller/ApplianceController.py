@@ -129,7 +129,7 @@ class ApplianceController:
                 .all()
             )
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name":compartmentappliance.name,
+                     "name":compartmentappliance.name,"port":compartmentappliance.port,
                      "compartment_id": compartment.id, "compartment_name": compartment.name,
                      "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
@@ -147,7 +147,7 @@ class ApplianceController:
                 .all()
             )
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,
+                     "name": compartmentappliance.name,"port":compartmentappliance.port,
                      "compartment_id": compartment.id, "compartment_name": compartment.name,
                      "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
@@ -169,6 +169,7 @@ class ApplianceController:
             return {
                 "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
                 "name": result.CompartmentAppliance.name,
+                "port": result.CompartmentAppliance.port,
                      "compartment_name": result.Compartment.name,
                      "appliance_id":result.Appliance.id,
                      "appliance_catagory": result.Appliance.catagory
@@ -191,7 +192,7 @@ class ApplianceController:
                 return {'error':f"Compartment Appliance not found"}
             return {
                 "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
-                "name": CompartmentAppliance.name,
+                "name": CompartmentAppliance.name,"port": result.CompartmentAppliance.port,
                 "compartment_name": result.Compartment.name,
                 "appliance_catagory": result.Appliance.catagory
             }
@@ -213,6 +214,7 @@ class ApplianceController:
 
             return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
                      "compartment_id":compartment.id,
                      "compartment_name": compartment.name,
                      "appliance_id":appliance.id,
@@ -236,6 +238,7 @@ class ApplianceController:
 
             return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
                      "compartment_id":compartment.id,
                      "compartment_name": compartment.name,
                      "appliance_id":appliance.id,
@@ -261,6 +264,7 @@ class ApplianceController:
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
                      "compartment_name": compartment.name,
                      "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
@@ -283,7 +287,7 @@ class ApplianceController:
                 return {'error': f"Compartment Appliance not found"}
 
             return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,
+                     "name": compartmentappliance.name,"port":compartmentappliance.port,
                      "compartment_name": compartment.name,
                      "appliance_catagory": appliance.catagory}
                     for compartmentappliance, compartment, appliance in result]
@@ -301,7 +305,7 @@ class ApplianceController:
             if compartment is None:
                 return {'error':f"Compartment not found"}
 
-            compartment_appliances = CompartmentAppliance(status=data['status'],
+            compartment_appliances = CompartmentAppliance(status=data['status'],port=data['port'],
                                             name=data['name'],compartment_id=data['compartment_id'],
                                                 appliance_id=data['appliance_id'],validate=1)
 
@@ -329,6 +333,7 @@ class ApplianceController:
             if compartment_appliances is not None:
                 compartment_appliances.name = data['name']
                 compartment_appliances.status = data['status']
+                compartment_appliances.port = data['port']
                 compartment_appliances.compartment_id = data['compartment_id']
                 compartment_appliances.appliance_id = data['appliance_id']
                 db.session.commit()

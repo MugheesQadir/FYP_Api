@@ -163,7 +163,7 @@ const EditCompartment = ({ navigation, route }) => {
                         />
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '190%', flexDirection: 'row', justifyContent: 'space-around' }]}>
+                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%', flexDirection: 'row', justifyContent: 'space-around' }]}>
                         <View style={{ position: '', backgroundColor: 'maroon', padding: 10, marginLeft: 31, width: '35%', borderRadius: 10, }}>
                             <TouchableOpacity onPress={DeleteCompartments}
                             >
