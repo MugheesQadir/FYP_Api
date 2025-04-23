@@ -5,7 +5,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import React, { useState, useEffect, useCallback,useRef  } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
@@ -69,10 +69,10 @@ const CompartmentAppliance = ({ navigation, route }) => {
   const handleSelectAll = useCallback(async () => {
     const newSelectAll = !selectAll;
     setSelectAll(newSelectAll);
-  
+
     const updatedToggles = {};
     const updates = [];
-  
+
     for (let item of data) {
       const id = item.Compartment_Appliance_id;
       if (toggleStates[id] !== newSelectAll) { // Only update if needed
@@ -83,9 +83,9 @@ const CompartmentAppliance = ({ navigation, route }) => {
         });
       }
     }
-  
+
     setToggleStates(prev => ({ ...prev, ...updatedToggles }));
-  
+
     try {
       await Promise.all(
         updates.map(payload =>
@@ -100,8 +100,6 @@ const CompartmentAppliance = ({ navigation, route }) => {
       Alert.alert('Network Error', error.message);
     }
   }, [data, selectAll, toggleStates]);
-  
-
 
   useEffect(() => {
     const storedId = storage.getNumber('compartment_id');
@@ -115,7 +113,6 @@ const CompartmentAppliance = ({ navigation, route }) => {
   // Polling with cleanup
   useEffect(() => {
     if (compartmentId) {
-      getCompartmentApplianceByCompartmentId(compartmentId);
       intervalRef.current = setInterval(() => {
         getCompartmentApplianceByCompartmentId(compartmentId);
       }, 300);
@@ -140,7 +137,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
         width: '75%',
         marginHorizontal: 0,
       },]}
-      // onPress={() => navigation.navigate('Compartment', { items: item })}
+        onPress={() => navigation.navigate('ApplianceSchedules', { items: item })}
       >
         <Text style={[styles.listText]}>{item.name}</Text>
         <TouchableOpacity
@@ -203,7 +200,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
       <View style={{ flex: 1, position: 'relative' }}>
         {data.length > 0 ?
-            <FlatList
+          <FlatList
             data={data}
             renderItem={FlatListData}
             contentContainerStyle={{ paddingBottom: 100 }}
@@ -232,27 +229,30 @@ const CompartmentAppliance = ({ navigation, route }) => {
           </View>
         }
 
-        <View style={[styles.Bottombtn, {
-          backgroundColor: 'white', padding: 10, bottom: 20, position: 'absolute',
-          flexDirection: 'row', justifyContent: 'space-evenly',
-        }]}>
-          <View style={{ backgroundColor: '#001F6D', padding: 10, marginLeft: 0, width: '35%', borderRadius: 10, }}>
-            <TouchableOpacity
-            // onPress={DeleteCompartmentAppliances}
-            >
-              <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, marginRight: 0, width: '35%', borderRadius: 10 }}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}
-            >
-              <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Add</Text>
-            </TouchableOpacity>
-          </View>
+      </View>
+      <View style={[styles.Bottombtn, {
+        backgroundColor: 'white', padding: 18, bottom: 0, position: 'absolute',
+        flexDirection: 'row', justifyContent: 'space-evenly', marginTop: '0%', borderWidth: 1.5,
+        borderColor: 'darkblue', borderRadius: 12,
+        outlineColor: '#B0B7C3',
+        outlineWidth: 1,
+        outlineStyle: 'solid', backgroundColor: '#B0B7C3'
+      }]}>
+        <View style={{ backgroundColor: '#001F6D', padding: 10, marginLeft: 0, width: '35%', borderRadius: 10, }}>
+          <TouchableOpacity
+          onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}
+          >
+            <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Schedule</Text>
+          </TouchableOpacity>
         </View>
 
+        <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, marginRight: 0, width: '35%', borderRadius: 10 }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}
+          >
+            <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Add</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );

@@ -85,16 +85,16 @@ const Compartment = ({ navigation, route }) => {
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
                     <FlatList
-                    data={data}
-                    // keyExtractor={(item) => item.Compartment_Appliance_id.toString()}
-                    renderItem={FlatListData}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    initialNumToRender={5}
-                    maxToRenderPerBatch={10}
-                    windowSize={5}
-                    removeClippedSubviews={true}
-                  />
-                  
+                        data={data}
+                        // keyExtractor={(item) => item.Compartment_Appliance_id.toString()}
+                        renderItem={FlatListData}
+                        contentContainerStyle={{ paddingBottom: 100 }}
+                        initialNumToRender={5}
+                        maxToRenderPerBatch={10}
+                        windowSize={5}
+                        removeClippedSubviews={true}
+                    />
+
                     :
                     <View>
                         <View style={[styles.listItem]}>

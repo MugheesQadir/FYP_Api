@@ -13,6 +13,7 @@ from Model.Security import Security
 from Model.SprinklerSchedule import SprinklerSchedule
 from Model.SprinklerScheduleLog import SprinklerScheduleLog
 from config import db
+from datetime import datetime
 
 class ApplianceController:
 
@@ -393,9 +394,9 @@ class ApplianceController:
                 return [{"id": applianceSchedule.id,
                          "compartment_name": compartment.name,
                          "appliance_catagory": appliance.catagory,
-                         "start_time": applianceSchedule.start_time,
-                         "end_time": applianceSchedule.end_time,
-                         "days": applianceSchedule.days
+                         "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
+                         "end_time" : applianceSchedule.end_time.strftime("%H:%M:%S"),
+                          "days": applianceSchedule.days
                          }
                         for applianceSchedule, compartment_appliance , compartment, appliance in applianceSchedule]
 
@@ -511,6 +512,28 @@ class ApplianceController:
             return str(e)
 
     @staticmethod
+    def list_appliance_schedule_by_compartment_id(id):
+        try:
+            applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
+                                 .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+                                 .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                                 .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                                 .where(ApplianceSchedule.validate == 1, ApplianceSchedule.type == 0,
+                                        CompartmentAppliance.compartment_id == id)
+                                 .all()
+                                 )
+            return [{"id": applianceSchedule.id,
+                     "Compartment_Appliance_id":compartment_appliance.id,
+                     "name": applianceSchedule.name,
+                     "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
+                         "end_time" : applianceSchedule.end_time.strftime("%H:%M:%S"),
+                     "days": applianceSchedule.days
+                     }
+                    for applianceSchedule, compartment_appliance, compartment, appliance in applianceSchedule]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
     def get_appliance_schedule_by_table_id(id, type):
         try:
             if type == 0:
@@ -523,10 +546,9 @@ class ApplianceController:
                                      .all()
                                      )
                 return [{"id": applianceSchedule.id,
-                         "compartment_name": compartment.name,
-                         "appliance_catagory": appliance.catagory,
-                         "start_time": applianceSchedule.start_time,
-                         "end_time": applianceSchedule.end_time,
+                         "name":applianceSchedule.name,
+                         "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
+                         "end_time" : applianceSchedule.end_time.strftime("%H:%M:%S"),
                          "days": applianceSchedule.days
                          }
                         for applianceSchedule, compartment_appliance, compartment, appliance in applianceSchedule]
@@ -594,21 +616,28 @@ class ApplianceController:
     def Add_Appliances_Schedule(data):
         try:
             if data['type'] == 0:
-                appliance = CompartmentAppliance.query.filter_by(id=data["table_id"], validate=1).first()
-                if appliance is None:
-                    return {'error':'Compartment Appliance not found'}
+                if data['type'] == 0:
+                    appliance = CompartmentAppliance.query.filter_by(id=data["table_id"], validate=1).first()
+                    if appliance is None:
+                        return {'error': 'Compartment Appliance not found'}
 
-                applianceSchedule = ApplianceSchedule(
-                    name=data['name'],
-                    type=data['type'],
-                    table_id=data['table_id'],
-                    start_time=data['start_time'],
-                    end_time=data['end_time'],
-                    days=data['days'], validate=1)
+                    # Ensure start_time and end_time are handled correctly as time objects
+                    start_time = data['start_time']
+                    end_time = data['end_time']
 
-                db.session.add(applianceSchedule)
-                db.session.commit()
-                return {'success':f"Appliance Schedule added successfully"}
+                    applianceSchedule = ApplianceSchedule(
+                        name=data['name'],
+                        type=data['type'],
+                        table_id=data['table_id'],
+                        start_time=start_time,  # Now directly using the time format
+                        end_time=end_time,  # Same for end_time
+                        days=data['days'],
+                        validate=1
+                    )
+
+                    db.session.add(applianceSchedule)
+                    db.session.commit()
+                    return {'success': f"Appliance Schedule added successfully"}
 
             elif data['type'] == 1:
 

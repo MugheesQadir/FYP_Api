@@ -419,6 +419,11 @@ def Get_deleted_Appliance_Schedule_Details(id,type):
     schedule = ApplianceController.get_deleted_appliance_schedule_by_id(id,type)
     return jsonify(schedule)
 
+@app.route('/list_Appliance_Schedule_By_comaprtment_id/<int:id>', methods = ['GET'])
+def list_appliance_schedule_by_compartment_id(id):
+    schedule = ApplianceController.list_appliance_schedule_by_compartment_id(id)
+    return jsonify(schedule)
+
 @app.route('/Get_Appliance_Schedule_By_table_id/<int:id>/<int:type>', methods = ['GET'])
 def Get_Appliance_Schedule_By_table_id(id,type):
     schedule = ApplianceController.get_appliance_schedule_by_table_id(id,type)
@@ -920,6 +925,11 @@ def get_relay_state():
 def Update_Compartment_Appliance_status():
     data = request.get_json()
     appliance = HardwareController.updateCompartmentAppliancesStatus(data)
+    return jsonify(appliance)
+
+@app.route('/check_schedule_update_status',methods = ["GET"])
+def check_schedule_update_status():
+    appliance = HardwareController.check_schedule_update_status()
     return jsonify(appliance)
 
 if __name__ == '__main__':

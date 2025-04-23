@@ -5,8 +5,8 @@ class ApplianceSchedule(db.Model):
 
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(30),nullable = False)
-    start_time = db.Column(db.String(20),nullable = False)
-    end_time = db.Column(db.String(20),nullable = False)
+    start_time = db.Column(db.Time,nullable = False)
+    end_time = db.Column(db.Time,nullable = False)
     days = db.Column(db.String(20),nullable=False)
     table_id = db.Column(db.Integer,nullable=False)
     type = db.Column(db.Integer,nullable=False)
