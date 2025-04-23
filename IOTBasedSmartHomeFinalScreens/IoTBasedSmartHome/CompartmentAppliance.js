@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
@@ -110,17 +111,22 @@ const CompartmentAppliance = ({ navigation, route }) => {
     }
   }, [items]);
 
-  // Polling with cleanup
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     if (compartmentId) {
       intervalRef.current = setInterval(() => {
         getCompartmentApplianceByCompartmentId(compartmentId);
-      }, 300);
+      }, 200);
     }
-    return () => clearInterval(intervalRef.current);
-  }, [compartmentId, getCompartmentApplianceByCompartmentId]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [compartmentId, getCompartmentApplianceByCompartmentId])
+);
 
-  // Update Select All toggle
   useEffect(() => {
     if (data.length > 0) {
       const allOn = data.every(item => toggleStates[item.Compartment_Appliance_id]);

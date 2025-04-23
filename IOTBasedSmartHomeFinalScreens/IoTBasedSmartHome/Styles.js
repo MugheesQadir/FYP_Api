@@ -39,11 +39,11 @@ const styles = StyleSheet.create({
         marginBottom: 15
     },
     innerContainer: {
-        justifyContent:'center',
+        justifyContent: 'center',
         alignItems: 'center',
         width: '90%',
-        flex:1,
-        position:'relative'
+        flex: 1,
+        position: 'relative'
     },
     navbar: {
         backgroundColor: '',
@@ -58,6 +58,15 @@ const styles = StyleSheet.create({
         color: 'black',
         marginLeft: 0,
         fontWeight: '800'
+    },
+    Text: {
+        fontSize: 18,
+        textAlign: 'center',
+        color: 'black', marginBottom: 10,
+    },
+    value: {
+        fontSize: 18, marginBottom: 10,
+        backgroundColor: '#f5f5f5', borderColor: 'black', borderWidth: 0.7, borderRadius: 15, fontSize: 18, padding: 10
     },
     image: {
         width: 200,
@@ -81,7 +90,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         width: '100%',
         marginBottom: 10,
-        backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7
+        backgroundColor: '#f5f5f5', borderColor: 'black', borderWidth: 0.7
     },
     button: {
         backgroundColor: '#001F6D',
@@ -96,20 +105,30 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
     },
-    textView: { backgroundColor: '#001F6D', padding: 20, borderRadius: 20, flex: 1, borderWidth: 1 },
-    applianceName: { fontSize: 18, marginLeft: 10, color: 'white' },
-    switchContainer: { position: 'relative', alignItems: 'center', justifyContent: 'center', marginLeft: 25 },
-  simulatedBorder: {
-    position: 'absolute',
-    width: 50,
-    height: 26,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#001F6D',
-  },
-  switch: { marginLeft: 0 },
-    row: {flexDirection: 'row', alignItems: 'center', marginHorizontal: 25, marginTop: 0 },
+    textView: { 
+        backgroundColor: '#001F6D', padding: 20, borderRadius: 20, flex: 1, borderWidth: 1 
+    },
+    applianceName: { 
+        fontSize: 18, marginLeft: 10, color: 'white'
+     },
+    switchContainer: { 
+        position: 'relative', alignItems: 'center', justifyContent: 'center', marginLeft: 25
+     },
+    simulatedBorder: {
+        position: 'absolute',
+        width: 50,
+        height: 26,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#001F6D',
+    },
+    switch: { 
+        marginLeft: 0 
+    },
+    row: { 
+        flexDirection: 'row', alignItems: 'center', marginHorizontal: 25, marginTop: 0
+     },
     listItem: {
         backgroundColor: '#001F6D',
         paddingVertical: 20,
@@ -122,7 +141,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         outlineColor: 'darkblue',
         outlineWidth: 2,
-        outlineStyle: 'solid', outlineOffset: 2,shadowOffset:2, shadowColor: 'darkblue', // Shadow for iOS
+        outlineStyle: 'solid', outlineOffset: 2, shadowOffset: 2, shadowColor: 'darkblue', // Shadow for iOS
     },
     listText: {
         fontSize: 20,

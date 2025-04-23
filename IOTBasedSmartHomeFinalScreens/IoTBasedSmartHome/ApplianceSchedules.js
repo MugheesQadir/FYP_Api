@@ -10,6 +10,7 @@ import { MMKV } from 'react-native-mmkv';
 import { useFocusEffect } from '@react-navigation/native';
 import URL from './Url';
 
+
 const storage = new MMKV();
 
 const ApplianceSchedules = ({ navigation, route }) => {
@@ -53,7 +54,14 @@ const ApplianceSchedules = ({ navigation, route }) => {
             const response = await fetch(`${URL}/list_Appliance_Schedule_By_comaprtment_id/${id}`);
             if (response.ok) {
                 const result = await response.json();
-                setData(result);
+                const uniqueData = result.filter(
+                    (item, index, self) =>
+                        index === self.findIndex((t) => (
+                            t.name === item.name
+                        ))
+                );
+                setData(uniqueData);
+
             }
         } catch (error) {
             console.error('Error fetching compartment_id:', error);
@@ -75,22 +83,30 @@ const ApplianceSchedules = ({ navigation, route }) => {
             Get_Appliance_Schedule_By_compartment_id(items);
         }
     }, [items]);
-    
+
 
     // ✅ 
     useFocusEffect(
         useCallback(() => {
+            if (typeof items === 'object' && items?.Compartment_Appliance_id) {
+                Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
+            } 
+            if (typeof items === 'number') {
+                Get_Appliance_Schedule_By_compartment_id(items);
+            }
             if (!items) {
                 getStorageData();
                 if (Compartment_Appliance_id) {
                     Get_Appliance_Schedule_By_table_id(Compartment_Appliance_id);
-                } else if (compartment_id) {
+                } 
+                if (compartment_id) {
                     Get_Appliance_Schedule_By_compartment_id(compartment_id);
                 }
             }
         }, [Compartment_Appliance_id, compartment_id, items])
     );
     
+
 
     const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]}
@@ -114,7 +130,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
-                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Schedules</Text>
+                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Schedulesss</Text>
                 </View>
             </View>
 
