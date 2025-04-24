@@ -13,15 +13,15 @@ import URL from './Url';
 
 const storage = new MMKV();
 
-const ApplianceSchedules = ({ navigation, route }) => {
+const LockSchedules = ({ navigation, route }) => {
     const [data, setData] = useState([]);
     const items = route.params?.items || {};
-    const [Compartment_Appliance_id, Set_Compartment_Appliance_id] = useState(null);
+    const [Compartment_Lock_id, Set_Compartment_Lock_id] = useState(null);
     const [compartment_id, setCompartmentId] = useState(null);
 
     const setStorageData = useCallback(() => {
-        if (items?.Compartment_Appliance_id) {
-            storage.set('compartment_appliance_id', Number(items.Compartment_Appliance_id));
+        if (items?.Compartment_Lock_id) {
+            storage.set('compartment_lock_id', Number(items.Compartment_Lock_id));
         }
         if (typeof items === 'number') {
             storage.set('compartment_id', Number(items));
@@ -29,16 +29,16 @@ const ApplianceSchedules = ({ navigation, route }) => {
     }, [items]);
 
     const getStorageData = useCallback(() => {
-        const storedId = storage.getNumber('compartment_appliance_id');
+        const storedId = storage.getNumber('compartment_lock_id');
         const storedComId = storage.getNumber('compartment_id');
-        if (storedId) Set_Compartment_Appliance_id(storedId);
+        if (storedId) Set_Compartment_Lock_id(storedId);
         if (storedComId) setCompartmentId(storedComId);
     }, []);
 
-    const Get_Appliance_Schedule_By_table_id = useCallback(async (id) => {
+    const List_Lock_Schedule_by_compartment_lock_id = useCallback(async (id) => {
         if (!id) return;
         try {
-            const response = await fetch(`${URL}/Get_Appliance_Schedule_By_table_id/${id}/0`);
+            const response = await fetch(`${URL}/List_Lock_Schedule_by_compartment_lock_id/${id}`);
             if (response.ok) {
                 const result = await response.json();
                 setData(result);
@@ -48,10 +48,10 @@ const ApplianceSchedules = ({ navigation, route }) => {
         }
     }, []);
 
-    const Get_Appliance_Schedule_By_compartment_id = useCallback(async (id) => {
+    const list_Lock_schedule_by_compartment_id = useCallback(async (id) => {
         if (!id) return;
         try {
-            const response = await fetch(`${URL}/list_Appliance_Schedule_By_comaprtment_id/${id}`);
+            const response = await fetch(`${URL}/list_Lock_schedule_by_compartment_id/${id}`);
             if (response.ok) {
                 const result = await response.json();
                 const uniqueData = result.filter(
@@ -71,16 +71,16 @@ const ApplianceSchedules = ({ navigation, route }) => {
     // useEffect(() => {
     //     if (!items) return;
 
-    //     if (typeof items === 'object' && items?.Compartment_Appliance_id) {
+    //     if (typeof items === 'object' && items?.Compartment_Lock_id) {
     //         setStorageData();
-    //         Set_Compartment_Appliance_id(items.Compartment_Appliance_id);
-    //         Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
+    //         Set_Compartment_Lock_id(items.Compartment_Lock_id);
+    //         List_Lock_Schedule_by_compartment_lock_id(items.Compartment_Lock_id);
     //     }
 
     //     if (typeof items === 'number') {
     //         setStorageData();
     //         setCompartmentId(items);
-    //         Get_Appliance_Schedule_By_compartment_id(items);
+    //         list_Lock_schedule_by_compartment_id(items);
     //     }
     // }, [items]);
 
@@ -88,22 +88,26 @@ const ApplianceSchedules = ({ navigation, route }) => {
     // ✅ 
     useFocusEffect(
         useCallback(() => {
-            if (typeof items === 'object' && items?.Compartment_Appliance_id) {
-                Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
+            if (typeof items === 'object' && items?.Compartment_Lock_id) {
+                setStorageData();
+                Set_Compartment_Lock_id(items.Compartment_Lock_id);
+                List_Lock_Schedule_by_compartment_lock_id(items.Compartment_Lock_id);
             } 
             if (typeof items === 'number') {
-                Get_Appliance_Schedule_By_compartment_id(items);
+                setStorageData()
+                setCompartmentId(items);
+                list_Lock_schedule_by_compartment_id(items);
             }
             if (!items) {
                 getStorageData();
-                if (Compartment_Appliance_id) {
-                    Get_Appliance_Schedule_By_table_id(Compartment_Appliance_id);
+                if (Compartment_Lock_id) {
+                    List_Lock_Schedule_by_compartment_lock_id(Compartment_Lock_id);
                 } 
                 if (compartment_id) {
-                    Get_Appliance_Schedule_By_compartment_id(compartment_id);
+                    list_Lock_schedule_by_compartment_id(compartment_id);
                 }
             }
-        }, [Compartment_Appliance_id, compartment_id, items])
+        }, [Compartment_Lock_id, compartment_id, items])
     );
     
 
@@ -170,7 +174,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddApplianceSchedule', { items })}
+                    onPress={() => navigation.navigate('AddLockSchedule', { items:items })}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>
@@ -179,4 +183,4 @@ const ApplianceSchedules = ({ navigation, route }) => {
     );
 };
 
-export default ApplianceSchedules;
+export default LockSchedules;

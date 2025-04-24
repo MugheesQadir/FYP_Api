@@ -5,6 +5,7 @@ from Model.ApplianceSchedule import ApplianceSchedule
 from Model.Compartment import Compartment
 from Model.CompartmentAppliance import CompartmentAppliance
 from Model.CompartmentLock import CompartmentLock
+from Model.LockSchedule import LockSchedule
 from config import db
 
 relay_state = {"state": 0}
@@ -112,6 +113,65 @@ class HardwareController:
             return {
                 "success": "checked",
                 "updated": updated
+            }
+        except Exception as e:
+            return {
+                "error": str(e),
+            }
+
+    @staticmethod
+    def check_lock_schedule_update_status():
+        try:
+            current_time = datetime.now().strftime('%H:%M')
+            current_day_number = datetime.now().isoweekday()  # Monday is 1, Sunday is 7
+            updated = []
+
+            schedules = LockSchedule.query.filter_by(validate=1).all()
+
+            for sched in schedules:
+                locks = CompartmentLock.query.get(sched.compartment_lock_id)
+                if not locks:
+                    continue
+
+                # Get list of valid days for this schedule
+                valid_days = str(sched.days)
+                valid_days = [int(day.strip()) for day in valid_days if day.strip().isdigit()]
+
+                # Skip if today is not in the schedule's valid days
+                if current_day_number not in valid_days:
+                    continue
+
+                start_time = sched.start_time.strftime('%H:%M')
+                end_time = sched.end_time.strftime('%H:%M')
+
+                # Start time condition
+                if start_time == current_time:
+                    if locks.status != 1:
+                        locks.status = 1
+                        db.session.commit()
+                        updated.append({
+                            "id": locks.id,
+                            "port": locks.port,
+                            "status": 1,
+                            "name": locks.name,
+                            "schedule_id": sched.id
+                        })
+
+                # End time condition
+                elif end_time == current_time:
+                    if locks.status != 0:
+                        locks.status = 0
+                        db.session.commit()
+                        updated.append({
+                            "id": locks.id,
+                            "port": locks.port,
+                            "status": 0,
+                            "name": locks.name,
+                            "schedule_id": sched.id
+                        })
+
+            return {
+                "success": "checked"
             }
         except Exception as e:
             return {

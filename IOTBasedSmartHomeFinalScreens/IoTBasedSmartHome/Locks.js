@@ -143,7 +143,7 @@ import {
           width: '75%',
           marginHorizontal: 0,
         },]}
-        //   onPress={() => navigation.navigate('ApplianceSchedules', { items: item })}
+          onPress={() => navigation.navigate('LockSchedules', { items: item })}
         >
           <Text style={[styles.listText]} numberOfLines={null} ellipsizeMode="tail">{item.name}</Text>
           <TouchableOpacity
@@ -247,7 +247,7 @@ import {
         }]}>
           <View style={{ backgroundColor: '#001F6D', padding: 10, marginLeft: 0, width: '35%', borderRadius: 10, }}>
             <TouchableOpacity
-            // onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}
+            onPress={() => navigation.navigate('LockSchedules', { items: compartmentId })}
             >
               <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Schedule</Text>
             </TouchableOpacity>

@@ -1378,7 +1378,7 @@ class ApplianceController:
                       .where(CompartmentLock.compartment_id == id, CompartmentLock.validate == 1).all()
                       )
             return [
-                {"id": compartmentLock.id,
+                {"Compartment_Lock_id": compartmentLock.id,
                  "name": compartmentLock.name,
                  "compartment_Name": compartment.name,
                  "compartment_id": compartment.id,
@@ -1494,16 +1494,14 @@ class ApplianceController:
                       .all()
                       )
             return [
-                {
-                    "id": lockSchedule.id,
-                    "name": lockSchedule.name,
-                    "lock_type": lockSchedule.lock_type,
-                    "start_time": lockSchedule.start_time,
-                    "end_time": lockSchedule.end_time,
-                    "days": lockSchedule.days,
-                    "compartment_lock_name": compartmentLock.name,
-                }
-                for lockSchedule, compartmentLock in result
+                {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock in result
             ]
         except Exception as e:
             return str(e)
@@ -1517,16 +1515,14 @@ class ApplianceController:
                       .all()
                       )
             return [
-                {
-                    "id": lockSchedule.id,
-                    "name": lockSchedule.name,
-                    "lock_type": lockSchedule.lock_type,
-                    "start_time": lockSchedule.start_time,
-                    "end_time": lockSchedule.end_time,
-                    "days": lockSchedule.days,
-                    "compartment_lock_name": compartmentLock.name,
-                }
-                for lockSchedule, compartmentLock in result
+                {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock in result
             ]
         except Exception as e:
             return str(e)
@@ -1542,16 +1538,14 @@ class ApplianceController:
             if result is None:
                 return {'error':'Lock Schedule not found'}
 
-            lockSchedule, compartmentLock = result
-            return {
-                    "id": lockSchedule.id,
-                    "name": lockSchedule.name,
-                    "lock_type": lockSchedule.lock_type,
-                    "start_time": lockSchedule.start_time,
-                    "end_time": lockSchedule.end_time,
-                    "days": lockSchedule.days,
-                    "compartment_lock_name": compartmentLock.name,
-                }
+            lockschedule, compartment_lock = result
+            return {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
         except Exception as e:
             return str(e)
 
@@ -1567,16 +1561,14 @@ class ApplianceController:
             if result is None:
                 return {'error': 'Lock Schedule not found'}
 
-            lockSchedule, compartmentLock = result
-            return {
-                "id": lockSchedule.id,
-                "name": lockSchedule.name,
-                "lock_type": lockSchedule.lock_type,
-                "start_time": lockSchedule.start_time,
-                "end_time": lockSchedule.end_time,
-                "days": lockSchedule.days,
-                "compartment_lock_name": compartmentLock.name,
-            }
+            lockschedule, compartment_lock = result
+            return {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
         except Exception as e:
             return str(e)
 
@@ -1588,16 +1580,14 @@ class ApplianceController:
                       .filter(LockSchedule.compartment_lock_id == id, LockSchedule.validate == 1).all()
                       )
             return [
-                {
-                    "id": lockSchedule.id,
-                    "name": lockSchedule.name,
-                    "lock_type": lockSchedule.lock_type,
-                    "start_time": lockSchedule.start_time,
-                    "end_time": lockSchedule.end_time,
-                    "days": lockSchedule.days,
-                    "compartment_lock_name": compartmentLock.name,
-                }
-                for lockSchedule, compartmentLock in result
+                {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock in result
             ]
         except Exception as e:
             return str(e)
@@ -1610,17 +1600,35 @@ class ApplianceController:
                       .filter(LockSchedule.compartment_lock_id == id, LockSchedule.validate == 0).all()
                       )
             return [
-                {
-                    "id": lockSchedule.id,
-                    "name": lockSchedule.name,
-                    "lock_type": lockSchedule.lock_type,
-                    "start_time": lockSchedule.start_time,
-                    "end_time": lockSchedule.end_time,
-                    "days": lockSchedule.days,
-                    "compartment_lock_name": compartmentLock.name,
-                }
-                for lockSchedule, compartmentLock in result
+                {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock in result
             ]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def list_Lock_schedule_by_compartment_id(id):
+        try:
+            result = (db.session.query(LockSchedule, CompartmentLock, Compartment)
+                                 .join(CompartmentLock, LockSchedule.compartment_lock_id == CompartmentLock.id)
+                                 .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
+                                 .where(LockSchedule.validate == 1, CompartmentLock.compartment_id == id)
+                                 .all()
+                                 )
+            return [{"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock, compartment in result]
         except Exception as e:
             return str(e)
 

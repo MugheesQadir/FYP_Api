@@ -670,6 +670,11 @@ def List_Deleted_Lock_Schedule_by_compartment_lock_id(id):
     schedule = ApplianceController.List_deleted_lock_schedule_by_compartment_lock_id(id)
     return jsonify(schedule)
 
+@app.route('/list_Lock_schedule_by_compartment_id/<int:id>', methods = ['GET'])
+def list_Lock_schedule_by_compartment_id(id):
+    schedule = ApplianceController.list_Lock_schedule_by_compartment_id(id)
+    return jsonify(schedule)
+
 @app.route('/Add_Lock_Schedule', methods=['POST'])
 def Add_Lock_Schedule():
     data = request.get_json()
@@ -936,6 +941,11 @@ def Update_Compartment_Lock_status():
 @app.route('/check_schedule_update_status',methods = ["GET"])
 def check_schedule_update_status():
     appliance = HardwareController.check_schedule_update_status()
+    return jsonify(appliance)
+
+@app.route('/check_lock_schedule_update_status',methods = ["GET"])
+def check_lock_schedule_update_status():
+    appliance = HardwareController.check_lock_schedule_update_status()
     return jsonify(appliance)
 
 if __name__ == '__main__':

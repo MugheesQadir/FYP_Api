@@ -18,6 +18,8 @@ import ApplianceSchedules from './IoTBasedSmartHome/ApplianceSchedules';
 import AddApplianceSchedule from './IoTBasedSmartHome/AddApplianceSchedule';
 import Locks from './IoTBasedSmartHome/Locks';
 import AddLocks from './IoTBasedSmartHome/AddLocks';
+import LockSchedules from './IoTBasedSmartHome/LockSchedules';
+import AddLockSchedule from './IoTBasedSmartHome/AddLockSchedule';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -41,6 +43,8 @@ const App = () => {
         <Stack.Screen name='AddApplianceSchedule' component={AddApplianceSchedule}/>
         <Stack.Screen name='Locks' component={Locks} />
         <Stack.Screen name='AddLocks' component={AddLocks} />
+        <Stack.Screen name='LockSchedules' component={LockSchedules}/>
+        <Stack.Screen name='AddLockSchedule' component={AddLockSchedule} />
       </Stack.Navigator>
     </NavigationContainer>
   );
