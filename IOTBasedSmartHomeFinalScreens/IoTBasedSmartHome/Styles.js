@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     Bottombtn: {
-        flex: 1,
         width: '100%',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        marginTop: '60%'
+        marginTop: '60%',
+        
     },
     input: {
         color: 'black',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
         height: 26,
         backgroundColor: 'white',
         borderRadius: 20,
-        borderWidth: 1,
+        borderWidth: 0.7,
         borderColor: '#001F6D',
     },
     switch: { 
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
      },
     listItem: {
         backgroundColor: '#001F6D',
-        paddingVertical: 20,
+        paddingVertical: 15,
         paddingHorizontal: 15,
         marginVertical: 5,
         marginHorizontal: 25,
@@ -144,14 +144,17 @@ const styles = StyleSheet.create({
         outlineStyle: 'solid', outlineOffset: 2, shadowOffset: 2, shadowColor: 'darkblue', // Shadow for iOS
     },
     listText: {
-        fontSize: 20,
+        fontSize: 15,
         color: 'white',
         fontStyle: 'italic',
         fontWeight: '600',
         letterSpacing: 0.8,
         fontFamily: 'Algerian',
-        marginLeft: 15
-    },
+        marginLeft: 15,
+        overflow: 'hidden',     // hide overflow text
+        flexShrink: 1,          // allow it to shrink within container
+      }
+,      
     infoIcon: {
         width: 30,
         height: 30,

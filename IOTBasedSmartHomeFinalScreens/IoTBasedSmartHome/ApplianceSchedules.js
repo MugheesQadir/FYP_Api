@@ -130,7 +130,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
-                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Schedulesss</Text>
+                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Schedules</Text>
                 </View>
             </View>
 

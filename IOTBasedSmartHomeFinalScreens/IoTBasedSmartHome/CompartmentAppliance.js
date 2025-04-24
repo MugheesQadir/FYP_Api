@@ -185,6 +185,7 @@ useFocusEffect(
           <Text style={[styles.navbarText, { marginRight: 25 }]}>Appliances</Text>
         </View>
       </View>
+      
       <View style={{ marginBottom: 10, flexDirection: 'row', }}>
         <Text style={{ marginLeft: 30, textAlign: 'center', fontSize: 15, fontWeight: '600', fontStyle: 'italic', marginTop: 3 }}>{items.compartment_name}</Text>
         <View style={{ flexDirection: 'row', width: '59%', justifyContent: 'flex-end' }}>
@@ -236,8 +237,35 @@ useFocusEffect(
         }
 
       </View>
+      <Pressable
+  onPress={() => navigation.navigate('Locks', { items: items })}
+  style={({ pressed }) => ({
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+    marginBottom:10,
+    marginLeft:30,
+    borderRadius: 8,
+    backgroundColor: pressed ? '#e6e9f0' : 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: pressed ? 0.15 : 0,
+    shadowRadius: 1,
+  })}
+>
+  <Text style={{
+    color: '#001F6D',
+    textDecorationLine: 'underline',
+    fontSize: 17,
+    fontWeight: '600',
+    fontStyle: 'italic',
+    letterSpacing: 0.5,
+  }}>
+    🔒 Locks
+  </Text>
+</Pressable>
       <View style={[styles.Bottombtn, {
-        backgroundColor: 'white', padding: 18, bottom: 0, position: 'absolute',
+        backgroundColor: 'white', padding: 18, bottom: 0, position: '',
         flexDirection: 'row', justifyContent: 'space-evenly', marginTop: '0%', borderWidth: 1.5,
         borderColor: 'darkblue', borderRadius: 12,
         outlineColor: '#B0B7C3',

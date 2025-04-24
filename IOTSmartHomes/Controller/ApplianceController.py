@@ -1425,7 +1425,7 @@ class ApplianceController:
                                                status=data['status'], type=data['type'],port=data['port'],validate=1)
             db.session.add(compartment_lock)
             db.session.commit()
-            return {'success':f"Compartment Lock with name : {compartment_lock.name} added successfully"}
+            return {'success':f"{compartment_lock.name} added successfully"}
         except Exception as e:
             return str(e)
 
