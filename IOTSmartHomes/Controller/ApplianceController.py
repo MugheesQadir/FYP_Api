@@ -1247,9 +1247,11 @@ class ApplianceController:
             return [
                 {"id": compartmentLock.id,
                  "name": compartmentLock.name,
-                 "compartment Name": compartment.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id":compartment.id,
                  "status": compartmentLock.status,
-                 "type":compartmentLock.type
+                 "type":compartmentLock.type,
+                 "port":compartmentLock.port
                  }
                 for compartmentLock, compartment in result
             ]
@@ -1267,9 +1269,11 @@ class ApplianceController:
             return [
                 {"id": compartmentLock.id,
                  "name": compartmentLock.name,
-                 "compartment Name": compartment.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id": compartment.id,
                  "status": compartmentLock.status,
-                 "type": compartmentLock.type
+                 "type": compartmentLock.type,
+                 "port": compartmentLock.port
                  }
                 for compartmentLock, compartment in result
             ]
@@ -1290,9 +1294,11 @@ class ApplianceController:
 
             return {"id": compartmentLock.id,
                  "name": compartmentLock.name,
-                 "compartment Name": compartment.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id":compartment.id,
                  "status": compartmentLock.status,
-                 "type": compartmentLock.type
+                 "type":compartmentLock.type,
+                 "port":compartmentLock.port
                  }
 
         except Exception as e:
@@ -1311,11 +1317,13 @@ class ApplianceController:
             compartmentLock, compartment = result
 
             return {"id": compartmentLock.id,
-                    "name": compartmentLock.name,
-                    "compartment Name": compartment.name,
-                    "status": compartmentLock.status,
-                    "type": compartmentLock.type
-                    }
+                 "name": compartmentLock.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id":compartment.id,
+                 "status": compartmentLock.status,
+                 "type":compartmentLock.type,
+                 "port":compartmentLock.port
+                 }
         except Exception as e:
             return str(e)
 
@@ -1370,11 +1378,13 @@ class ApplianceController:
                       .where(CompartmentLock.compartment_id == id, CompartmentLock.validate == 1).all()
                       )
             return [
-                {"Compartment_Lock_id": compartmentLock.id,
+                {"id": compartmentLock.id,
                  "name": compartmentLock.name,
-                 "compartment Name": compartment.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id": compartment.id,
                  "status": compartmentLock.status,
-                 "type": compartmentLock.type
+                 "type": compartmentLock.type,
+                 "port": compartmentLock.port
                  }
                 for compartmentLock, compartment in result
             ]
@@ -1393,9 +1403,11 @@ class ApplianceController:
             return [
                 {"id": compartmentLock.id,
                  "name": compartmentLock.name,
-                 "compartment Name": compartment.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id": compartment.id,
                  "status": compartmentLock.status,
-                 "type": compartmentLock.type
+                 "type": compartmentLock.type,
+                 "port": compartmentLock.port
                  }
                 for compartmentLock, compartment in result
             ]
@@ -1410,7 +1422,7 @@ class ApplianceController:
                 return {'error':'Compartment not found'}
 
             compartment_lock = CompartmentLock(name=data['name'], compartment_id=data['compartment_id'],
-                                               status=data['status'], type=data['type'],validate=1)
+                                               status=data['status'], type=data['type'],port=data['port'],validate=1)
             db.session.add(compartment_lock)
             db.session.commit()
             return {'success':f"Compartment Lock with name : {compartment_lock.name} added successfully"}
@@ -1432,6 +1444,7 @@ class ApplianceController:
             compartment_lock.compartment_id = data['compartment_id']
             compartment_lock.status = data['status']
             compartment_lock.type = data['type']
+            compartment_lock.port = data['port']
 
             db.session.commit()
             return {'success':f"Compartment Lock with id {compartment_lock.name} updated successfully"}

@@ -7,6 +7,7 @@ class CompartmentLock(db.Model):
     name = db.Column(db.String(30),nullable=False)
     type = db.Column(db.Integer,nullable = False)
     status = db.Column(db.Integer,nullable = False)
+    port = db.Column(db.Integer, nullable=False)
     validate = db.Column(db.Integer, nullable=False)
 
     compartment_id = db.Column(db.Integer, db.ForeignKey('Compartment.id'), nullable=False)
