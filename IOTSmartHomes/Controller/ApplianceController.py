@@ -1370,7 +1370,7 @@ class ApplianceController:
                       .where(CompartmentLock.compartment_id == id, CompartmentLock.validate == 1).all()
                       )
             return [
-                {"id": compartmentLock.id,
+                {"Compartment_Lock_id": compartmentLock.id,
                  "name": compartmentLock.name,
                  "compartment Name": compartment.name,
                  "status": compartmentLock.status,

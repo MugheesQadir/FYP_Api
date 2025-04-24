@@ -927,6 +927,12 @@ def Update_Compartment_Appliance_status():
     appliance = HardwareController.updateCompartmentAppliancesStatus(data)
     return jsonify(appliance)
 
+@app.route('/Update_Compartment_Lock_status',methods = ["POST"])
+def Update_Compartment_Lock_status():
+    data = request.get_json()
+    appliance = HardwareController.updateCompartmentLockStatus(data)
+    return jsonify(appliance)
+
 @app.route('/check_schedule_update_status',methods = ["GET"])
 def check_schedule_update_status():
     appliance = HardwareController.check_schedule_update_status()
