@@ -8,22 +8,37 @@ from Model.CompartmentLock import CompartmentLock
 from Model.LockSchedule import LockSchedule
 from config import db
 
-relay_state = {"state": 0}
+# relay_state = {"state": 0}
+water_level_state = {"state": 0}
 
 class HardwareController:
+    # @staticmethod
+    # def set_relay_state(data):
+    #     try:
+    #         if data["state"] in [0, 1]:  # Validate state (0 or 1)
+    #             relay_state["state"] = data["state"]
+    #             return {"message": "Relay state updated", "current_state": relay_state["state"]}
+    #         return {"error": "Invalid state. Must be 0 or 1."}
+    #     except Exception as e:
+    #         return {"error": f"An error occurred: {str(e)}"}
+    #
+    # @staticmethod
+    # def get_relay_state():
+    #     return {"state": relay_state["state"]}
+
     @staticmethod
-    def set_relay_state(data):
+    def set_water_level_statee(data):
         try:
-            if data["state"] in [0, 1]:  # Validate state (0 or 1)
-                relay_state["state"] = data["state"]
-                return {"message": "Relay state updated", "current_state": relay_state["state"]}
-            return {"error": "Invalid state. Must be 0 or 1."}
+            if "state" in data:  # Validate state (0 or 1)
+                water_level_state["state"] = data["state"]
+                return {"message": "water level state updated", "current_state": water_level_state["state"]}
+            return {"error": "Invalid state."}
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}"}
 
     @staticmethod
-    def get_relay_state():
-        return {"state": relay_state["state"]}
+    def get_water_level_state():
+        return {"state": water_level_state["state"]}
 
     @staticmethod
     def updateCompartmentAppliancesStatus(data):
@@ -171,7 +186,8 @@ class HardwareController:
                         })
 
             return {
-                "success": "checked"
+                "success": "checked",
+                "updated":updated
             }
         except Exception as e:
             return {

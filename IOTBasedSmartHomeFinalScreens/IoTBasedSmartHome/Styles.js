@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
         width: '85%',
         marginTop: 10
     },
+    
     select: {
         borderWidth: 0.7,
         borderColor: 'black',

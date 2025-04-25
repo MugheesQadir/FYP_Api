@@ -6,6 +6,7 @@ from Controller.HomeController import HomeController
 from Controller.PersonController import PersonController
 from config import app
 
+
 ############### Person ##############
 
 @app.route('/ListPerson',methods=['GET'])
@@ -915,15 +916,26 @@ def Backup_sprinkler_Schedule_Log_By_id(id):
 
 #--------------------------- Hardware --------------------------------
 
-@app.route('/set_relay_state', methods=['POST'])
-def set_relay_state():
-    data = request.get_json()
-    result = HardwareController.set_relay_state(data)
-    return jsonify(result)
+# @app.route('/set_relay_state', methods=['POST'])
+# def set_relay_state():
+#     data = request.get_json()
+#     result = HardwareController.set_relay_state(data)
+#     return jsonify(result)
+#
+# @app.route('/get_relay_state', methods=['GET'])
+# def get_relay_state():
+#     res = HardwareController.get_relay_state()
+#     return jsonify(res), 200
 
-@app.route('/get_relay_state', methods=['GET'])
-def get_relay_state():
-    res = HardwareController.get_relay_state()
+@app.route('/set_water_level_state', methods=['POST'])
+def set_water_level_state():
+    data = request.get_json()
+    result = HardwareController.set_water_level_statee(data)
+    return jsonify(result) ,200
+
+@app.route('/get_water_level_state', methods=['GET'])
+def get_water_level_state():
+    res = HardwareController.get_water_level_state()
     return jsonify(res), 200
 
 @app.route('/Update_Compartment_Appliance_status',methods = ["POST"])

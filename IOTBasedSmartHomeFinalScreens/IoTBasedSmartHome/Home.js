@@ -82,35 +82,64 @@ const Home = ({ navigation, route }) => {
                 </View>
             </View>
 
+
+            <Pressable
+                onPress={() => navigation.navigate('WaterLevelState')}
+                style={({ pressed }) => ({
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    alignSelf: 'flex-start',
+                    marginBottom: 10,
+                    marginLeft: 30,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? '#e6e9f0' : 'transparent',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: pressed ? 0.15 : 0,
+                    shadowRadius: 1,
+                })}
+            >
+                <Text style={{
+                    color: '#001F6D',
+                    textDecorationLine: 'underline',
+                    fontSize: 17,
+                    fontWeight: '600',
+                    fontStyle: 'italic',
+                    letterSpacing: 0.5,
+                }}>
+                    💧 Water Level
+                </Text>
+            </Pressable>
+
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
                     <FlatList
-                    data={data}
-                    renderItem={FlatListData}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    initialNumToRender={5}
-                    maxToRenderPerBatch={10}
-                    windowSize={5}
-                    removeClippedSubviews={true}
-                  />
-                  
+                        data={data}
+                        renderItem={FlatListData}
+                        contentContainerStyle={{ paddingBottom: 100 }}
+                        initialNumToRender={5}
+                        maxToRenderPerBatch={10}
+                        windowSize={5}
+                        removeClippedSubviews={true}
+                    />
+
                     :
                     <View>
-                    <View style={[styles.listItem]}>
-                        <Text style={styles.listText}>Please Add Homes</Text>
-                        <View>
-                            <View style={styles.infoIcon}>
-                                <Text style={styles.infoText}>!</Text>
+                        <View style={[styles.listItem]}>
+                            <Text style={styles.listText}>Please Add Homes</Text>
+                            <View>
+                                <View style={styles.infoIcon}>
+                                    <Text style={styles.infoText}>!</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                    <View style={{padding:'10%',backgroundColor:''}}>
-                        <Text style={{fontSize:15}}>Note :</Text>
-                    <View style={{justifyContent:'center',padding:50,borderRadius:20,alignItems:'center',marginTop:10,backgroundColor:'lightgray'}}>
-                        <Text style={[styles.listText,{color:'black',fontSize:18,marginLeft:0}]}>No Homes available</Text>
-                        <Text style={[styles.listText,{color:'black',fontSize:15,marginLeft:6,marginTop:15}]}>Please press + icon to add home</Text>
-                    </View>
-                    </View>
+                        <View style={{ padding: '10%', backgroundColor: '' }}>
+                            <Text style={{ fontSize: 15 }}>Note :</Text>
+                            <View style={{ justifyContent: 'center', padding: 50, borderRadius: 20, alignItems: 'center', marginTop: 10, backgroundColor: 'lightgray' }}>
+                                <Text style={[styles.listText, { color: 'black', fontSize: 18, marginLeft: 0 }]}>No Homes available</Text>
+                                <Text style={[styles.listText, { color: 'black', fontSize: 15, marginLeft: 6, marginTop: 15 }]}>Please press + icon to add home</Text>
+                            </View>
+                        </View>
                     </View>
                 }
 
