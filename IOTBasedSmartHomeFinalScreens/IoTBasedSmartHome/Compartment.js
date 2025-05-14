@@ -1,7 +1,7 @@
 import {
     Text, View, TouchableOpacity, Pressable,
     KeyboardAvoidingView, Platform, FlatList,
-    Alert
+    Alert, ScrollView
 } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Styles';
@@ -9,6 +9,8 @@ import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import { useFocusEffect } from '@react-navigation/native';
 import URL from './Url';
+import { Checkbox } from 'react-native-paper';
+
 
 const storage = new MMKV();
 
@@ -16,6 +18,10 @@ const Compartment = ({ navigation, route }) => {
     const [data, setData] = useState([]);
     const [items, setItems] = useState(route.params?.items || {});
     const [home_id, sethomeId] = useState(items?.home_id || null);
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedCompartments, setSelectedCompartments] = useState([]);
+
+    const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
 
     const setStorageData = useCallback(() => {
         if (items?.home_id) {
@@ -29,6 +35,43 @@ const Compartment = ({ navigation, route }) => {
             sethomeId(storedId);
         }
     });
+
+    // const getCities = async () => {
+    //     const url = `${URL}/ListCities`;
+    //     try {
+    //         const response = await fetch(url);
+    //         if (response.ok) {
+    //             const result = await response.json();
+    //             Setcities(result);
+    //         } else {
+    //             console.error('Failed to fetch cities');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching data: ', error);
+    //     }
+    // };
+
+    const handleCategorySelect = (category) => {
+        setSelectedCategory(category);
+        setSelectedCompartments([]);
+    };
+
+    const handleCompartmentSelect = (compartmentId) => {
+        setSelectedCompartments(prev => {
+            if (prev.includes(compartmentId)) {
+                return prev.filter(id => id !== compartmentId);
+            } else {
+                return [...prev, compartmentId];
+            }
+        });
+    };
+
+    // const ApplianceItem = ({ item }) => (
+    //     <View style={styles.applianceItem}>
+    //         <Text style={styles.applianceName}>{item.name}</Text>
+    //         <Text style={styles.applianceType}>{item.type}</Text>
+    //     </View>
+    // );
 
     const getCompartmentByHomeId = useCallback(async (home_id) => {
         if (!home_id) return;
@@ -44,45 +87,92 @@ const Compartment = ({ navigation, route }) => {
             console.error('Error fetching data: ', error);
         }
     });
-
-    useEffect(() => {
-        if (items?.home_id) {
+    useFocusEffect(
+        useCallback(() => {
             setStorageData();
-            getCompartmentByHomeId(items.home_id);
-        }
-    }, [items]);
-
+            getStorageData();
+        }, [])
+    );
     // ✅ 
     useFocusEffect(
         useCallback(() => {
-            getStorageData();
             if (home_id) getCompartmentByHomeId(home_id);
         }, [home_id])
     );
 
     const FlatListData = useCallback(({ item }) => (
-        <Pressable style={[styles.listItem]} onPress={() => navigation.navigate('CompartmentAppliance', { items: item })}>
-            <Text style={styles.listText}>{item.compartment_name}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('EditCompartment', { items: item })}>
-                <View style={styles.infoIcon}>
-                    <Text style={styles.infoText}>i</Text>
-                </View>
-            </TouchableOpacity>
-        </Pressable>
-    ));
+        <View style={styles.row}>
+            <Pressable
+                style={[styles.listItem, {
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '82.5%',
+                    marginHorizontal: 0,
+                }]}
+                onPress={() => navigation.navigate('CompartmentAppliance', { items: item })}
+            >
+                <Text style={styles.listText}>{item.compartment_name}</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('EditCompartment', { items: item })}>
+                    <View style={styles.infoIcon}>
+                        <Text style={styles.infoText}>i</Text>
+                    </View>
+                </TouchableOpacity>
+            </Pressable>
+
+            {/* Checkbox Container */}
+            <View style={styles.checkboxContainer}>
+                <View style={styles.CheckBoxsimulatedBorder} />
+                <Checkbox
+                    status={selectedCompartments.includes(item.compartment_id) ? 'checked' : 'unchecked'}
+                    onPress={() => handleCompartmentSelect(item.compartment_id)}
+                    color="#001F6D"
+                    uncheckedColor="#B0B7C3"
+                />
+            </View>
+        </View>
+    ), [selectedCompartments]);
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
-            <View style={styles.navbar}>
+            <View style={[styles.navbar]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <View style={{ flex: 1 }}>
-                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Compartment</Text>
+                <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                    <Text style={styles.navbarText}>Compartment--{selectedCompartments}</Text>
                 </View>
             </View>
 
-            <View style={{ flex: 1 }}>
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Appliances</Text>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.categoriesContainer}
+                >
+                    {categories.map((category) => (
+                        <TouchableOpacity
+                            key={category}
+                            style={[
+                                styles.categoryButton,
+                                selectedCategory === category && styles.selectedCategory
+                            ]}
+                            onPress={() => handleCategorySelect(category)}
+                        >
+                            <Text style={[
+                                styles.categoryText,
+                                selectedCategory === category && styles.selectedCategoryText
+                            ]}>
+                                {category}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
+            </View>
+
+            <View style={{ flex: 7 }}>
+                <Text style={{ marginLeft: 25, bottom: 8, fontSize: 15, fontWeight: '600', fontStyle: 'italic' }}>{items.home_name}</Text>
                 {data.length > 0 ?
                     <FlatList
                         data={data}
@@ -109,21 +199,27 @@ const Compartment = ({ navigation, route }) => {
                             <Text style={{ fontSize: 15 }}>Note :</Text>
                             <View style={{ justifyContent: 'center', padding: 50, borderRadius: 20, alignItems: 'center', marginTop: 10, backgroundColor: 'lightgray' }}>
                                 <Text style={[styles.listText, { color: 'black', fontSize: 16, marginLeft: 0 }]}>No Compartment available</Text>
-                                <Text style={[styles.listText, { color: 'black', fontSize: 15, marginLeft: 6, marginTop: 15 }]}>Please press + icon to add Compartment</Text>
+                                <Text style={[styles.listText, { color: 'black', fontSize: 15, marginLeft: 6, marginTop: 15 }]}>Please press add button to add new Compartments</Text>
                             </View>
                         </View>
                     </View>
                 }
-
-
-                {/* Floating Button */}
-                <Pressable
-                    style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddCompartment', { items })}
-                >
-                    <Text style={styles.floatingButtonText}>+</Text>
-                </Pressable>
             </View>
+            <View style={[styles.Bottombtn, {
+                    padding: 18,
+                    flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
+                    borderColor: 'darkblue', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
+                    outlineStyle: 'solid', backgroundColor: '#B0B7C3'
+                }]}>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C', width: '35%', marginStart: 20 }]}
+                        onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}>
+                        <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                         onPress={() => navigation.navigate('AddCompartment', { items })}>
+                        <Text style={styles.buttonText}>Add</Text>
+                    </TouchableOpacity>
+                </View>
         </KeyboardAvoidingView>
     );
 };

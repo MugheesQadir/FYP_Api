@@ -11,7 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { MMKV } from 'react-native-mmkv';
 import URL from './Url';
 
-const AddLockSchedule = ({ navigation, route }) => {
+const EditLockSchedule = ({ navigation, route }) => {
     const [name, setName] = useState('');
     const [day, setDay] = useState(null);
     const [timeOn, setTimeOn] = useState(new Date());
@@ -21,12 +21,12 @@ const AddLockSchedule = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
     const items = route.params?.items || {};
     const [type, setType] = useState(null)
-    const [show,setShow] = useState(null)
+    const [show, setShow] = useState(null)
 
     // State for received data
     const [compartmentLockId, setCompartmentLockId] = useState(null);
     const [compartmentId, setCompartmentId] = useState(null);
-    
+
     const storage = new MMKV();
 
     const days = [
@@ -65,220 +65,108 @@ const AddLockSchedule = ({ navigation, route }) => {
         }
     };
 
-    const setStorageData = useCallback(() => {
-            if (items?.Compartment_Lock_id) {
-                storage.set('type', Number(items.type));
-            }
-        }, [items]);
-
-    // Initialize received data
     useEffect(() => {
-        const storedCompartmentId = storage.getNumber('compartment_id');
-        const storedlocksId = storage.getNumber('compartment_lock_id');
-        // If the `items` prop exists and contains a lock ID, we assume single schedule
-        if (items?.Compartment_Lock_id) {            
-            setShow(false)
-            setType(items.type)
-            setStorageData()
-            setCompartmentLockId(items.Compartment_Lock_id);
-        }
-        // If `items` is just a number, we assume it's a compartment ID (i.e. add schedule to all locks in that compartment)
-        else if (typeof items === 'number') {            
-            setShow(true)
-            setCompartmentId(items);
-        }
-
-        // If no `items` passed, fallback to MMKV storage values
-        if (!items) {
-            if (!compartmentId && storedCompartmentId) {
-                setCompartmentId(storedCompartmentId);
+        if (items) {
+            if (items.name) {
+                setName(items.name);
             }
 
-            if (!compartmentLockId && storedlocksId) {
-                setCompartmentLockId(storedlocksId);
+            if (items.days) {
+                setDay(items.days.toString());
+            }
+
+            if (items.start_time) {
+                // items.start_time is in "HH:MM:SS" format
+                const [hours, minutes, seconds] = items.start_time.split(':');
+                const startDate = new Date();
+                startDate.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                setTimeOn(startDate);
+            }
+
+            if (items.end_time) {
+                const [hours, minutes, seconds] = items.end_time.split(':');
+                const endDate = new Date();
+                endDate.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds || 0));
+                setTimeOff(endDate);
             }
         }
-    }, []);
+    }, [items]);
 
-    const addScheduleForSingleLock = async () => {
-        if (items.type !== type) {
-            Alert.alert('Error', 'You selected internal lock and add schedule on external locks');
-            return;
-        }
+    const update_matching_Appliance_Schedule = async () => {
         try {
             const payload = {
-                name: name,
-                compartment_lock_id: compartmentLockId,
-                start_time: formatTime(timeOn),
-                end_time: formatTime(timeOff),
-                days: day,
-                lock_type: type
+                old: {
+                    name: items.name,
+                    start_time: items.start_time,
+                    end_time: items.end_time,
+                    days: items.days.toString()
+                },
+                new: {
+                    name: name,
+                    start_time: formatTime(timeOn),
+                    end_time: formatTime(timeOff),
+                    days: day.toString()
+                }
             };
-
-            const addResponse = await fetch(`${URL}/Add_Lock_Schedule`, {
+            const response = await fetch(`${URL}/update_matching_lock_Schedule`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
-            if (!addResponse.ok) {
-                const errorText = await addResponse.text();
-                throw new Error(errorText);
-            }
-
-            const addResult = await addResponse.json();
-
-            if (addResult.success) {
-                return { success: true, message: addResult.success || 'Schedule added successfully' };
-            } else {
-                return { success: false, message: addResult.error || 'Failed to add schedule' };
-            }
-
-        } catch (error) {
-            return { success: false, message: error.message };
-        }
-    };
-
-    const addScheduleForAllLocks = async () => {
-        
-        if (type === null || type === undefined) {
-            Alert.alert('Error', 'Please Select type');
-            return;
-        }
-        try {
-            // First get all appliances for this compartment
-            const response = await fetch(`${URL}/List_Compartment_lock_by_compartment_id/${compartmentId}`);
-
-            // Check if response is OK and parse JSON
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Failed to fetch compartment locks');
-            }
-
             const result = await response.json();
 
-            if (!Array.isArray(result)) {
-                throw new Error('Invalid response format - expected array of locks');
-            }
-
-            let successCount = 0;
-            let errorMessages = [];
-
-            // Add schedule for each appliance
-            for (const appliance of result) {
-                if (type === appliance.type) {
-                    const payload = {
-                        name: name,
-                        compartment_lock_id: appliance.Compartment_Lock_id,
-                        start_time: formatTime(timeOn),
-                        end_time: formatTime(timeOff),
-                        days: day,
-                        lock_type: type
-                    };
-
-                    try {
-                        const addResponse = await fetch(`${URL}/Add_Lock_Schedule`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        if (!addResponse.ok) {
-                            const errorText = await addResponse.text();
-                            throw new Error(errorText);
-                        }
-
-                        const addResult = await addResponse.json();
-
-                        if (addResult.success) {
-                            successCount++;
-                        } else {
-                            errorMessages.push(`Failed for ${appliance.name}: ${addResult.error || 'Unknown error'}`);
-                        }
-                    } catch (error) {
-                        errorMessages.push(`Failed for ${appliance.name}: ${error.message}`);
-                    }
-                }
-            }
-
-            return {
-                success: successCount > 0,
-                message: successCount === result.length
-                    ? `Schedule added to all ${successCount} locks successfully`
-                    : `Schedule added to ${successCount} of ${result.length} appliances`,
-                errors: errorMessages.length > 0 ? errorMessages : null
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: error.message,
-                errors: [error.message]
-            };
-        }
-    };
-
-    const handleAddSchedule = async () => {
-        if (!name) {
-            Alert.alert('Error', 'Please enter schedule name');
-            return;
-        }
-
-        if (!day) {
-            Alert.alert('Error', 'Please select a day');
-            return;
-        }
-        if (
-            timeOn.getHours() === timeOff.getHours() &&
-            timeOn.getMinutes() === timeOff.getMinutes()
-        ) {
-            Alert.alert('Error', 'Time On and Time Off cannot be the same');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            let result;
-
-            if (compartmentLockId && !compartmentId) {                
-                // Only one lock
-                result = await addScheduleForSingleLock();
-            } else if (compartmentId) {
-                // Add to all locks in the compartment
-                result = await addScheduleForAllLocks();
-            } else {
-                throw new Error('No locks or compartment selected');
-            }
-
-            if (result.success) {
-                Alert.alert('Success', result.message);
-                if (result.errors?.length > 0) {
-                    const errorsToShow = result.errors.slice(0, 3);
-                    if (result.errors.length > 3) {
-                        errorsToShow.push(`...and ${result.errors.length - 3} more`);
-                    }
-                    Alert.alert('Partial Errors', errorsToShow.join('\n\n'));
-                }
+            if (response.ok) {
+                Alert.alert('Success', result.success || 'Schedules updated successfully');
                 navigation.goBack();
             } else {
-                Alert.alert('Error', result.message);
+                Alert.alert('Error', result.error || 'Update failed');
             }
         } catch (error) {
             Alert.alert('Error', error.message);
-        } finally {
-            setLoading(false);
+        }
+    };
+
+    const delete_matching_Lock_Schedule = async () => {
+        try {
+            const payload = {
+                old: {
+                    name: items.name,
+                    start_time: items.start_time,
+                    end_time: items.end_time,
+                    days: items.days.toString(),
+                    lock_type: items.lock_type.toString(),
+                    validate: 1
+                }
+            };
+            const response = await fetch(`${URL}/delete_matching_lock_Schedule`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Alert.alert('Success', result.success || 'Schedules deleted successfully');
+                navigation.goBack();
+            } else {
+                Alert.alert('Error', result.error || 'delete failed');
+            }
+        } catch (error) {
+            Alert.alert('Error', error.message);
         }
     };
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={[styles.navbar]}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
-                        <Text style={styles.navbarText}>Add Schedule</Text>
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                        <Text style={styles.navbarText}>Edit Schedule</Text>
                     </View>
                 </View>
 
@@ -340,7 +228,7 @@ const AddLockSchedule = ({ navigation, route }) => {
                             )}
                         </View>
 
-                        <View style={{ width: '100%'}}>
+                        <View style={{ width: '100%' }}>
                             <Dropdown
                                 style={styles.input}
                                 placeholderStyle={{ fontSize: 15, color: 'gray' }}
@@ -360,10 +248,14 @@ const AddLockSchedule = ({ navigation, route }) => {
                     </View>
                 </View>
             </ScrollView>
-            <View style={[styles.Bottombtn, { bottom: 0 }]}>
-                <TouchableOpacity style={styles.button} 
-                onPress={handleAddSchedule}
-                disabled={loading}
+            <View style={[styles.Bottombtn, { flex: 0.3, flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%', marginStart: 20 }]}
+                onPress={delete_matching_Lock_Schedule}
+                >
+                    <Text style={styles.buttonText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                    onPress={update_matching_Appliance_Schedule}
                 >
                     <Text style={styles.buttonText}>Save</Text>
                 </TouchableOpacity>
@@ -372,4 +264,4 @@ const AddLockSchedule = ({ navigation, route }) => {
     );
 }
 
-export default AddLockSchedule;
+export default EditLockSchedule;

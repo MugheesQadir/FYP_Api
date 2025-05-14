@@ -447,6 +447,18 @@ def update_Appliance_Schedule():
     schedule = ApplianceController.Update_Appliances_Schedule(data)
     return jsonify(schedule)
 
+@app.route('/update_matching_Appliance_Schedule', methods = ["POST"])
+def update_matching_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.update_matching_schedules(data)
+    return jsonify(schedule)
+
+@app.route('/delete_matching_Appliance_Schedule', methods = ["POST"])
+def delete_matching_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.delete_matching_Appliance_Schedule(data)
+    return jsonify(schedule)
+
 @app.route('/delete_Appliance_Schedule/<int:id>/<int:type>', methods = ['DELETE'])
 def delete_Appliance_Schedule(id,type):
     schedule = ApplianceController.Delete_Appliances_Schedule(id,type)
@@ -696,6 +708,18 @@ def delete_Lock_Schedule(id):
 @app.route('/backup_deleted_lock_schedule_by_id/<int:id>', methods=['GET'])
 def backup_deleted_lock_schedule_by_id(id):
     schedule = ApplianceController.backup_deleted_lock_schedule_by_id(id)
+    return jsonify(schedule)
+
+@app.route('/update_matching_lock_Schedule', methods = ["POST"])
+def update_matching_lock_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.update_matching_Lock_schedules(data)
+    return jsonify(schedule)
+
+@app.route('/delete_matching_lock_Schedule', methods = ["POST"])
+def delete_matching_lock_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.delete_matching_Lock_Schedule(data)
     return jsonify(schedule)
 
 #-------------------------- Lock Scedule Log --------------------------------

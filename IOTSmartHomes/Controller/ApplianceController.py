@@ -392,6 +392,7 @@ class ApplianceController:
                                      .all()
                                      )
                 return [{"id": applianceSchedule.id,
+                         "name":applianceSchedule.name,
                          "compartment_name": compartment.name,
                          "appliance_catagory": appliance.catagory,
                          "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
@@ -409,6 +410,7 @@ class ApplianceController:
                     .all()
                     )
                 return [{"id": applianceSchedule.id,
+                         "name": applianceSchedule.name,
                          "security_name": security.name,
                          "start_time": applianceSchedule.start_time,
                          "end_time": applianceSchedule.end_time,
@@ -437,6 +439,7 @@ class ApplianceController:
                 applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
 
                 return {"id": applianceSchedule.id,
+                        "name": applianceSchedule.name,
                          "compartment_name": compartment.name,
                          "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
@@ -457,6 +460,7 @@ class ApplianceController:
                 applianceSchedules, security = result
                 if result is not None:
                     return {"id": applianceSchedules.id,
+                            "name": applianceSchedules.name,
                             "security_name": security.name,
                             "start_time": applianceSchedules.start_time,
                             "end_time": applianceSchedules.end_time,
@@ -483,6 +487,7 @@ class ApplianceController:
                 applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
 
                 return {"id": applianceSchedule.id,
+                        "name": applianceSchedule.name,
                         "compartment_name": compartment.name,
                         "appliance_catagory": appliance.catagory,
                         "start_time": applianceSchedule.start_time,
@@ -503,6 +508,7 @@ class ApplianceController:
                 applianceSchedules, security = result
                 if result is not None:
                     return {"id": applianceSchedules.id,
+                            "name": applianceSchedules.name,
                             "security_name": security.name,
                             "start_time": applianceSchedules.start_time,
                             "end_time": applianceSchedules.end_time,
@@ -563,6 +569,7 @@ class ApplianceController:
 
                 if result is not None:
                     return [{"id": applianceSchedules.id,
+                             "name": applianceSchedules.name,
                             "security_name": security.name,
                             "start_time": applianceSchedules.start_time,
                             "end_time": applianceSchedules.end_time,
@@ -585,6 +592,7 @@ class ApplianceController:
                                      .all()
                                      )
                 return [{"id": applianceSchedule.id,
+                         "name": applianceSchedule.name,
                          "compartment_name": compartment.name,
                          "appliance_catagory": appliance.catagory,
                          "start_time": applianceSchedule.start_time,
@@ -603,6 +611,7 @@ class ApplianceController:
 
                 if result is not None:
                     return [{"id": applianceSchedules.id,
+                             "name": applianceSchedules.name,
                              "security_name": security.name,
                              "start_time": applianceSchedules.start_time,
                              "end_time": applianceSchedules.end_time,
@@ -705,6 +714,64 @@ class ApplianceController:
                 return {'success':f"Security Schedule updated successfully"}
         except Exception as e:
             return str(e)
+
+    @staticmethod
+    def update_matching_schedules(data):
+
+        old = data.get('old')
+        new = data.get('new')
+
+        if not old or not new:
+            return {'error': 'Old and new data are required'}
+
+        try:
+            schedules = ApplianceSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days'],
+                type=old['type']
+            ).all()
+
+            for schedule in schedules:
+                schedule.name = new['name']
+                schedule.start_time = new['start_time']
+                schedule.end_time = new['end_time']
+                schedule.days = new['days']
+                schedule.type = new['type']
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) updated successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
+
+    @staticmethod
+    def delete_matching_Appliance_Schedule(data):
+
+        old = data.get('old')
+        try:
+            schedules = ApplianceSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days'],
+                type=old['type'],
+                validate = old['validate']
+            ).all()
+
+            for schedule in schedules:
+                schedule.validate = 0
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) deleted successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
 
     @staticmethod
     def Delete_Appliances_Schedule(id, type):
@@ -1452,7 +1519,6 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
-
     @staticmethod
     def Delete_compartment_lock(id):
         try:
@@ -1626,7 +1692,8 @@ class ApplianceController:
                  "name": lockschedule.name,
                  "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
                  "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
-                 "days": lockschedule.days
+                 "days": lockschedule.days,
+                 "lock_type":lockschedule.lock_type
                  }
                 for lockschedule, compartment_lock, compartment in result]
         except Exception as e:
@@ -1702,6 +1769,62 @@ class ApplianceController:
             return {'success':'Backup Lock Schedule Log Successfully'}
         except Exception as e:
             return str(e)
+
+    @staticmethod
+    def update_matching_Lock_schedules(data):
+
+        old = data.get('old')
+        new = data.get('new')
+
+        if not old or not new:
+            return {'error': 'Old and new data are required'}
+
+        try:
+            schedules = LockSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days']
+            ).all()
+
+            for schedule in schedules:
+                schedule.name = new['name']
+                schedule.start_time = new['start_time']
+                schedule.end_time = new['end_time']
+                schedule.days = new['days']
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) updated successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
+
+    @staticmethod
+    def delete_matching_Lock_Schedule(data):
+
+        old = data.get('old')
+        try:
+            schedules = LockSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days'],
+                lock_type=old['lock_type'],
+                validate=old['validate']
+            ).all()
+
+            for schedule in schedules:
+                schedule.validate = 0
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) deleted successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
 
 #---------------------- Lock Schedule Log --------------------------------
 

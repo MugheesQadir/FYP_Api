@@ -13,11 +13,10 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
     const [name, setName] = useState('')
     const [Appliances, setAppliances] = useState(null);
     const [status, setstatus] = useState(null);
-    const [port,setPort] = useState('')
+    const [port, setPort] = useState('')
     const [listAppliances, setListAppliances] = useState([]);
     const [items, setItems] = useState(route.params?.items || null);
     const [Com_App_id, set_Com_App_Id] = useState(null);
-    const [data, setData] = useState(null);
 
     const stat = [{ id: 0, name: 'Off' }, { id: 1, name: 'On' }]
 
@@ -60,8 +59,8 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
             Alert.alert('Error', 'Please Select status');
             return;
         }
-        
-        const payload = { id:Com_App_id,name: name,port:port, compartment_id: compartment_id, appliance_id: Appliances, status: status === 1 ? 1 : 0 };
+
+        const payload = { id: Com_App_id, name: name, port: port, compartment_id: compartment_id, appliance_id: Appliances, status: status === 1 ? 1 : 0 };
         try {
             const res = await fetch(`${URL}/Update_Compartment_Appliance`, {
                 method: 'POST',
@@ -129,42 +128,16 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
         }
     };
 
-
-    const getCompartmentApplianceById = async (id) => {
-        if (!id) return;
-        try {
-            const response = await fetch(`${URL}/Get_Compartment_Appliance_ById/${id}`);
-            if (response.ok) {
-                const result = await response.json();
-                setData(result);
-            } else {
-                console.error('Failed to fetch data');
-            }
-        } catch (error) {
-            console.error('Error fetching data: ', error);
-        }
-    };
-
     useEffect(() => {
-            if (items) {
-                set_Com_App_Id(items.Compartment_Appliance_id);  // Set home_id after receiving items
-            }
-        }, [items]);
-    
-        useEffect(() => {
-            if (Com_App_id) {
-                getCompartmentApplianceById(Com_App_id);
-            }
-        }, [Com_App_id]);
-    
-        useEffect(() => {
-            if (data) {
-                setName(data.name);
-                setAppliances(data.appliance_id.toString())
-                setstatus(data.status)   
-                setPort(data.port.toString())             
-            }
-        }, [data]);
+        if (items) {
+            set_Com_App_Id(items.Compartment_Appliance_id);  // Set home_id after receiving items
+            setName(items.name);
+            setAppliances(items.appliance_id.toString())
+            setstatus(items.status)
+            setPort(items.port.toString())
+
+        }
+    }, [items]);
 
     useEffect(() => {
         GetStorageData()
@@ -174,22 +147,21 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View
-                        style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>
-                            Edit Appliance</Text></View>
-
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                        <Text style={styles.navbarText}>Edit Appliance</Text>
+                    </View>
                 </View>
-                <View style={[styles.innerContainer,{flex:1,position:'relative'}]}>
+                <View style={[styles.innerContainer]}>
                     <View style={styles.formContainer}>
-                        
 
-                        <View style={{ position: 'absolute', width: '100%', marginTop: '' }}>
+
+                        <View style={{ width: '100%' }}>
                             <Dropdown
-                                style={styles.select}
+                                style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
@@ -206,16 +178,16 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
                         </View>
 
                         <TextInput
-                            style={[styles.input, { position:'absolute',backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7,marginTop:'19%' }]}
+                            style={[styles.input]}
                             placeholder='Name'
                             placeholderTextColor='gray'
                             onChangeText={setName}
                             value={name}
                         />
 
-                        <View style={{ position: 'absolute', width: '100%', marginTop: '40%' }}>
+                        <View style={{ width: '100%' }}>
                             <Dropdown
-                                style={styles.select}
+                                style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
@@ -232,33 +204,25 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
                         </View>
 
                         <TextInput
-                            style={[styles.input, {position:'absolute', backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7,marginTop:'60%' }]}
+                            style={[styles.input]}
                             placeholder='Port'
                             placeholderTextColor='gray'
                             onChangeText={setPort}
                             value={port}
                         />
                     </View>
-
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%', flexDirection: 'row', justifyContent: 'space-around' }]}>
-                        <View style={{ position: '', backgroundColor: 'maroon', padding: 10, marginLeft: 31, width: '35%', borderRadius: 10, }}>
-                            <TouchableOpacity 
-                            onPress={DeleteCompartmentAppliances}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, marginRight: 31, width: '35%', borderRadius: 10 }}>
-                            <TouchableOpacity 
-                            onPress={EditAppliances}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Save</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
                 </View>
             </ScrollView>
+            <View style={[styles.Bottombtn, { flex: 0.3, flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%', marginStart: 20 }]}
+                    onPress={DeleteCompartmentAppliances}>
+                    <Text style={styles.buttonText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                    onPress={EditAppliances}>
+                    <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+            </View>
         </KeyboardAvoidingView>
     );
 }

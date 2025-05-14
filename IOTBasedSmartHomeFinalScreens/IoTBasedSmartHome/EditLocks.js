@@ -2,84 +2,66 @@ import {
     StyleSheet, Text, View, Image, TouchableOpacity, TextInput,
     Alert, KeyboardAvoidingView, ScrollView, Platform
 } from 'react-native'
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import URL from './Url';
 
-const EditHome = ({ navigation, route }) => {
-    const [name, setname] = useState('')
-    const [city, setCity] = useState(null);
-    const [place, setPlace_id] = useState(null);
-    const [listCities, Setcities] = useState([]);
-    const [listplaces, setPlaces] = useState([]);
+const EditLocks = ({ navigation, route }) => {
+    const [name, setName] = useState('')
+    const [status, setstatus] = useState(null);
+    const [port, setPort] = useState('')
+    const [type, setType] = useState(null)
     const [items, setItems] = useState(route.params?.items || null);
-    const [home_id, setHomeId] = useState(null);
-    const [id, setid] = useState(null)
+    const [cmp_lock_id, set_Com_Lock_id] = useState(null)
+
+    const stat = [{ id: 0, name: 'Unlocked' }, { id: 1, name: 'Locked' }]
+    const Locktype = [{ id: 0, name: 'Internal' }, { id: 1, name: 'External' }]
+
+    const [compartment_id, set_Com_id] = useState(null)
 
     const storage = new MMKV();
 
-    const getCities = async () => {
-        const url = `${URL}/ListCities`;
-        try {
-            const response = await fetch(url);
-            if (response.ok) {
-                const result = await response.json();
-                Setcities(result);
-            } else {
-                console.error('Failed to fetch cities');
-            }
-        } catch (error) {
-            console.error('Error fetching data: ', error);
-        }
-    };
-
-    const getPlaces = async (city) => {
-        const url = `${URL}/ListPlacesByCityId/${city}`;
-        try {
-            const response = await fetch(url);
-            if (response.ok) {
-                const result = await response.json();
-                setPlaces(result);
-            } else {
-                console.error('Failed to fetch places');
-            }
-        } catch (error) {
-            console.error('Error fetching data: ', error);
-        }
-    };
-
-    const getStorageData = () => {
-        const storedId = storage.getNumber('person_id');
+    const GetStorageData = () => {
+        const storedId = storage.getNumber('compartment_id');
         if (storedId !== undefined) {
-            setid(storedId);
+            set_Com_id(storedId);
         }
     };
 
-    const UpdateHome = async () => {
+    useEffect(() => {
+        if (items) {
+            set_Com_Lock_id(items.Compartment_Lock_id);  // Set home_id after receiving items
+            setName(items.name);
+            setType(items.type.toString())
+            setstatus(items.status)
+            setPort(items.port.toString())
+
+        }
+    }, [items]);
+
+    const EditLocks = async () => {
         if (!name) {
-            Alert.alert('Error', 'Please Enter Home name');
+            Alert.alert('Error', 'Please Enter locks name')
             return;
         }
-        if (!city) {
-            Alert.alert('Error', 'Please Select city');
+        if (!port) {
+            Alert.alert('Error', 'Please insert Port')
+        }
+        if (status === null || status === undefined) {
+            Alert.alert('Error', 'Please Select status');
             return;
         }
-        if (!place || place === "") {
-            Alert.alert('Error', 'Please Select Place');
-            return;
-        }
-        if (!home_id) {
-            Alert.alert('Error', 'Home ID is missing');
+        if (type === null || type === undefined) {
+            Alert.alert('Error', 'Please Select type');
             return;
         }
 
-        const payload = { id: home_id, name: name, place_id: place, person_id: id };
-
+        const payload = { id:cmp_lock_id,name: name, compartment_id: compartment_id, status: status, port: port, type: type };
         try {
-            const res = await fetch(`${URL}/UpdateHome`, {
+            const res = await fetch(`${URL}/update_Compartment_Lock`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
@@ -107,18 +89,14 @@ const EditHome = ({ navigation, route }) => {
         }
     };
 
-    const DeleteHome = async () => {
-        if (!name) {
-            Alert.alert('Error', 'Please Enter Home name');
-            return;
-        }
-        if (!home_id) {
-            Alert.alert('Error', 'Home ID is missing');
+    const DeleteLocks = async () => {
+        if (!cmp_lock_id) {
+            Alert.alert('Error', 'Compartment Lock ID is missing');
             return;
         }
 
         try {
-            const res = await fetch(`${URL}/DeleteHome/${home_id}`, {
+            const res = await fetch(`${URL}/delete_Compartment_Lock/${cmp_lock_id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
             });
@@ -146,57 +124,45 @@ const EditHome = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        if (items?.home_id) {
-            setHomeId(items.home_id);  // Set home_id after receiving items
-        }
-        if (items?.home_name) {
-            setname(items.home_name);  // Set home_name after receiving items
-        }
-        getCities();
-        getStorageData()
+        GetStorageData()
     }, []);
-
-    useEffect(() => {
-        if (city !== null) {
-            getPlaces(city);
-        }
-    }, [city]);
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={[styles.navbar]}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
-                        <Text style={styles.navbarText}>Edit Home</Text>
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                        <Text style={styles.navbarText}>Edit Locks</Text>
                     </View>
                 </View>
-                <View style={[styles.innerContainer]}>
+                <View style={styles.innerContainer}>
                     <View style={styles.formContainer}>
+
                         <TextInput
                             style={[styles.input]}
                             placeholder='Name'
                             placeholderTextColor='gray'
+                            onChangeText={setName}
                             value={name}
-                            onChangeText={setname}
                         />
 
-                        <View style={{ width: '100%', }}>
+                        <View style={{ width: '100%' }}>
                             <Dropdown
                                 style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
-                                data={listCities.map(city => ({ label: city.name, value: city.id.toString() }))} // Correct structure
+                                data={stat.map(place => ({ label: place.name, value: place.id.toString() }))} // Correct structure
                                 searchmaxHeight={300}
                                 labelField="label"
                                 valueField="value"
-                                placeholder="Select City"
+                                placeholder="Select status"
                                 searchPlaceholder="Search..."
-                                value={city?.toString()}  // Ensure correct value type
-                                onChange={(selectedItem) => setCity(parseInt(selectedItem.value))}  // Correct key access
+                                value={status?.toString()}  // Ensure correct value type
+                                onChange={(selectedItem) => setstatus(parseInt(selectedItem.value))}  // Correct key access
                             />
 
                         </View>
@@ -207,32 +173,41 @@ const EditHome = ({ navigation, route }) => {
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
-                                data={listplaces.map(place => ({ label: place.name, value: place.id.toString() }))} // Correct structure
+                                data={Locktype.map(place => ({ label: place.name, value: place.id.toString() }))} // Correct structure
                                 searchmaxHeight={300}
                                 labelField="label"
                                 valueField="value"
-                                placeholder="Select Place"
+                                placeholder="Select type"
                                 searchPlaceholder="Search..."
-                                value={place?.toString()}  // Ensure correct value type
-                                onChange={(selectedItem) => setPlace_id(parseInt(selectedItem.value))}  // Correct key access
+                                value={type?.toString()}  // Ensure correct value type
+                                onChange={(selectedItem) => setType(parseInt(selectedItem.value))}  // Correct key access
                             />
 
                         </View>
+
+                        <TextInput
+                            style={[styles.input]}
+                            placeholder='Port'
+                            placeholderTextColor='gray'
+                            onChangeText={setPort}
+                            value={port}
+                        />
                     </View>
                 </View>
-                <View style={[styles.Bottombtn, { flex:0.3,flexDirection: 'row', justifyContent: 'space-evenly' }]}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%',marginStart:20 }]}
-                        onPress={DeleteHome}>
-                        <Text style={styles.buttonText}>Delete</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%',marginEnd:20 }]}
-                        onPress={UpdateHome}>
-                        <Text style={styles.buttonText}>Save</Text>
-                    </TouchableOpacity>
-                </View>
             </ScrollView>
+            <View style={[styles.Bottombtn, { flex: 0.3, flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%', marginStart: 20 }]}
+                    onPress={DeleteLocks}
+                    >
+                    <Text style={styles.buttonText}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                    onPress={EditLocks}>
+                    <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+            </View>
         </KeyboardAvoidingView>
     );
-};
+}
 
-export default EditHome;
+export default EditLocks

@@ -108,27 +108,26 @@ const AddHome = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+            <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View
-                        style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>
-                            Add Home</Text></View>
-
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Add Home</Text>
+                    </View>
                 </View>
                 <View style={[styles.innerContainer]}>
-                    <View style={styles.formContainer}>
+                    <View style={[styles.formContainer, { flex: 0 }]}>
                         <TextInput
-                            style={[styles.input, { backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 }]}
+                            style={[styles.input]}
                             placeholder='Name'
                             placeholderTextColor='gray'
                             onChangeText={setname}
                         />
 
-                        <View style={{ position: 'absolute', width: '100%', marginTop: '20%' }}>
+                        <View style={{ position: '', width: '100%', }}>
                             <Dropdown
-                                style={styles.select}
+                                style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
@@ -144,9 +143,9 @@ const AddHome = ({ navigation, route }) => {
 
                         </View>
 
-                        <View style={{ position: 'absolute', width: '100%', marginTop: '40%' }}>
+                        <View style={{ position: '', width: '100%', }}>
                             <Dropdown
-                                style={styles.select}
+                                style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16, }}
                                 inputSearchStyle={{ height: 40, fontSize: 16, }}
@@ -162,15 +161,11 @@ const AddHome = ({ navigation, route }) => {
 
                         </View>
                     </View>
-
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%' }]}>
-                        <View style={{  backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
-                            <TouchableOpacity onPress={AddHome}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Save</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                </View>
+                <View style={[styles.Bottombtn, { bottom: 45 }]}>
+                    <TouchableOpacity style={styles.button} onPress={AddHome}>
+                        <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>

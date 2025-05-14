@@ -22,6 +22,7 @@ const WaterLevelState = ({ navigation }) => {
     const levelDis = () => {
         if (waterLevel < 6) {
             SetDisplay('OverFlow');
+            setImageUrl('');
         } else if(waterLevel >= 6 && waterLevel < 8) {
             SetDisplay('100%');
             setImageUrl(images.full);
@@ -73,19 +74,18 @@ const WaterLevelState = ({ navigation }) => {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container,{flex: 1, alignItems: 'center', backgroundColor: '#f5f5f5'}]}>
-            <View style={[styles.navbar,{}]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-        >
-          <Icon name="arrow-left" size={24} color="black" />
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.navbarText, { fontSize: 22, textAlign: 'center', color: 'black',marginRight:22 }]}>Water Level</Text>
-        </View>
-      </View>
+            <View style={[styles.navbar]}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Icon name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Water Level</Text>
+                    </View>
+                </View>
 
             <Image
-                source={imageUrl ? imageUrl : require('../Images/empty.jpeg')}
+                // source={imageUrl ? imageUrl : require('../Images/empty.jpeg')}
+                source = {imageUrl}
                 style={[styles.image,{width: 300,
                     height: 350,
                     borderWidth: 1,

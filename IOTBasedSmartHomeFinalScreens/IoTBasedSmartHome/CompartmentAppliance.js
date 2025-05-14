@@ -102,30 +102,34 @@ const CompartmentAppliance = ({ navigation, route }) => {
     }
   }, [data, selectAll, toggleStates]);
 
-  useEffect(() => {
-    const storedId = storage.getNumber('compartment_id');
-    if (storedId) setCompartmentId(storedId);
-    if (items?.compartment_id) {
-      storage.set('compartment_id', Number(items.compartment_id));
-      setCompartmentId(items.compartment_id);
-    }
-  }, [items]);
+  useFocusEffect(
+    useCallback(() => {
+      if (items?.compartment_id) {
+        storage.set('compartment_id', Number(items.compartment_id));
+      }
+      const storedId = storage.getNumber('compartment_id');
+      if (storedId) setCompartmentId(storedId);
+    }, [items?.compartment_id])
+  );
+  
+  useFocusEffect(
+    useCallback(() => {
+      if (!compartmentId) return;
 
-useFocusEffect(
-  useCallback(() => {
-    if (compartmentId) {
+      getCompartmentApplianceByCompartmentId(compartmentId);
+  
       intervalRef.current = setInterval(() => {
         getCompartmentApplianceByCompartmentId(compartmentId);
       }, 200);
-    }
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [compartmentId, getCompartmentApplianceByCompartmentId])
-);
+  
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+    }, [compartmentId])
+  );
 
   useEffect(() => {
     if (data.length > 0) {
@@ -176,21 +180,19 @@ useFocusEffect(
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
       <View style={[styles.navbar]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.navbarText, { marginRight: 25 }]}>Appliances</Text>
+        <View style={{ flex: 0.90, justifyContent: 'center' }}>
+          <Text style={styles.navbarText}>Appliances</Text>
         </View>
       </View>
-      
-      <View style={{ marginBottom: 10, flexDirection: 'row', }}>
-        <Text style={{ marginLeft: 30, textAlign: 'center', fontSize: 15, fontWeight: '600', fontStyle: 'italic', marginTop: 3 }}>{items.compartment_name}</Text>
-        <View style={{ flexDirection: 'row', width: '59%', justifyContent: 'flex-end' }}>
-          <Text style={{ fontSize: 15, fontWeight: '400', fontStyle: 'italic', marginTop: 3, marginLeft: 20 }}>Select All</Text>
-          <View style={[styles.switchContainer, { marginBottom: 0 }]}>
+
+      <View style={{ marginBottom: 10, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center' }}>
+        <Text style={{ fontSize: 15, fontWeight: '600', fontStyle: 'italic' }}>{items.compartment_name}</Text>
+        <View style={{ flexDirection: 'row', width: '59%', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Text style={{ fontSize: 15, fontWeight: '400', fontStyle: 'italic', }}>Select All</Text>
+          <View style={[styles.switchContainer]}>
             <View style={styles.simulatedBorder} />
             <Switch
               trackColor={{ false: 'transparent', true: 'transparent' }}
@@ -205,7 +207,7 @@ useFocusEffect(
         </View>
       </View>
 
-      <View style={{ flex: 1, position: 'relative' }}>
+      <View style={{ flex: 7, position: 'relative' }}>
         {data.length > 0 ?
           <FlatList
             data={data}
@@ -226,11 +228,11 @@ useFocusEffect(
                 </View>
               </View>
             </View>
-            <View style={{ padding: '10%', backgroundColor: '' }}>
+            <View style={{ padding: '10%' }}>
               <Text style={{ fontSize: 15 }}>Note :</Text>
               <View style={{ justifyContent: 'center', padding: 50, borderRadius: 20, alignItems: 'center', marginTop: 10, backgroundColor: 'lightgray' }}>
                 <Text style={[styles.listText, { color: 'black', fontSize: 16, marginLeft: 0 }]}>No Appliances available</Text>
-                <Text style={[styles.listText, { color: 'black', fontSize: 15, marginLeft: 6, marginTop: 15 }]}>Please press + icon to add Appliances</Text>
+                <Text style={[styles.listText, { color: 'black', fontSize: 15, marginLeft: 6, marginTop: 15 }]}>Please press Add button to add Appliances</Text>
               </View>
             </View>
           </View>
@@ -238,55 +240,46 @@ useFocusEffect(
 
       </View>
       <Pressable
-  onPress={() => navigation.navigate('Locks', { items: items })}
-  style={({ pressed }) => ({
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignSelf: 'flex-start',
-    marginBottom:10,
-    marginLeft:30,
-    borderRadius: 8,
-    backgroundColor: pressed ? '#e6e9f0' : 'transparent',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: pressed ? 0.15 : 0,
-    shadowRadius: 1,
-  })}
->
-  <Text style={{
-    color: '#001F6D',
-    textDecorationLine: 'underline',
-    fontSize: 17,
-    fontWeight: '600',
-    fontStyle: 'italic',
-    letterSpacing: 0.5,
-  }}>
-    🔒 Locks
-  </Text>
-</Pressable>
+        onPress={() => navigation.navigate('Locks', { items: items })}
+        style={({ pressed }) => ({
+          paddingHorizontal: 12,
+          paddingVertical: 6,
+          alignSelf: 'flex-start',
+          marginBottom: 10,
+          marginLeft: 30,
+          borderRadius: 8,
+          backgroundColor: pressed ? '#e6e9f0' : 'transparent',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: pressed ? 0.15 : 0,
+          shadowRadius: 1,
+        })}
+      >
+        <Text style={{
+          color: '#001F6D',
+          textDecorationLine: 'underline',
+          fontSize: 17,
+          fontWeight: '600',
+          fontStyle: 'italic',
+          letterSpacing: 0.5,
+        }}>
+          🔒 Locks
+        </Text>
+      </Pressable>
       <View style={[styles.Bottombtn, {
-        backgroundColor: 'white', padding: 18, bottom: 0, position: '',
-        flexDirection: 'row', justifyContent: 'space-evenly', marginTop: '0%', borderWidth: 1.5,
-        borderColor: 'darkblue', borderRadius: 12,
-        outlineColor: '#B0B7C3',
-        outlineWidth: 1,
+        padding: 18,
+        flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
+        borderColor: 'darkblue', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
         outlineStyle: 'solid', backgroundColor: '#B0B7C3'
       }]}>
-        <View style={{ backgroundColor: '#001F6D', padding: 10, marginLeft: 0, width: '35%', borderRadius: 10, }}>
-          <TouchableOpacity
-          onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}
-          >
-            <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Schedule</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, marginRight: 0, width: '35%', borderRadius: 10 }}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}
-          >
-            <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Add</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C', width: '35%', marginStart: 20 }]}
+          onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}>
+          <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+          onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}>
+          <Text style={styles.buttonText}>Add</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );

@@ -10,10 +10,10 @@ const MainScreen = ({ navigation }) => {
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
             <View style={styles.navbar}>
-                <View style={{ flex: 1 }}><Text style={styles.navbarText}>Main Screen</Text></View>
+                <View style={{ }}><Text style={styles.navbarText}>Main Screen</Text></View>
             </View>
 
-            <View style={[styles.innerContainer,{ flex:1, justifyContent: 'center', backgroundColor: 'white',marginTop:0 }]}>
+            <View style={[styles.innerContainer,{justifyContent:'center'}]}>
                 <Image
                     source={require('../Images/Iot4.png')}
                     style={styles.image}
@@ -22,7 +22,7 @@ const MainScreen = ({ navigation }) => {
                 <Text style={styles.description}>IoT based smart homes use interconnected devices to offer remote control, energy efficiency, enhanced security, and automation.</Text>
 
                 <View style={{ backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Login')}
+                    <TouchableOpacity onPress={() => navigation.replace('Login')}
                     >
                         <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Get Started</Text>
                     </TouchableOpacity>

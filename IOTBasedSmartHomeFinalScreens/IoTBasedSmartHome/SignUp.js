@@ -15,10 +15,10 @@ const SignUp = ({ navigation }) => {
 
     const SignUp = async () => {
         if (!email || !Password || !name || !cpass) {
-                    Alert.alert('Error', 'Please enter all fields');
-                    return;
-                }
-        var person = { name: name, email: email, password: Password ,role:'user'};
+            Alert.alert('Error', 'Please enter all fields');
+            return;
+        }
+        var person = { name: name, email: email, password: Password, role: 'user' };
         try {
             if (Password == '' || cpass == '') {
                 Alert.alert('Error', 'Please! Enter all fields')
@@ -64,17 +64,16 @@ const SignUp = ({ navigation }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+            <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>Sign Up</Text></View>
-
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Sign Up</Text>
+                    </View>
                 </View>
 
-                <View style={styles.innerContainer}>
-
-
+                <View style={[styles.innerContainer]}>
                     <Image source={require('../Images/Iot4.png')} style={styles.image} />
 
                     <TextInput
@@ -106,14 +105,10 @@ const SignUp = ({ navigation }) => {
                         onChangeText={setConpass}
                     />
 
-                    <View style={styles.Bottombtn}>
-
-                        <View style={{ position:'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 ,}}>
-                            <TouchableOpacity onPress={SignUp}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>SignUp</Text>
-                            </TouchableOpacity>
-                        </View>
+                    <View style={[styles.Bottombtn,{}]}>
+                        <TouchableOpacity style={styles.button} onPress={SignUp}>
+                            <Text style={styles.buttonText}>SignUp</Text>
+                        </TouchableOpacity>
                     </View>
 
                 </View>

@@ -1,13 +1,12 @@
 import {
     StyleSheet, Text, View, Image, TouchableOpacity, TextInput,
     Alert, KeyboardAvoidingView, ScrollView, Platform
-} from 'react-native'
-import React, { useEffect, useState, useCallback } from 'react'
+} from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import Iconn from "react-native-vector-icons/MaterialCommunityIcons";
 import { useFocusEffect } from '@react-navigation/native';
-
 import URL from './Url';
 
 const Login = ({ navigation }) => {
@@ -21,28 +20,22 @@ const Login = ({ navigation }) => {
             return;
         }
 
-        const person = { email, password };
         try {
-            const url = `${URL}/login_person`;
-            const res = await fetch(url, {
+            const res = await fetch(`${URL}/login_person`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(person),
+                body: JSON.stringify({ email, password }),
             });
 
-            const data = await res.json();  // Response ko JSON format me parse karna zaroori hai
+            const data = await res.json();
 
-            if (res.ok) {
-                if (data.id) {
-                    Alert.alert('Login Successful', `Welcome ${data.name}`);
-                    navigation.navigate('Home', { items: data });
-                    setEmail('')
-                    setPassword('')
-                } else {
-                    Alert.alert('Login failed', data.error || 'Invalid credentials.');
-                }
+            if (res.ok && data.id) {
+                Alert.alert('Login Successful', `Welcome ${data.name}`);
+                navigation.navigate('Home', { items: data });
+                setEmail('');
+                setPassword('');
             } else {
-                Alert.alert('Login failed', data.error || 'Invalid email or password.');
+                Alert.alert('Login failed', data.error || 'Invalid credentials.');
             }
         } catch (error) {
             console.error('Error during login:', error);
@@ -51,77 +44,69 @@ const Login = ({ navigation }) => {
     };
 
     useFocusEffect(
-            useCallback(() => {
-                setSecureText(true)
-            }, [])
-        );
+        useCallback(() => {
+            setSecureText(true);
+        }, [])
+    );
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+        >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+            <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>Login</Text></View>
-
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Login</Text>
+                    </View>
                 </View>
-                <View style={[styles.innerContainer, { flex:1,position:'relative', marginTop: '10%' }]}>
+
+                <View style={[styles.innerContainer,]}>
                     <Image source={require('../Images/Iot4.png')} style={styles.image} />
 
                     <TextInput
                         style={styles.input}
                         placeholder="Email"
                         value={email}
-                        placeholderTextColor={'gray'}
                         onChangeText={setEmail}
+                        placeholderTextColor="gray"
+                        autoCapitalize="none"
+                        keyboardType="email-address"
                     />
-                    <View style={{ flexDirection: 'row', marginBottom: 10, borderRadius: 15, backgroundColor: 'white',
-                         borderColor: 'black', borderWidth: 0.7 ,width: '100%'}}>
+
+                    <View style={[styles.input, { flexDirection: 'row',padding:0}]}>
                         <TextInput
-                            style={{
-                                color: 'black',
-                                fontSize: 18,
-                                padding: 10,
-                                width: '90%',
-                            }}
+                            style={{ flex: 1, color: 'black', fontSize: 18}}
                             placeholder="Password"
                             value={password}
-                            placeholderTextColor={'gray'}
-                            secureTextEntry={secureText}
                             onChangeText={setPassword}
+                            placeholderTextColor="gray"
+                            secureTextEntry={secureText}
                         />
-                        <TouchableOpacity onPress={() => setSecureText(!secureText)}
-                            style={{justifyContent:'center',alignItems:'center'}}>
+                        <TouchableOpacity onPress={() => setSecureText(!secureText)} style={{ justifyContent: 'center' }}>
                             <Iconn
-                                name={secureText ? "eye-off" : "eye"} // Toggle between icons
+                                name={secureText ? "eye-off" : "eye"}
                                 size={24}
                                 color="black"
                             />
                         </TouchableOpacity>
                     </View>
-
-                    <View style={[styles.Bottombtn,{justifyContent:'center',alignItems:'center',flexDirection:'',marginBottom:25}]}>
-                        <View style={{ backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10, marginBottom: 10 }}>
-                            <TouchableOpacity onPress={Login_method}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Login</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={{ position: '', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>SignUp</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
                 </View>
+                <View style={[styles.Bottombtn,{}]}>
+                        <TouchableOpacity style={styles.button} onPress={Login_method}>
+                            <Text style={styles.buttonText}>Login</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
+                            <Text style={styles.buttonText}>SignUp</Text>
+                        </TouchableOpacity>
+                    </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 };
 
 export default Login;
-
-

@@ -45,17 +45,15 @@ const Home = ({ navigation, route }) => {
         }
     };
 
-    useEffect(() => {
-        if (items?.id) {
+    useFocusEffect(
+        useCallback(() => {
             setStorageData();
-            getHomeByPersonId(items.id);
-        }
-    }, [items]);
-
+            getStorageData();
+        }, [])
+    );
     // ✅ 
     useFocusEffect(
         useCallback(() => {
-            getStorageData();
             if (id) getHomeByPersonId(id);
         }, [id])
     );
@@ -73,15 +71,14 @@ const Home = ({ navigation, route }) => {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
-            <View style={styles.navbar}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
-                <View style={{ flex: 1 }}>
-                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Home</Text>
+            <View style={[styles.navbar]}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Icon name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Home</Text>
+                    </View>
                 </View>
-            </View>
-
 
             <Pressable
                 onPress={() => navigation.navigate('WaterLevelState')}

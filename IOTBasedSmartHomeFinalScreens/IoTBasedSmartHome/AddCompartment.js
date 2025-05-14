@@ -19,14 +19,14 @@ const AddCompartment = ({ navigation, route }) => {
         if (storedId !== undefined) {
             setid(storedId);
         }
-    };    
+    };
 
     const AddCompartments = async () => {
         if (!name) {
             Alert.alert('Error', 'Please Enter Compartment name')
             return;
         }
-        const payload = { name: name, home_id:home_id};
+        const payload = { name: name, home_id: home_id };
         try {
             const res = await fetch(`${URL}/AddCompartment`,
                 {
@@ -58,35 +58,32 @@ const AddCompartment = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+            <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View
-                        style={{ flex: 1 }}><Text style={[styles.navbarText, { marginRight: 25 }]}>
-                            Add Compartment</Text></View>
-
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Add Compartment</Text>
+                    </View>
                 </View>
                 <View style={[styles.innerContainer]}>
                     <View style={styles.formContainer}>
                         <TextInput
-                            style={[styles.input, { backgroundColor: 'white', borderColor: 'black', borderWidth: 0.7 }]}
+                            style={[styles.input,]}
                             placeholder='Name'
                             placeholderTextColor='gray'
                             onChangeText={setname}
                         />
                     </View>
 
-                    <View style={[styles.Bottombtn, { position: 'absolute', marginTop: '180%' }]}>
-                        <View style={{ position: 'absolute', backgroundColor: '#001F6D', padding: 10, width: '70%', borderRadius: 10 }}>
-                            <TouchableOpacity onPress={AddCompartments}
-                            >
-                                <Text style={{ color: 'white', textAlign: 'center', fontSize: 20 }}>Save</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
                 </View>
+
             </ScrollView>
+            <View style={[styles.Bottombtn, { bottom: 45 }]}>
+                <TouchableOpacity style={styles.button} onPress={AddCompartments}>
+                    <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+            </View>
         </KeyboardAvoidingView>
     );
 };

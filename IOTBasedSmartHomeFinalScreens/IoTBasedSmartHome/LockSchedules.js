@@ -57,7 +57,11 @@ const LockSchedules = ({ navigation, route }) => {
                 const uniqueData = result.filter(
                     (item, index, self) =>
                         index === self.findIndex((t) => (
-                            t.name === item.name
+                            t.name === item.name &&
+                            t.start_time === item.start_time &&
+                            t.end_time === item.end_time &&
+                            t.days === item.days &&
+                            t.lock_type === item.lock_type
                         ))
                 );
                 setData(uniqueData);
@@ -67,23 +71,6 @@ const LockSchedules = ({ navigation, route }) => {
             console.error('Error fetching compartment_id:', error);
         }
     }, []);
-
-    // useEffect(() => {
-    //     if (!items) return;
-
-    //     if (typeof items === 'object' && items?.Compartment_Lock_id) {
-    //         setStorageData();
-    //         Set_Compartment_Lock_id(items.Compartment_Lock_id);
-    //         List_Lock_Schedule_by_compartment_lock_id(items.Compartment_Lock_id);
-    //     }
-
-    //     if (typeof items === 'number') {
-    //         setStorageData();
-    //         setCompartmentId(items);
-    //         list_Lock_schedule_by_compartment_id(items);
-    //     }
-    // }, [items]);
-
 
     // ✅ 
     useFocusEffect(
@@ -109,8 +96,6 @@ const LockSchedules = ({ navigation, route }) => {
             }
         }, [Compartment_Lock_id, compartment_id, items])
     );
-    
-
 
     const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]}
@@ -118,7 +103,7 @@ const LockSchedules = ({ navigation, route }) => {
         >
             <Text style={styles.listText}>{item.name}</Text>
             <TouchableOpacity
-            // onPress={() => navigation.navigate('EditCompartment', { items: item })}
+            onPress={() => navigation.navigate('EditLockSchedule', { items: item })}
             >
                 <View style={styles.infoIcon}>
                     <Text style={styles.infoText}>i</Text>
@@ -129,14 +114,14 @@ const LockSchedules = ({ navigation, route }) => {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
-            <View style={styles.navbar}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-left" size={24} color="black" />
-                </TouchableOpacity>
-                <View style={{ flex: 1 }}>
-                    <Text style={[styles.navbarText, { marginRight: 25 }]}>Schedules</Text>
+            <View style={[styles.navbar]}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Icon name="arrow-left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Schedules</Text>
+                    </View>
                 </View>
-            </View>
 
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?

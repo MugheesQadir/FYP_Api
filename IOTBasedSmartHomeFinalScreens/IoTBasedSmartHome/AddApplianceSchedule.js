@@ -26,13 +26,13 @@ const AddApplianceSchedule = ({ navigation, route }) => {
     const [compartmentId, setCompartmentId] = useState(null);
 
     const days = [
-        { id: 1, name: 'Monday' }, 
+        { id: 1, name: 'Monday' },
         { id: 2, name: 'Tuesday' },
-        { id: 3, name: 'Wednesday' }, 
-        { id: 4, name: 'Thursday' }, 
-        { id: 5, name: 'Friday' }, 
+        { id: 3, name: 'Wednesday' },
+        { id: 4, name: 'Thursday' },
+        { id: 5, name: 'Friday' },
         { id: 6, name: 'Saturday' },
-        { id: 7, name: 'Sunday' } 
+        { id: 7, name: 'Sunday' }
     ];
 
     const formatTime = (date) => {
@@ -60,29 +60,29 @@ const AddApplianceSchedule = ({ navigation, route }) => {
     // Initialize received data
     useEffect(() => {
         const storage = new MMKV();
-    
+
         const storedCompartmentId = storage.getNumber('compartment_id');
         const storedApplianceId = storage.getNumber('compartment_appliance_id');
-    
+
         // Priority: props > storage
         if (items?.Compartment_Appliance_id) {
             setCompartmentApplianceId(items.Compartment_Appliance_id);
         } else if (typeof items === 'number') {
             setCompartmentId(items);
         }
-    
+
         // Fallback if above didn’t set them
         if (!items) {
             if (!compartmentId && storedCompartmentId) {
                 setCompartmentId(storedCompartmentId);
             }
-    
+
             if (!compartmentApplianceId && storedApplianceId) {
                 setCompartmentApplianceId(storedApplianceId);
             }
         }
     }, []);
-    
+
 
     const addScheduleForSingleAppliance = async () => {
         try {
@@ -100,9 +100,9 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 return { success: true, message: result.success || 'Schedule added successfully' };
             } else {
@@ -117,22 +117,22 @@ const AddApplianceSchedule = ({ navigation, route }) => {
         try {
             // First get all appliances for this compartment
             const response = await fetch(`${URL}/get_compartment_appliance_with_compartment_id/${compartmentId}`);
-            
+
             // Check if response is OK and parse JSON
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(errorText || 'Failed to fetch compartment appliances');
             }
-            
+
             const result = await response.json();
-            
+
             if (!Array.isArray(result)) {
                 throw new Error('Invalid response format - expected array of appliances');
             }
-    
+
             let successCount = 0;
             let errorMessages = [];
-    
+
             // Add schedule for each appliance
             for (const appliance of result) {
                 const payload = {
@@ -143,21 +143,21 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                     end_time: formatTime(timeOff),
                     days: day
                 };
-    
+
                 try {
                     const addResponse = await fetch(`${URL}/Add_Appliance_Schedule`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    
+
                     if (!addResponse.ok) {
                         const errorText = await addResponse.text();
                         throw new Error(errorText);
                     }
-                    
+
                     const addResult = await addResponse.json();
-                    
+
                     if (addResult.success) {
                         successCount++;
                     } else {
@@ -167,17 +167,17 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                     errorMessages.push(`Failed for ${appliance.name}: ${error.message}`);
                 }
             }
-    
-            return { 
+
+            return {
                 success: successCount > 0,
-                message: successCount === result.length 
+                message: successCount === result.length
                     ? `Schedule added to all ${successCount} appliances successfully`
                     : `Schedule added to ${successCount} of ${result.length} appliances`,
                 errors: errorMessages.length > 0 ? errorMessages : null
             };
         } catch (error) {
-            return { 
-                success: false, 
+            return {
+                success: false,
                 message: error.message,
                 errors: [error.message]
             };
@@ -189,7 +189,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             Alert.alert('Error', 'Please enter schedule name');
             return;
         }
-    
+
         if (!day) {
             Alert.alert('Error', 'Please select a day');
             return;
@@ -201,13 +201,13 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             Alert.alert('Error', 'Time On and Time Off cannot be the same');
             return;
         }
-        
-    
+
+
         setLoading(true);
-    
+
         try {
             let result;
-    
+
             if (compartmentApplianceId && !compartmentId) {
                 // Only one appliance
                 result = await addScheduleForSingleAppliance();
@@ -217,7 +217,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             } else {
                 throw new Error('No appliance or compartment selected');
             }
-    
+
             if (result.success) {
                 Alert.alert('Success', result.message);
                 if (result.errors?.length > 0) {
@@ -237,30 +237,23 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             setLoading(false);
         }
     };
-    
+
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <View style={styles.navbar}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 1 }}>
-                        <Text style={[styles.navbarText, { marginRight: 25 }]}>
-                            Add Schedule
-                        </Text>
+                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                        <Text style={styles.navbarText}>Add Schedule</Text>
                     </View>
                 </View>
 
                 <View style={styles.innerContainer}>
                     <View style={styles.formContainer}>
                         <TextInput
-                            style={[styles.input, { 
-                                backgroundColor: 'white', 
-                                borderColor: 'black', 
-                                borderWidth: 0.7, 
-                                marginTop: '0%' 
-                            }]}
+                            style={[styles.input, ]}
                             placeholder='Schedule Name'
                             placeholderTextColor='gray'
                             value={name}
@@ -270,7 +263,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                         <Text style={[styles.Text, { marginRight: '70%' }]}>Time On:</Text>
                         <View style={{ width: '85%' }}>
                             <Pressable onPress={() => setShowTimeOnPicker(true)}>
-                                <Text style={styles.value}>{formatTime(timeOn)}</Text>
+                                <Text style={styles.input}>{formatTime(timeOn)}</Text>
                             </Pressable>
                             {showTimeOnPicker && (
                                 <DateTimePicker
@@ -286,7 +279,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                         <Text style={[styles.Text, { marginRight: '70%' }]}>Time Off:</Text>
                         <View style={{ width: '85%', marginBottom: 5 }}>
                             <Pressable onPress={() => setShowTimeOffPicker(true)}>
-                                <Text style={styles.value}>{formatTime(timeOff)}</Text>
+                                <Text style={styles.input}>{formatTime(timeOff)}</Text>
                             </Pressable>
                             {showTimeOffPicker && (
                                 <DateTimePicker
@@ -301,12 +294,12 @@ const AddApplianceSchedule = ({ navigation, route }) => {
 
                         <View style={{ width: '100%', marginTop: '0%' }}>
                             <Dropdown
-                                style={styles.select}
+                                style={styles.input}
                                 placeholderStyle={{ fontSize: 16, color: 'gray' }}
                                 selectedTextStyle={{ fontSize: 16 }}
-                                data={days.map(day => ({ 
-                                    label: day.name, 
-                                    value: day.id.toString() 
+                                data={days.map(day => ({
+                                    label: day.name,
+                                    value: day.id.toString()
                                 }))}
                                 searchmaxHeight={30}
                                 labelField="label"
@@ -318,12 +311,12 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                         </View>
                     </View>
 
-                    <View style={[styles.Bottombtn, { marginBottom : 35 }]}>
-                        <View style={{ 
-                            backgroundColor: '#001F6D', 
-                            padding: 10, 
-                            width: '70%', 
-                            borderRadius: 10 
+                    <View style={[styles.Bottombtn, { marginBottom: 35 }]}>
+                        <View style={{
+                            backgroundColor: '#001F6D',
+                            padding: 10,
+                            width: '70%',
+                            borderRadius: 10
                         }}>
                             <TouchableOpacity
                                 onPress={handleAddSchedule}
@@ -332,10 +325,10 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                                 {loading ? (
                                     <ActivityIndicator color="white" />
                                 ) : (
-                                    <Text style={{ 
-                                        color: 'white', 
-                                        textAlign: 'center', 
-                                        fontSize: 20 
+                                    <Text style={{
+                                        color: 'white',
+                                        textAlign: 'center',
+                                        fontSize: 20
                                     }}>
                                         Save
                                     </Text>
