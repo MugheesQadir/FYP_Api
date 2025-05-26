@@ -204,7 +204,7 @@ const Compartment = ({ navigation, route }) => {
                         <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
-                         onPress={() => navigation.navigate('AddCompartment', { items })}>
+                         onPress={() => navigation.navigate('AddCompartment', { items:items })}>
                         <Text style={styles.buttonText}>Add</Text>
                     </TouchableOpacity>
                 </View>

@@ -16,24 +16,20 @@ const EditCompartment = ({ navigation, route }) => {
 
     const storage = new MMKV();
 
-    const GetStorageData = () => {
-        const storedId = storage.getNumber('home_id');
-        if (storedId !== undefined) {
-            setid(storedId);
-        }
-    };
+    // const GetStorageData = () => {
+    //     const storedId = storage.getNumber('home_id');
+    //     if (storedId !== undefined) {
+    //         setid(storedId);
+    //     }
+    // };
 
     const UpdateCompartments = async () => {
         if (!name) {
             Alert.alert('Error', 'Please Enter Compartment name');
             return;
         }
-        if (!home_id) {
-            Alert.alert('Error', 'Home ID is missing');
-            return;
-        }
 
-        const payload = { id: compartment_id, name: name, home_id: home_id };
+        const payload = { id: compartment_id, name: name };
 
         try {
             const res = await fetch(`${URL}/UpdateCompartment`, {
@@ -69,10 +65,6 @@ const EditCompartment = ({ navigation, route }) => {
             Alert.alert('Error', 'Please Enter Home name');
             return;
         }
-        if (!home_id) {
-            Alert.alert('Error', 'Home ID is missing');
-            return;
-        }
 
         try {
             const res = await fetch(`${URL}/DeleteCompartment/${compartment_id}`, {
@@ -103,14 +95,11 @@ const EditCompartment = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        if (items?.compartment_id) {
-            setCompartment_id(items.compartment_id);
+        if(items){
+            setCompartment_id(items.compartment_id)
+            setname(items.compartment_name)
         }
-        if (items?.compartment_name) {
-            setname(items.compartment_name);
-        }
-        GetStorageData()
-    }, []);
+    }, [items]);
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>

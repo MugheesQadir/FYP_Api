@@ -89,7 +89,7 @@ const EditHome = ({ navigation, route }) => {
             return;
         }
 
-        const payload = { id: home_id, name: name, place_id: place, person_id: id };
+        const payload = { id: home_id, name: name, place_id: place};
 
         try {
             const res = await fetch(`${URL}/UpdateHome`, {

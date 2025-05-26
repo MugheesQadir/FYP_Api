@@ -7,19 +7,21 @@ import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import URL from './Url';
+import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 
 const AddCompartment = ({ navigation, route }) => {
     const [name, setname] = useState('')
-    const [home_id, setid] = useState(null)
+    const [home_id, setHomeid] = useState(null)
+    const [items, setItems] = useState(route.params?.items || null);
 
     const storage = new MMKV();
 
-    const GetStorageData = () => {
-        const storedId = storage.getNumber('home_id');
-        if (storedId !== undefined) {
-            setid(storedId);
-        }
-    };
+    // const GetStorageData = () => {
+    //     const storedId = storage.getNumber('home_id');
+    //     if (storedId !== undefined) {
+    //         setid(storedId);
+    //     }
+    // };
 
     const AddCompartments = async () => {
         if (!name) {
@@ -51,7 +53,12 @@ const AddCompartment = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        GetStorageData()
+        // GetStorageData()
+
+        if(items){
+            setHomeid(items.home_id)
+        }
+
     }, []);
 
 
