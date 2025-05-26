@@ -148,7 +148,7 @@ const Home = ({ navigation, route }) => {
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddHome', { items })}
+                    onPress={() => navigation.navigate('AddHome', { items:items })}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>

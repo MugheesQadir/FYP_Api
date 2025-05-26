@@ -64,12 +64,12 @@ const EditHome = ({ navigation, route }) => {
         }
     };
 
-    const getStorageData = () => {
-        const storedId = storage.getNumber('person_id');
-        if (storedId !== undefined) {
-            setid(storedId);
-        }
-    };
+    // const getStorageData = () => {
+    //     const storedId = storage.getNumber('person_id');
+    //     if (storedId !== undefined) {
+    //         setid(storedId);
+    //     }
+    // };
 
     const UpdateHome = async () => {
         if (!name) {
@@ -168,8 +168,6 @@ const EditHome = ({ navigation, route }) => {
     //     getCities();
     //     getStorageData()
     // }, []);
-
-
 
     useEffect(() => {
         if (city !== null) {
