@@ -23,33 +23,18 @@ const Compartment = ({ navigation, route }) => {
 
     const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
 
-    const setStorageData = useCallback(() => {
-        if (items?.home_id) {
-            storage.set('home_id', Number(items.home_id));
-        }
-    });
-
-    const getStorageData = useCallback(() => {
-        const storedId = storage.getNumber('home_id');
-        if (storedId !== undefined) {
-            sethomeId(storedId);
-        }
-    });
-
-    // const getCities = async () => {
-    //     const url = `${URL}/ListCities`;
-    //     try {
-    //         const response = await fetch(url);
-    //         if (response.ok) {
-    //             const result = await response.json();
-    //             Setcities(result);
-    //         } else {
-    //             console.error('Failed to fetch cities');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error fetching data: ', error);
+    // const setStorageData = useCallback(() => {
+    //     if (items?.home_id) {
+    //         storage.set('home_id', Number(items.home_id));
     //     }
-    // };
+    // });
+
+    // const getStorageData = useCallback(() => {
+    //     const storedId = storage.getNumber('home_id');
+    //     if (storedId !== undefined) {
+    //         sethomeId(storedId);
+    //     }
+    // });
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
@@ -89,8 +74,11 @@ const Compartment = ({ navigation, route }) => {
     });
     useFocusEffect(
         useCallback(() => {
-            setStorageData();
-            getStorageData();
+            // setStorageData();
+            // getStorageData();
+            if(items){
+                sethomeId(items.home_id)
+            }
         }, [])
     );
     // ✅ 
