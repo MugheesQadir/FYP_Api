@@ -8,7 +8,6 @@ import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import URL from './Url';
-import { Item } from 'react-native-paper/lib/typescript/components/Drawer/Drawer';
 
 const AddHome = ({ navigation, route }) => {
     const [name, setname] = useState('')
@@ -16,20 +15,18 @@ const AddHome = ({ navigation, route }) => {
     const [place, setPlace_id] = useState(null);
     const [listCities, Setcities] = useState([]);
     const [listplaces, setPlaces] = useState([]);
-    const [items, setItems] = useState(route.params?.items || null);
 
     // const { items } = route.params;
     const [id, setid] = useState(null)
 
     const storage = new MMKV();
 
-    // const GetStorageData = () => {
-    //     const storedId = storage.getNumber('person_id');
-    //     if (storedId !== undefined) {
-    //         setid(storedId);
-    //     }
-    // };
-    
+    const GetStorageData = () => {
+        const storedId = storage.getNumber('person_id');
+        if (storedId !== undefined) {
+            setid(storedId);
+        }
+    };
     const getCities = async () => {
         const url = `${URL}/ListCities`;
         try {
@@ -73,10 +70,6 @@ const AddHome = ({ navigation, route }) => {
             Alert.alert('Error', 'Please Select Place')
             return;
         }
-        if(!id){
-            Alert.alert('Error', 'Person Not found')
-            return;
-        }
         const payload = { name: name, place_id: place, person_id: id };
         try {
             const res = await fetch(`${URL}/AddHome`,
@@ -102,11 +95,8 @@ const AddHome = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        // GetStorageData()
+        GetStorageData()
         getCities();
-        if(items){
-            setid(items.id)
-        }
     }, []);
 
     useEffect(() => {

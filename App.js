@@ -24,6 +24,7 @@ import WaterLevelState from './IoTBasedSmartHome/WaterLevelState';
 import EditApplianceSchedule from './IoTBasedSmartHome/EditApplianceSchedule';
 import EditLocks from './IoTBasedSmartHome/EditLocks';
 import EditLockSchedule from './IoTBasedSmartHome/EditLockSchedule';
+import ApplianceWiseAppliances from './IoTBasedSmartHome/ApplianceWiseAppliances';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -54,6 +55,7 @@ const App = () => {
         <Stack.Screen name='AddLockSchedule' component={AddLockSchedule} />
         <Stack.Screen name='EditLockSchedule' component={EditLockSchedule}/>
         <Stack.Screen name='WaterLevelState' component={WaterLevelState} />
+        <Stack.Screen name='ApplianceWiseAppliances' component={ApplianceWiseAppliances} />
       </Stack.Navigator>
     </NavigationContainer>
   );

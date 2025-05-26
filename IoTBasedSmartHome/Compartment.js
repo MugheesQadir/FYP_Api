@@ -20,21 +20,56 @@ const Compartment = ({ navigation, route }) => {
     const [home_id, sethomeId] = useState(items?.home_id || null);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedCompartments, setSelectedCompartments] = useState([]);
+    const [categories, setCatagories] = useState([])
 
-    const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
 
-    // const setStorageData = useCallback(() => {
-    //     if (items?.home_id) {
-    //         storage.set('home_id', Number(items.home_id));
+    console.log(selectedCompartments)
+    // const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
+
+    const setStorageData = useCallback(() => {
+        if (items?.home_id) {
+            storage.set('home_id', Number(items.home_id));
+        }
+    });
+
+    const getAppliances = async () => {
+        const url = `${URL}/ListAppliance`;
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                const result = await response.json(); // result is an array of appliances
+                const uniqueCategories = ['All', ...new Set(result.map(item => item.catagory))];
+                setCatagories(uniqueCategories);
+            } else {
+                console.error('Failed to fetch Appliances');
+            }
+        } catch (error) {
+            console.error('Error fetching data: ', error);
+        }
+    };
+
+
+    const getStorageData = useCallback(() => {
+        const storedId = storage.getNumber('home_id');
+        if (storedId !== undefined) {
+            sethomeId(storedId);
+        }
+    });
+
+    // const getCities = async () => {
+    //     const url = `${URL}/ListCities`;
+    //     try {
+    //         const response = await fetch(url);
+    //         if (response.ok) {
+    //             const result = await response.json();
+    //             Setcities(result);
+    //         } else {
+    //             console.error('Failed to fetch cities');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching data: ', error);
     //     }
-    // });
-
-    // const getStorageData = useCallback(() => {
-    //     const storedId = storage.getNumber('home_id');
-    //     if (storedId !== undefined) {
-    //         sethomeId(storedId);
-    //     }
-    // });
+    // };
 
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
@@ -72,13 +107,12 @@ const Compartment = ({ navigation, route }) => {
             console.error('Error fetching data: ', error);
         }
     });
+
     useFocusEffect(
         useCallback(() => {
-            // setStorageData();
-            // getStorageData();
-            if(items){
-                sethomeId(items.home_id)
-            }
+            getAppliances()
+            setStorageData();
+            getStorageData();
         }, [])
     );
     // ✅ 
@@ -128,7 +162,7 @@ const Compartment = ({ navigation, route }) => {
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ flex: 0.90, justifyContent: 'center' }}>
-                    <Text style={styles.navbarText}>Compartment--{selectedCompartments}</Text>
+                    <Text style={styles.navbarText}>Compartment</Text>
                 </View>
             </View>
 
@@ -172,7 +206,6 @@ const Compartment = ({ navigation, route }) => {
                         windowSize={5}
                         removeClippedSubviews={true}
                     />
-
                     :
                     <View>
                         <View style={[styles.listItem]}>
@@ -194,20 +227,37 @@ const Compartment = ({ navigation, route }) => {
                 }
             </View>
             <View style={[styles.Bottombtn, {
-                    padding: 18,
-                    flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
-                    borderColor: 'darkblue', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
-                    outlineStyle: 'solid', backgroundColor: '#B0B7C3'
-                }]}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C', width: '35%', marginStart: 20 }]}
-                        onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}>
-                        <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
-                         onPress={() => navigation.navigate('AddCompartment', { items:items })}>
-                        <Text style={styles.buttonText}>Add</Text>
-                    </TouchableOpacity>
-                </View>
+                padding: 18,
+                flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
+                borderColor: 'darkblue', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
+                outlineStyle: 'solid', backgroundColor: '#B0B7C3'
+            }]}>
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C', width: '35%', marginStart: 20 }]}
+                    onPress={() => {
+                        if (selectedCompartments.length === 0) {
+                            Alert.alert('Alert', 'Please select at least one compartment');
+                        } else {
+                            // Save values to MMKV storage before navigating
+                            storage.set('selectedCompartments', JSON.stringify(selectedCompartments));
+                            storage.set('selectedCategory', selectedCategory);
+
+                            // Navigate and pass the data
+                            navigation.navigate('ApplianceWiseAppliances', {
+                                selectedCategory,
+                                selectedCompartments
+                            });
+                        }
+                    }}
+                >
+                    <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                    // onPress={() => navigation.navigate('AddCompartment', { items })}
+                    onPress={console.log(selectedCompartments)}
+                    >
+                    <Text style={styles.buttonText}>Add</Text>
+                </TouchableOpacity>
+            </View>
         </KeyboardAvoidingView>
     );
 };

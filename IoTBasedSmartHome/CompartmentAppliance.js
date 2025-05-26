@@ -120,7 +120,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
   
       intervalRef.current = setInterval(() => {
         getCompartmentApplianceByCompartmentId(compartmentId);
-      }, 200);
+      }, 1000);
   
       return () => {
         if (intervalRef.current) {
