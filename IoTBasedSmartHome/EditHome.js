@@ -21,6 +21,19 @@ const EditHome = ({ navigation, route }) => {
 
     const storage = new MMKV();
 
+    useEffect(() => {
+        if (items) {
+            setHomeId(items.home_id);  // Set home_id after receiving items
+            setname(items.home_name);
+            setCity(items.city_id)
+            setPlace_id(items.place_id)
+        }
+        getCities()
+        if(city) getPlaces(city)
+    }, [items]);
+
+
+
     const getCities = async () => {
         const url = `${URL}/ListCities`;
         try {
@@ -145,16 +158,18 @@ const EditHome = ({ navigation, route }) => {
         }
     };
 
-    useEffect(() => {
-        if (items?.home_id) {
-            setHomeId(items.home_id);  // Set home_id after receiving items
-        }
-        if (items?.home_name) {
-            setname(items.home_name);  // Set home_name after receiving items
-        }
-        getCities();
-        getStorageData()
-    }, []);
+    // useEffect(() => {
+    //     if (items?.home_id) {
+    //         setHomeId(items.home_id);  // Set home_id after receiving items
+    //     }
+    //     if (items?.home_name) {
+    //         setname(items.home_name);  // Set home_name after receiving items
+    //     }
+    //     getCities();
+    //     getStorageData()
+    // }, []);
+
+
 
     useEffect(() => {
         if (city !== null) {
@@ -165,11 +180,11 @@ const EditHome = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={[styles.navbar]}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
                         <Text style={styles.navbarText}>Edit Home</Text>
                     </View>
                 </View>
@@ -220,12 +235,12 @@ const EditHome = ({ navigation, route }) => {
                         </View>
                     </View>
                 </View>
-                <View style={[styles.Bottombtn, { flex:0.3,flexDirection: 'row', justifyContent: 'space-evenly' }]}>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%',marginStart:20 }]}
+                <View style={[styles.Bottombtn, { flex: 0.3, flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+                    <TouchableOpacity style={[styles.button, { backgroundColor: 'maroon', width: '35%', marginStart: 20 }]}
                         onPress={DeleteHome}>
                         <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%',marginEnd:20 }]}
+                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
                         onPress={UpdateHome}>
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>

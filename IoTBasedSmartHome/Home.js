@@ -17,18 +17,18 @@ const Home = ({ navigation, route }) => {
     const [items, setItems] = useState(route.params?.items || {});
     const [id, setId] = useState(items?.id || null);
 
-    const setStorageData = () => {
-        if (items?.id) {
-            storage.set('person_id', Number(items.id));
-        }
-    };
+    // const setStorageData = () => {
+    //     if (items?.id) {
+    //         storage.set('person_id', Number(items.id));
+    //     }
+    // };
 
-    const getStorageData = () => {
-        const storedId = storage.getNumber('person_id');
-        if (storedId !== undefined) {
-            setId(storedId);
-        }
-    };
+    // const getStorageData = () => {
+    //     const storedId = storage.getNumber('person_id');
+    //     if (storedId !== undefined) {
+    //         setId(storedId);
+    //     }
+    // };
 
     const getHomeByPersonId = async (personId) => {
         if (!personId) return;
@@ -47,16 +47,21 @@ const Home = ({ navigation, route }) => {
 
     useFocusEffect(
         useCallback(() => {
-            setStorageData();
-            getStorageData();
+            // setStorageData();
+            // getStorageData();
+            if(items?.id){
+                setId(items.id)
+            }
+            if (id) getHomeByPersonId(id);
         }, [])
     );
+    
     // ✅ 
-    useFocusEffect(
-        useCallback(() => {
-            if (id) getHomeByPersonId(id);
-        }, [id])
-    );
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         if (id) getHomeByPersonId(id);
+    //     }, [id])
+    // );
 
     const FlatListData = ({ item }) => (
         <Pressable style={[styles.listItem]} onPress={() => navigation.navigate('Compartment', { items: item })}>
