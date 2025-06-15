@@ -55,11 +55,11 @@ const Login = ({ navigation }) => {
             style={styles.container}
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={[styles.navbar]}>
+                <View style={[styles.navbar]}>
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
                         <Text style={styles.navbarText}>Login</Text>
                     </View>
                 </View>
@@ -77,9 +77,9 @@ const Login = ({ navigation }) => {
                         keyboardType="email-address"
                     />
 
-                    <View style={[styles.input, { flexDirection: 'row',padding:0}]}>
+                    <View style={[styles.input, { flexDirection: 'row', padding: 0 }]}>
                         <TextInput
-                            style={{ flex: 1, color: 'black', fontSize: 18}}
+                            style={{ flex: 1, color: 'black', fontSize: 18 }}
                             placeholder="Password"
                             value={password}
                             onChangeText={setPassword}
@@ -95,15 +95,15 @@ const Login = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={[styles.Bottombtn,{}]}>
-                        <TouchableOpacity style={styles.button} onPress={Login_method}>
-                            <Text style={styles.buttonText}>Login</Text>
-                        </TouchableOpacity>
+                <View style={[styles.Bottombtn, {  }]}>
+                    <TouchableOpacity style={styles.button} onPress={Login_method}>
+                        <Text style={styles.buttonText}>Login</Text>
+                    </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
-                            <Text style={styles.buttonText}>SignUp</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('SignUp')}>
+                        <Text style={styles.buttonText}>SignUp</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );

@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
         color: 'black',
         fontWeight: '800',
     },
+    //////////////////////////////
     Text: {
         fontSize: 18,
         textAlign: 'center',
@@ -64,6 +65,7 @@ const styles = StyleSheet.create({
         borderRadius: 50,
         marginBottom: 20,
     },
+    ///////////////////////
     Bottombtn: {
         width: '100%',
         alignItems: 'center',
@@ -89,6 +91,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
     },
+    ////////////////////////
     input: {
         color: '#111827', // slightly softer black
         fontSize: 16,
@@ -116,6 +119,7 @@ const styles = StyleSheet.create({
     applianceName: {
         fontSize: 18, marginLeft: 10, color: 'white'
     },
+    //////////////////////
     switchContainer: {
         position: 'relative', alignItems: 'center', justifyContent: 'center', marginLeft: 25
     },
@@ -128,6 +132,7 @@ const styles = StyleSheet.create({
         borderWidth: 0.7,
         borderColor: '#001F6D',
     },
+    //////////////////////////////
     switch: {
         marginLeft: 0
     },
@@ -175,6 +180,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 20,
     },
+
+    ////////////////////
     floatingButton: {
         position: 'absolute',
         bottom: 20,

@@ -5,6 +5,9 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "clean":"cd android && ./graldew clean && cd ..",
+    "reset-cache":"npx start --reset-cache",
+    "clean-project":"npx react-native clean",
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest"

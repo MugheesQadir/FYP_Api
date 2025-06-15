@@ -366,6 +366,24 @@ def get_compartment_appliance_with_compartment_id(comp_id):
     appliance = ApplianceController.get_compartment_appliance_with_compartment_id(comp_id)
     return jsonify(appliance)
 
+@app.route('/get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List', methods=["POST"])
+def get_appliances_by_category_and_compartments():
+    try:
+        data = request.get_json()
+
+        category = data.get("category")
+        compartment_id_list = data.get("compartment_ids")
+
+        if not category or not compartment_id_list:
+            return jsonify({"error": "Both 'category' and 'compartment_ids' are required."}), 400
+
+        result = ApplianceController.get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category, compartment_id_list)
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route('/get_deleted_compartment_appliance_with_compartment_id/<int:comp_id>',methods = ["GET"])
 def get_deleted_compartment_appliance_with_compartment_id(comp_id):
     appliance = ApplianceController.get_deleted_compartment_appliance_with_compartment_id(comp_id)
@@ -435,10 +453,22 @@ def Get_Deleted_Appliance_Schedule_By_table_id(id,type):
     schedule = ApplianceController.get_deleted_appliance_schedule_by_table_id(id,type)
     return jsonify(schedule)
 
+@app.route('/List_Appliance_Schedules_with_Appiance_wise', methods = ["POST"])
+def List_Appliance_Schedules_with_Appiance_wise():
+    data = request.get_json()
+    schedule = ApplianceController.List_Appliance_Schedules_with_Appiance_wise(data)
+    return jsonify(schedule)
+
 @app.route('/Add_Appliance_Schedule', methods = ["POST"])
 def Add_Appliance_Schedule():
     data = request.get_json()
     schedule = ApplianceController.Add_Appliances_Schedule(data)
+    return jsonify(schedule)
+
+@app.route('/Add_Appliances_Schedule_with_Appliances_wise', methods = ["POST"])
+def Add_Appliances_Schedule_with_Appliances_wise():
+    data = request.get_json()
+    schedule = ApplianceController.Add_Appliances_Schedule_with_Appliances_wise(data)
     return jsonify(schedule)
 
 @app.route('/update_Appliance_Schedule', methods = ["POST"])

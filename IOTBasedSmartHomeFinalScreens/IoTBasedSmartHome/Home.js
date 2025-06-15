@@ -14,21 +14,21 @@ const storage = new MMKV();
 
 const Home = ({ navigation, route }) => {
     const [data, setData] = useState([]);
-    const [items, setItems] = useState(route.params?.items || {});
-    const [id, setId] = useState(items?.id || null);
+    const [items, setItems] = useState(route.params?.items);
+    const [id, setPersonId] = useState(items?.id || null);
 
-    const setStorageData = () => {
-        if (items?.id) {
-            storage.set('person_id', Number(items.id));
-        }
-    };
+    // const setStorageData = () => {
+    //     if (items?.id) {
+    //         storage.set('person_id', Number(items.id));
+    //     }
+    // };
 
-    const getStorageData = () => {
-        const storedId = storage.getNumber('person_id');
-        if (storedId !== undefined) {
-            setId(storedId);
-        }
-    };
+    // const getStorageData = () => {
+    //     const storedId = storage.getNumber('person_id');
+    //     if (storedId !== undefined) {
+    //         setId(storedId);
+    //     }
+    // };
 
     const getHomeByPersonId = async (personId) => {
         if (!personId) return;
@@ -47,8 +47,11 @@ const Home = ({ navigation, route }) => {
 
     useFocusEffect(
         useCallback(() => {
-            setStorageData();
-            getStorageData();
+            // setStorageData();
+            // getStorageData();
+            if(items){
+                setPersonId(items.id)
+            }
         }, [])
     );
     // ✅ 
@@ -143,7 +146,7 @@ const Home = ({ navigation, route }) => {
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddHome', { items })}
+                    onPress={() => navigation.navigate('AddHome', { items:items })}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>

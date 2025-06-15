@@ -21,6 +21,7 @@ const Locks = ({ navigation, route }) => {
   const [compartmentId, setCompartmentId] = useState(route.params?.items?.compartment_id || null);
   const items = route.params?.items || {};
   const intervalRef = useRef(null);
+  const scheduleUpdateIntervalRef = useRef(null);
 
   const List_Compartment_lock_by_compartment_id = useCallback(async (id) => {
     if (!id) return;
@@ -35,6 +36,19 @@ const Locks = ({ navigation, route }) => {
           initialToggles[item.Compartment_Lock_id] = item.status === 1;
         });
         setToggleStates(initialToggles);
+      } else {
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  }, []);
+
+  const check_Lock_schedule_update_status = useCallback(async () => {
+    try {
+      const response = await fetch(`${URL}/check_lock_schedule_update_status`);
+      if (response.ok) {
+        return;
       } else {
         console.error('Failed to fetch data');
       }
@@ -119,7 +133,7 @@ const Locks = ({ navigation, route }) => {
       if (compartmentId) {
         intervalRef.current = setInterval(() => {
           List_Compartment_lock_by_compartment_id(compartmentId);
-        }, 200);
+        }, 1000);
       }
       return () => {
         if (intervalRef.current) {
@@ -129,6 +143,25 @@ const Locks = ({ navigation, route }) => {
       };
     }, [compartmentId])
   );
+
+  useEffect(() => {
+    // Run immediately on app start
+    check_Lock_schedule_update_status();
+
+    // Start the interval (thread)
+    scheduleUpdateIntervalRef.current = setInterval(() => {
+      check_Lock_schedule_update_status();
+    }, 1000); // every 1 sec
+
+    // Cleanup when app unmounts
+    return () => {
+      if (scheduleUpdateIntervalRef.current) {
+        clearInterval(scheduleUpdateIntervalRef.current);
+        scheduleUpdateIntervalRef.current = null;
+        console.log("Global schedule update interval cleared.");
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (data.length > 0) {

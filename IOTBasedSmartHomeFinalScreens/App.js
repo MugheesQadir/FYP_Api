@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
+import { StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NativeModules } from 'react-native'; // ✅ Import NativeModules
+
 import MainScreen from './IoTBasedSmartHome/MainScreen';
 import Login from './IoTBasedSmartHome/Login';
 import SignUp from './IoTBasedSmartHome/SignUp';
@@ -24,9 +26,17 @@ import WaterLevelState from './IoTBasedSmartHome/WaterLevelState';
 import EditApplianceSchedule from './IoTBasedSmartHome/EditApplianceSchedule';
 import EditLocks from './IoTBasedSmartHome/EditLocks';
 import EditLockSchedule from './IoTBasedSmartHome/EditLockSchedule';
+import ApplianceWiseAppliances from './IoTBasedSmartHome/ApplianceWiseAppliances';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
+
+  useEffect(() => {
+    // ✅ Background Service start hogi app ke start hote hi
+    NativeModules.BackgroundServiceModule.startService();
+    // console.log("Background Service Started by Mughees bhai 🚀");
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{
@@ -54,6 +64,7 @@ const App = () => {
         <Stack.Screen name='AddLockSchedule' component={AddLockSchedule} />
         <Stack.Screen name='EditLockSchedule' component={EditLockSchedule}/>
         <Stack.Screen name='WaterLevelState' component={WaterLevelState} />
+        <Stack.Screen name='ApplianceWiseAppliances' component={ApplianceWiseAppliances} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -61,6 +72,4 @@ const App = () => {
 
 export default App;
 
-const styles = StyleSheet.create({
-
-});
+const styles = StyleSheet.create({});

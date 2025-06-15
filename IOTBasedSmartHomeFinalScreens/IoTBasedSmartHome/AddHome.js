@@ -16,17 +16,18 @@ const AddHome = ({ navigation, route }) => {
     const [listCities, Setcities] = useState([]);
     const [listplaces, setPlaces] = useState([]);
 
-    // const { items } = route.params;
-    const [id, setid] = useState(null)
+    const [items, setItems] = useState(route.params?.items);
+    const [id, setPersonid] = useState(null)
 
     const storage = new MMKV();
 
-    const GetStorageData = () => {
-        const storedId = storage.getNumber('person_id');
-        if (storedId !== undefined) {
-            setid(storedId);
-        }
-    };
+    // const GetStorageData = () => {
+    //     const storedId = storage.getNumber('person_id');
+    //     if (storedId !== undefined) {
+    //         setid(storedId);
+    //     }
+    // };
+
     const getCities = async () => {
         const url = `${URL}/ListCities`;
         try {
@@ -95,8 +96,11 @@ const AddHome = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        GetStorageData()
+        // GetStorageData()
         getCities();
+        if(items){
+            setPersonid(items.id)
+        }
     }, []);
 
     useEffect(() => {

@@ -18,15 +18,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
     const items = route.params?.items || {};
     const [Compartment_Appliance_id, Set_Compartment_Appliance_id] = useState(null);
     const [compartment_id, setCompartmentId] = useState(null);
-
-    // const setStorageData = useCallback(() => {
-    //     if (items?.Compartment_Appliance_id) {
-    //         storage.set('compartment_appliance_id', Number(items.Compartment_Appliance_id));
-    //     }
-    //     if (typeof items === 'number') {
-    //         storage.set('compartment_id', Number(items));
-    //     }
-    // }, [items]);
+    const [dataa, setdataa] = useState([])
 
     const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('compartment_appliance_id');
@@ -74,15 +66,95 @@ const ApplianceSchedules = ({ navigation, route }) => {
     }, []);
 
     // ✅ 
+    // useFocusEffect(
+    //     useCallback(() => {
+    //         if (typeof items === 'object' && items?.Compartment_Appliance_id) {
+    //             Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
+    //         }
+    //         if (typeof items === 'number') {
+    //             Get_Appliance_Schedule_By_compartment_id(items);
+    //         }
+    //         if (!items) {
+    //             getStorageData();
+    //             if (Compartment_Appliance_id) {
+    //                 Get_Appliance_Schedule_By_table_id(Compartment_Appliance_id);
+    //             }
+    //             if (compartment_id) {
+    //                 Get_Appliance_Schedule_By_compartment_id(compartment_id);
+    //             }
+    //         }
+    //     }, [])
+    // );
+
+    const List_Appliance_Schedules_with_Appiance_wise = useCallback(async (compartment_ids, category) => {
+        if (!compartment_ids || !Array.isArray(compartment_ids) || compartment_ids.length === 0) return;
+
+        try {
+            const response = await fetch(`${URL}/List_Appliance_Schedules_with_Appiance_wise`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    category: category,
+                    compartment_ids: compartment_ids,
+                    type: 0
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                if (Array.isArray(result)) {
+                    const uniqueData = result.filter(
+                        (item, index, self) =>
+                            index === self.findIndex((t) =>
+                                t.name === item.name &&
+                                t.start_time === item.start_time &&
+                                t.end_time === item.end_time &&
+                                t.days === item.days &&
+                                t.type === item.type
+                            )
+                    );
+                    setData(uniqueData);
+                } else {
+                    console.warn("Unexpected response format:", result);
+                    setData([]); // clear list or handle UI gracefully
+                }
+            }
+
+
+        } catch (error) {
+            console.error('Error fetching appliance schedules:', error);
+        }
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
+            // Case 3: Check for new navigation format
+            if (route.params?.compartmentId && route.params?.catagory) {
+                const ids = route.params.compartmentId;
+                const category = route.params.catagory;
+                if (Array.isArray(ids)) {
+                    List_Appliance_Schedules_with_Appiance_wise(ids, category);
+                    return;
+                }
+            }
+
+            // Case 1: items is an object (single appliance)
             if (typeof items === 'object' && items?.Compartment_Appliance_id) {
                 Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
+                return;
             }
+
+            // Case 2: items is a number (compartment ID)
             if (typeof items === 'number') {
                 Get_Appliance_Schedule_By_compartment_id(items);
+                return;
             }
-            if (!items) {
+
+            // Fallback: from storage
+            if (!items && !route.params?.compartmentId && !route.params?.catagory) {
                 getStorageData();
                 if (Compartment_Appliance_id) {
                     Get_Appliance_Schedule_By_table_id(Compartment_Appliance_id);
@@ -91,8 +163,10 @@ const ApplianceSchedules = ({ navigation, route }) => {
                     Get_Appliance_Schedule_By_compartment_id(compartment_id);
                 }
             }
-        }, [])
+
+        }, [items, route.params])
     );
+
 
     const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]}

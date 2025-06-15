@@ -438,9 +438,11 @@ class HomeController:
     def List_homes_by_person_id(person_id):
         try:
             result = (
-                db.session.query(Home, Person)
+                db.session.query(Home, Person, Place, City)
                 .join(Person, Home.person_id == Person.id)
-                .filter(Home.person_id == person_id,Home.validate == 1)
+                .join(Place, Home.place_id == Place.id)
+                .join(City, Place.city_id == City.id)
+                .filter(Home.person_id == person_id, Home.validate == 1)
                 .all()
             )
             if result is None:
@@ -448,9 +450,10 @@ class HomeController:
 
             if result is not None:
                 return [{"home_id": home.id, "home_name":
-                    home.name, "person_name": person.name}
-                    for home, person in result
-                ]
+                    home.name, "person_name": person.name
+                            , "place_id": place.id, "city_id": city.id}
+                        for home, person, place, city in result
+                        ]
         except Exception as e:
             return str(e)
 
@@ -458,8 +461,10 @@ class HomeController:
     def List_deleted_homes_by_person_id(person_id):
         try:
             result = (
-                db.session.query(Home, Person)
+                db.session.query(Home, Person, Place, City)
                 .join(Person, Home.person_id == Person.id)
+                .join(Place, Home.place_id == Place.id)
+                .join(City, Place.city_id == City.id)
                 .filter(Home.person_id == person_id,Home.validate == 0)
                 .all()
             )
@@ -468,8 +473,9 @@ class HomeController:
 
             if result is not None:
                 return [{"home_id": home.id, "home_name":
-                    home.name, "person_name": person.name}
-                    for home, person in result
+                    home.name, "person_name": person.name
+                         ,"place_name":place.name,"city_name":city.name}
+                    for home, person, place, city in result
                 ]
         except Exception as e:
             return str(e)
@@ -499,10 +505,6 @@ class HomeController:
     @staticmethod
     def update_home(data):
         try:
-            person = Person.query.filter_by(id=data['person_id'], validate=1).first()
-            if person is None:
-                return {'error':'Person not found'}
-
             place = Place.query.filter_by(id=data['place_id'], validate=1).first()
             if place is None:
                 return {'error':'Place not found'}
@@ -513,7 +515,6 @@ class HomeController:
 
             if homes is not None:
                 homes.name = data['name']
-                homes.person_id = data['person_id']
                 homes.place_id = data['place_id']
                 homes.validate = 1
                 db.session.commit()
@@ -689,9 +690,9 @@ class HomeController:
     @staticmethod
     def update_compartment(data):
         try:
-            home = Home.query.filter_by(id=data['home_id'],validate=1).first()
-            if home is None:
-                return {'error':'Invalid Home Id'}
+            # home = Home.query.filter_by(id=data['home_id'],validate=1).first()
+            # if home is None:
+            #     return {'error':'Invalid Home Id'}
 
             compartments = Compartment.query.filter_by(id=data['id'],validate=1).first()
             if compartments is None:
@@ -699,7 +700,7 @@ class HomeController:
 
             if compartments is not None:
                 compartments.name = data['name']
-                compartments.home_id = data['home_id']
+                # compartments.home_id = data['home_id']
                 compartments.validate = 1
                 db.session.commit()
                 return {'success':f"{data['name']} updated successfully"}

@@ -213,7 +213,8 @@ class ApplianceController:
             if result is None:
                 return {'error':f"Compartment Appliance not found"}
 
-            return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
+            return [{"Compartment_Appliance_id": compartmentappliance.id,
+                     "status": compartmentappliance.status,
                      "name": compartmentappliance.name,
                      "port": compartmentappliance.port,
                      "compartment_id":compartment.id,
@@ -223,6 +224,41 @@ class ApplianceController:
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
+
+    @staticmethod
+    def get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category,compartment_id_list):
+        try:
+            query = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(
+                    CompartmentAppliance.compartment_id.in_(compartment_id_list),
+                    CompartmentAppliance.validate == 1
+                )
+            )
+
+            # ✅ Only apply category filter if it's not "All"
+            if category.lower() != "all":
+                query = query.filter(Appliance.catagory == category)
+
+            result = query.all()
+
+            if not result:
+                return []
+
+            return [{"Compartment_Appliance_id": compartmentappliance.id,
+                     "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
+                     "compartment_id": compartment.id,
+                     "compartment_name": compartment.name,
+                     "appliance_id": appliance.id,
+                     "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+
+        except Exception as e:
+            return {"error": str(e)}
 
     @staticmethod
     def get_deleted_compartment_appliance_with_compartment_id(id):
@@ -335,7 +371,7 @@ class ApplianceController:
                 compartment_appliances.name = data['name']
                 compartment_appliances.status = data['status']
                 compartment_appliances.port = data['port']
-                compartment_appliances.compartment_id = data['compartment_id']
+                # compartment_appliances.compartment_id = data['compartment_id']
                 compartment_appliances.appliance_id = data['appliance_id']
                 db.session.commit()
                 return {'success':f"Compartment Appliance with id {data['id']} updated successfully"}
@@ -622,6 +658,60 @@ class ApplianceController:
             return str(e)
 
     @staticmethod
+    def List_Appliance_Schedules_with_Appiance_wise(data):
+        try:
+            # Validate required fields
+            required_fields = ['category', 'compartment_ids', 'type']
+            for field in required_fields:
+                if field not in data:
+                    return {'error': f'Missing field: {field}'}
+
+            category = data['category']
+            compartment_ids = data['compartment_ids']
+            type_ = data['type']
+
+            # Base query with joins
+            query = (db.session.query(ApplianceSchedule, CompartmentAppliance, Appliance, Compartment)
+            .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+            .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+            .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+            .filter(
+                CompartmentAppliance.compartment_id.in_(compartment_ids),
+                ApplianceSchedule.type == type_,
+                ApplianceSchedule.validate == 1,
+                CompartmentAppliance.validate == 1,
+                Appliance.validate == 1
+            ))
+
+            # Apply category filter only if it's not 'All'
+            if category != "All":
+                query = query.filter(Appliance.catagory == category)
+
+            schedules = query.all()
+
+            if not schedules:
+                return []
+
+            # Prepare response
+            result = []
+            for schedule, comp_app, appliance, compartment in schedules:
+                result.append({
+                    "schedule_id": schedule.id,
+                    "name": schedule.name,
+                    "start_time": schedule.start_time.strftime("%H:%M:%S"),
+                    "end_time": schedule.end_time.strftime("%H:%M:%S"),
+                    "days": schedule.days,
+                    "compartment": compartment.name,
+                    "compartment_appliance_id": comp_app.id,
+                    "type": schedule.type
+                })
+
+            return result
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def Add_Appliances_Schedule(data):
         try:
             if data['type'] == 0:
@@ -668,6 +758,61 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
+    @staticmethod
+    def Add_Appliances_Schedule_with_Appliances_wise(data):
+        try:
+            # Validate required fields
+            required_fields = ['category', 'compartment_ids', 'name', 'type', 'start_time', 'end_time', 'days']
+            for field in required_fields:
+                if field not in data:
+                    return {'error': f'Missing field: {field}'}
+
+            # Extract and normalize input
+            category = data['category']
+            compartment_ids = data['compartment_ids']
+            name = data['name']
+            type_ = data['type']  # 'type' is typo from Postman; map to 'type'
+            start_time = data['start_time']
+            end_time = data['end_time']
+            days = data['days']
+
+            # Base query for valid compartment appliances in specified compartments
+            query = CompartmentAppliance.query.join(Appliance, CompartmentAppliance.appliance_id == Appliance.id) \
+                .filter(
+                CompartmentAppliance.compartment_id.in_(compartment_ids),
+                CompartmentAppliance.validate == 1,
+                Appliance.validate == 1
+            )
+
+            # Apply category filter only if not 'All'
+            if category != "All":
+                query = query.filter(Appliance.catagory == category)
+
+            # Fetch matching CompartmentAppliance entries
+            appliances = query.all()
+
+            if not appliances:
+                return {'error': 'No valid CompartmentAppliances found for given input.'}
+
+            # Insert schedule for each appliance
+            for appliance in appliances:
+                new_schedule = ApplianceSchedule(
+                    name=name,
+                    type=type_,
+                    table_id=appliance.id,
+                    start_time=start_time,
+                    end_time=end_time,
+                    days=days,
+                    validate=1
+                )
+                db.session.add(new_schedule)
+
+            db.session.commit()
+            return {'success': f'Schedule added for {len(appliances)} appliances.'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
 
     @staticmethod
     def Update_Appliances_Schedule(data):
