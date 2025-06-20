@@ -1,8 +1,7 @@
 import { StyleSheet } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect,useRef,useCallback } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NativeModules } from 'react-native'; // ✅ Import NativeModules
 
 import MainScreen from './IoTBasedSmartHome/MainScreen';
 import Login from './IoTBasedSmartHome/Login';
@@ -27,15 +26,64 @@ import EditApplianceSchedule from './IoTBasedSmartHome/EditApplianceSchedule';
 import EditLocks from './IoTBasedSmartHome/EditLocks';
 import EditLockSchedule from './IoTBasedSmartHome/EditLockSchedule';
 import ApplianceWiseAppliances from './IoTBasedSmartHome/ApplianceWiseAppliances';
+import URL from './IoTBasedSmartHome/Url';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
+  const scheduleUpdateIntervalRef = useRef(null);
+
+  const check_appliance_schedule_update_status = useCallback(async () => {
+    try {
+      const response = await fetch(`${URL}/check_schedule_update_status`);
+      if (response.ok) {
+        return;
+      } else {
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  }, []);
+
+  const check_Lock_schedule_update_status = useCallback(async () => {
+    try {
+      const response = await fetch(`${URL}/check_lock_schedule_update_status`);
+      if (response.ok) {
+        return;
+      } else {
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  }, []);
 
   useEffect(() => {
-    // ✅ Background Service start hogi app ke start hote hi
-    NativeModules.BackgroundServiceModule.startService();
-    // console.log("Background Service Started by Mughees bhai 🚀");
-  }, []);
+      // Run immediately on app start
+      check_appliance_schedule_update_status();
+      check_Lock_schedule_update_status()
+  
+      // Start the interval (thread)
+      scheduleUpdateIntervalRef.current = setInterval(() => {
+        check_appliance_schedule_update_status();
+        check_Lock_schedule_update_status()
+      }, 1000); // every 1 sec
+  
+      // Cleanup when app unmounts
+      return () => {
+        if (scheduleUpdateIntervalRef.current) {
+          clearInterval(scheduleUpdateIntervalRef.current);
+          scheduleUpdateIntervalRef.current = null;
+          console.log("Global schedule update interval cleared.");
+        }
+      };
+    }, []);
+
+  // useEffect(() => {
+  //   // ✅ Background Service start hogi app ke start hote hi
+  //   NativeModules.BackgroundServiceModule.startService();
+  //   // console.log("Background Service Started by Mughees bhai 🚀");
+  // }, []);
 
   return (
     <NavigationContainer>
