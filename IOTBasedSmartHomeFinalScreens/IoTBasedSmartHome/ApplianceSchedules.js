@@ -68,27 +68,6 @@ const ApplianceSchedules = ({ navigation, route }) => {
         }
     }, []);
 
-    // ✅ 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         if (typeof items === 'object' && items?.Compartment_Appliance_id) {
-    //             Get_Appliance_Schedule_By_table_id(items.Compartment_Appliance_id);
-    //         }
-    //         if (typeof items === 'number') {
-    //             Get_Appliance_Schedule_By_compartment_id(items);
-    //         }
-    //         if (!items) {
-    //             getStorageData();
-    //             if (Compartment_Appliance_id) {
-    //                 Get_Appliance_Schedule_By_table_id(Compartment_Appliance_id);
-    //             }
-    //             if (compartment_id) {
-    //                 Get_Appliance_Schedule_By_compartment_id(compartment_id);
-    //             }
-    //         }
-    //     }, [])
-    // );
-
     const List_Appliance_Schedules_with_Appiance_wise = useCallback(async (compartment_ids, category) => {
         if (!compartment_ids || !Array.isArray(compartment_ids) || compartment_ids.length === 0) return;
 

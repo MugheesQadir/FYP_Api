@@ -333,12 +333,11 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
             </View>
 
             <View style={[styles.Bottombtn, {
-                padding: 18,
-                flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
+                justifyContent: 'center', borderWidth: 1.5,
                 borderColor: 'darkblue', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
                 outlineStyle: 'solid', backgroundColor: '#B0B7C3'
             }]}>
-                <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C', width: '35%', marginStart: 20 }]}
+                <TouchableOpacity style={[styles.button, { backgroundColor: '#78081C' }]}
                     onPress={() => navigation.navigate('ApplianceSchedules', {
                         compartmentId: compartmentId,
                         catagory: catagory
@@ -348,10 +347,10 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
                 >
                     <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                {/* <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
                     onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}>
                     <Text style={styles.buttonText}>Add</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
             </View>
         </KeyboardAvoidingView>
     );

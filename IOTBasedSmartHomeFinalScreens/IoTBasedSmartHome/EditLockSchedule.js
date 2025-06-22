@@ -254,7 +254,7 @@ const EditLockSchedule = ({ navigation, route }) => {
                 >
                     <Text style={styles.buttonText}>Delete</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                <TouchableOpacity style={[styles.button, {  width: '35%', marginEnd: 20 }]}
                     onPress={update_matching_Appliance_Schedule}
                 >
                     <Text style={styles.buttonText}>Save</Text>

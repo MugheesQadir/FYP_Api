@@ -225,7 +225,7 @@ const EditHome = ({ navigation, route }) => {
                         onPress={DeleteHome}>
                         <Text style={styles.buttonText}>Delete</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%',marginEnd:20 }]}
+                    <TouchableOpacity style={[styles.button, { width: '35%',marginEnd:20 }]}
                         onPress={UpdateHome}>
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>

@@ -111,8 +111,8 @@ const WaterLevelState = ({ navigation }) => {
             </View>
 
             {/* Level Text */}
-            <View style={localStyles.displayBox}>
-                <Text style={localStyles.displayText}>{levelDisplay}</Text>
+            <View style={[styles.button,{marginTop:20}]}>
+                <Text style={styles.buttonText}>{levelDisplay}</Text>
             </View>
         </KeyboardAvoidingView>
     );
@@ -136,18 +136,6 @@ const localStyles = StyleSheet.create({
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
     },
-    displayBox: {
-        backgroundColor: '#001F6D',
-        width: '70%',
-        borderRadius: 10,
-        padding: 8,
-        marginTop: 20,
-    },
-    displayText: {
-        fontSize: 22,
-        textAlign: 'center',
-        color: 'white',
-    }
 });
 
 export default WaterLevelState;

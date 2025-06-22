@@ -278,7 +278,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
           onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}>
           <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+        <TouchableOpacity style={[styles.button, {  width: '35%', marginEnd: 20 }]}
           onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}>
           <Text style={styles.buttonText}>Add</Text>
         </TouchableOpacity>

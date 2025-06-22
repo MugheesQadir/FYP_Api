@@ -239,6 +239,57 @@ def delete_matching_lock_Schedule():
     schedule = ApplianceController.delete_matching_Lock_Schedule(data)
     return jsonify(schedule)
 
+#--------------------------- Hardware --------------------------------
+
+@app.route('/set_water_level_state', methods=['POST'])
+def set_water_level_state():
+    data = request.get_json()
+    result = HardwareController.set_water_level_statee(data)
+    return jsonify(result) ,200
+
+@app.route('/get_water_level_state', methods=['GET'])
+def get_water_level_state():
+    res = HardwareController.get_water_level_state()
+    return jsonify(res), 200
+
+@app.route('/Update_Compartment_Appliance_status',methods = ["POST"])
+def Update_Compartment_Appliance_status():
+    data = request.get_json()
+    appliance = HardwareController.updateCompartmentAppliancesStatus(data)
+    return jsonify(appliance)
+
+@app.route('/Update_Compartment_Lock_status',methods = ["POST"])
+def Update_Compartment_Lock_status():
+    data = request.get_json()
+    appliance = HardwareController.updateCompartmentLockStatus(data)
+    return jsonify(appliance)
+
+@app.route('/check_schedule_update_status',methods = ["GET"])
+def check_schedule_update_status():
+    appliance = HardwareController.check_schedule_update_status()
+    return jsonify(appliance)
+
+@app.route('/check_lock_schedule_update_status',methods = ["GET"])
+def check_lock_schedule_update_status():
+    appliance = HardwareController.check_lock_schedule_update_status()
+    return jsonify(appliance)
+
+@app.route('/Update_Gas_Cylinder_status_with_Home_ID',methods = ["POST"])
+def Update_Gas_Cylinder_status():
+    data = request.get_json()
+    appliance = HardwareController.updateGasCylinderStatusWith_HomeID(data)
+    return jsonify(appliance)
+
+@app.route('/get_geyser_by_Home_id/<int:id>',methods = ['GET'])
+def get_geyser_by_Home_id(id):
+    homes = HardwareController.get_geyser_by_Home_id(id)
+    return jsonify(homes)
+
+
+#--------------------- Total Api Used -------------------------
+##############################################################################################################################
+##############################################################################################################################
+##############################################################################################################################
 
 ############### Person ##############
 
@@ -986,51 +1037,7 @@ def Backup_sprinkler_Schedule_Log_By_id(id):
     log = ApplianceController.Backup_sprinkler_Schedule_Log_by_id(id)
     return jsonify(log)
 
-#--------------------------- Hardware --------------------------------
 
-@app.route('/set_water_level_state', methods=['POST'])
-def set_water_level_state():
-    data = request.get_json()
-    result = HardwareController.set_water_level_statee(data)
-    return jsonify(result) ,200
-
-@app.route('/get_water_level_state', methods=['GET'])
-def get_water_level_state():
-    res = HardwareController.get_water_level_state()
-    return jsonify(res), 200
-
-@app.route('/Update_Compartment_Appliance_status',methods = ["POST"])
-def Update_Compartment_Appliance_status():
-    data = request.get_json()
-    appliance = HardwareController.updateCompartmentAppliancesStatus(data)
-    return jsonify(appliance)
-
-@app.route('/Update_Compartment_Lock_status',methods = ["POST"])
-def Update_Compartment_Lock_status():
-    data = request.get_json()
-    appliance = HardwareController.updateCompartmentLockStatus(data)
-    return jsonify(appliance)
-
-@app.route('/check_schedule_update_status',methods = ["GET"])
-def check_schedule_update_status():
-    appliance = HardwareController.check_schedule_update_status()
-    return jsonify(appliance)
-
-@app.route('/check_lock_schedule_update_status',methods = ["GET"])
-def check_lock_schedule_update_status():
-    appliance = HardwareController.check_lock_schedule_update_status()
-    return jsonify(appliance)
-
-@app.route('/Update_Gas_Cylinder_status_with_Home_ID',methods = ["POST"])
-def Update_Gas_Cylinder_status():
-    data = request.get_json()
-    appliance = HardwareController.updateGasCylinderStatusWith_HomeID(data)
-    return jsonify(appliance)
-
-@app.route('/get_geyser_by_Home_id/<int:id>',methods = ['GET'])
-def get_geyser_by_Home_id(id):
-    homes = HardwareController.get_geyser_by_Home_id(id)
-    return jsonify(homes)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

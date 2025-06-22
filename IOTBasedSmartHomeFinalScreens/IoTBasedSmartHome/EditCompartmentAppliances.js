@@ -218,7 +218,7 @@ const EditCompartmentAppliances = ({ navigation, route }) => {
                     onPress={DeleteCompartmentAppliances}>
                     <Text style={styles.buttonText}>Delete</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
+                <TouchableOpacity style={[styles.button, { width: '35%', marginEnd: 20 }]}
                     onPress={EditAppliances}>
                     <Text style={styles.buttonText}>Save</Text>
                 </TouchableOpacity>
