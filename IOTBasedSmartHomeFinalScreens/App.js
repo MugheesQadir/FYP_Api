@@ -27,6 +27,7 @@ import EditLocks from './IoTBasedSmartHome/EditLocks';
 import EditLockSchedule from './IoTBasedSmartHome/EditLockSchedule';
 import ApplianceWiseAppliances from './IoTBasedSmartHome/ApplianceWiseAppliances';
 import URL from './IoTBasedSmartHome/Url';
+import Geyser from './IoTBasedSmartHome/Geyser';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -113,6 +114,7 @@ const App = () => {
         <Stack.Screen name='EditLockSchedule' component={EditLockSchedule}/>
         <Stack.Screen name='WaterLevelState' component={WaterLevelState} />
         <Stack.Screen name='ApplianceWiseAppliances' component={ApplianceWiseAppliances} />
+        <Stack.Screen name='Geyser' component={Geyser}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

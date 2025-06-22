@@ -3,6 +3,7 @@ from Model.City import City
 from Model.Compartment import Compartment
 from Model.CompartmentAppliance import CompartmentAppliance
 from Model.CompartmentLock import CompartmentLock
+from Model.Geyser import Geyser
 from Model.Home import Home
 from Model.HomeSprinkler import HomeSprinkler
 from Model.Place import Place
@@ -10,8 +11,7 @@ from Model.Security import Security
 from config import db
 
 class HomeController:
-
-### --------------------- City -----------------------------
+#-------------- City --------------
     @staticmethod
     def list_cities():
         try:
@@ -19,6 +19,223 @@ class HomeController:
             return [{'id': c.id, 'name': c.name} for c in cities]
         except Exception as e:
             return str(e)
+
+#--------------- Place -----------------
+    @staticmethod
+    def List_places_by_city_id(id):
+        try:
+            result = (
+                db.session.query(Place, City)
+                .join(City, Place.city_id == City.id)
+                .filter(Place.city_id == id, Place.validate == 1)
+                .all()
+            )
+            if result is None:
+                return {'error': 'Place not found for this city'}
+
+            if result is not None:
+                return [{'id': place.id, 'name': place.name}
+                        for place, city in result
+                        ]
+        except Exception as e:
+            return str(e)
+
+    #------------ Home -------------------
+
+    @staticmethod
+    def List_homes_by_person_id(person_id):
+        try:
+            result = (
+                db.session.query(Home, Person, Place, City)
+                .join(Person, Home.person_id == Person.id)
+                .join(Place, Home.place_id == Place.id)
+                .join(City, Place.city_id == City.id)
+                .filter(Home.person_id == person_id, Home.validate == 1)
+                .all()
+            )
+            if result is None:
+                return {'error':'Home not found for this person'}
+
+            if result is not None:
+                return [{"home_id": home.id, "home_name":
+                    home.name, "person_name": person.name
+                            , "place_id": place.id, "city_id": city.id}
+                        for home, person, place, city in result
+                        ]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def add_home(data):
+        try:
+            person_id = data.get('person_id')
+            place_id = data.get('place_id')
+
+            person = Person.query.filter_by(id=person_id, validate=1).first()
+            if person is None:
+                return {'error': 'Person not found'}
+
+            place = Place.query.filter_by(id=place_id, validate=1).first()
+            if place is None:
+                return {'error': 'Place not found'}
+
+            home = Home(
+            name=data['name'],
+            person_id=data['person_id'],
+            place_id=data['place_id'],
+            validate=1
+            )
+            db.session.add(home)
+            db.session.flush()
+            #Flush jo ha usse autoIncrement wali id create ho jati ha. phir usy hm jider use kreen balan balan balan
+
+            geyser = Geyser(
+            name='Geyser',
+            gas_status=0,
+            cylinder_status=0,
+            home_id=home.id,
+            validate=1
+            )
+            db.session.add(geyser)
+            db.session.commit()
+
+            return {
+            'success': f"{data['name']} added successfully",
+             }
+        except Exception as e:
+             db.session.rollback()
+             return {'error': str(e)}
+
+    @staticmethod
+    def update_home(data):
+        try:
+            place = Place.query.filter_by(id=data['place_id'], validate=1).first()
+            if place is None:
+                return {'error':'Place not found'}
+
+            homes = Home.query.filter_by(id=data['id'],validate=1).first()
+            if homes is None:
+                return {'error':'Home not found'}
+
+            if homes is not None:
+                homes.name = data['name']
+                homes.place_id = data['place_id']
+                homes.validate = 1
+                db.session.commit()
+                return {'success':f"{data['name']} updated successfully"}
+        except Exception as a:
+            return str(a)
+
+    @staticmethod
+    def delete_home(id):
+        try:
+            homes = Home.query.filter(Home.id == id,Home.validate == 1).first()
+            if homes is None:
+                return {'error':'Home for deletion not found'}
+
+            compartment = Compartment.query.filter_by(home_id=id,validate=1).first()
+            if compartment:
+                return {'error':f'Home has associated Compartment. It Cannot be deleted'}
+
+            security = Security.query.filter_by(home_id=id,validate=1).first()
+            if security:
+                return {'error':f'Home has associated Security. It Cannot be deleted'}
+
+            sprinkler = HomeSprinkler.query.filter_by(home_id=id,validate=1).first()
+            if sprinkler:
+                return {'error':f'Home has associated Sprinkler. It Cannot be deleted'}
+
+            homes.validate = 0
+            db.session.commit()
+            return {'success':f'Home deleted successfully'}
+        except Exception as e:
+            return str(e)
+
+#------------------ Compartment -----------------
+
+    @staticmethod
+    def List_compartments_by_home_id(home_id):
+        try:
+            result = (
+                db.session.query(Compartment, Home)
+                .join(Home, Compartment.home_id == Home.id)
+                .filter(Compartment.home_id == home_id, Compartment.validate == 1)
+                .all()
+            )
+            if result is not None:
+                return [
+                    {
+                        "compartment_id": compartment.id,
+                        "compartment_name": compartment.name,
+                        "home_id": home.id,
+                        "home_name": home.name,
+                    }
+                    for compartment, home in result
+                ]
+        except Exception as a:
+            return str(a)
+
+
+    @staticmethod
+    def add_compartment(data):
+        try:
+            home_id = data.get('home_id')
+            home = Home.query.filter_by(id=home_id,validate=1).first()
+            if home is None:
+                return {'error':'Home not found'}
+
+            compartments = Compartment(name=data['name'], home_id=data['home_id'],validate=1)
+            db.session.add(compartments)
+            db.session.commit()
+            return {'success':f"{data['name']} added successfully"}
+        except Exception as a:
+            return str(a)
+
+    @staticmethod
+    def update_compartment(data):
+        try:
+            # home = Home.query.filter_by(id=data['home_id'],validate=1).first()
+            # if home is None:
+            #     return {'error':'Invalid Home Id'}
+
+            compartments = Compartment.query.filter_by(id=data['id'],validate=1).first()
+            if compartments is None:
+                return {'error':'Compartment not found'}
+
+            if compartments is not None:
+                compartments.name = data['name']
+                # compartments.home_id = data['home_id']
+                compartments.validate = 1
+                db.session.commit()
+                return {'success':f"{data['name']} updated successfully"}
+        except Exception as a:
+            return str(a)
+
+    @staticmethod
+    def delete_compartment(id):
+        try:
+            compartment = Compartment.query.filter_by(id=id,validate=1).first()
+            if compartment is None:
+                return {'error':'Compartment not found'}
+
+            compartment_appliances = CompartmentAppliance.query.filter_by(compartment_id=id,validate=1).first()
+            if compartment_appliances is not None:
+                return {'error':f'Compartment has associated Compartment Appliances. It Cannot be deleted'}
+
+            compartment_locks = CompartmentLock.query.filter_by(compartment_id=id,validate=1).first()
+            if compartment_locks is not None:
+                return {'error':f'Compartment has associated Compartment Locks. It Cannot be deleted'}
+
+            compartment.validate = 0
+            db.session.commit()
+            return {'success':f'Compartment deleted successfully'}
+        except Exception as e:
+            return str(e)
+
+
+
+
+### --------------------- City -----------------------------
 
     @staticmethod
     def get_cities_by_id(id):
@@ -166,27 +383,6 @@ class HomeController:
                     .first())
 
             return {'id': places.id, 'name': places.name,'city_name':city.name}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def List_places_by_city_id(id):
-        try:
-            result = (
-                db.session.query(Place, City)
-                .join(City, Place.city_id == City.id)
-                .filter(Place.city_id == id, Place.validate == 1)
-                .all()
-            )
-            if result is None:
-                return {'error': 'Place not found for this city'}
-
-            if result is not None:
-                return [{'id': place.id, 'name': place.name}
-                        for place, city in result
-                        ]
-
-
         except Exception as e:
             return str(e)
 
@@ -435,29 +631,6 @@ class HomeController:
             return str(e)
 
     @staticmethod
-    def List_homes_by_person_id(person_id):
-        try:
-            result = (
-                db.session.query(Home, Person, Place, City)
-                .join(Person, Home.person_id == Person.id)
-                .join(Place, Home.place_id == Place.id)
-                .join(City, Place.city_id == City.id)
-                .filter(Home.person_id == person_id, Home.validate == 1)
-                .all()
-            )
-            if result is None:
-                return {'error':'Home not found for this person'}
-
-            if result is not None:
-                return [{"home_id": home.id, "home_name":
-                    home.name, "person_name": person.name
-                            , "place_id": place.id, "city_id": city.id}
-                        for home, person, place, city in result
-                        ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
     def List_deleted_homes_by_person_id(person_id):
         try:
             result = (
@@ -477,74 +650,6 @@ class HomeController:
                          ,"place_name":place.name,"city_name":city.name}
                     for home, person, place, city in result
                 ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def add_home(data):
-        try:
-            person_id = data.get('person_id')
-            place_id = data.get('place_id')
-
-            person = Person.query.filter_by(id=person_id,validate=1).first()
-            if person is None:
-                return {'error':'Person not found'}
-
-            place = Place.query.filter_by(id=place_id,validate=1).first()
-            if place is None:
-                return {'error':'Place not found'}
-
-            homes = Home(name=data['name'], person_id=data['person_id'],
-                         place_id=data['place_id'],validate=1)
-            db.session.add(homes)
-            db.session.commit()
-            return {'success':f"{data['name']} added successfully"}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def update_home(data):
-        try:
-            place = Place.query.filter_by(id=data['place_id'], validate=1).first()
-            if place is None:
-                return {'error':'Place not found'}
-
-            homes = Home.query.filter_by(id=data['id'],validate=1).first()
-            if homes is None:
-                return {'error':'Home not found'}
-
-            if homes is not None:
-                homes.name = data['name']
-                homes.place_id = data['place_id']
-                homes.validate = 1
-                db.session.commit()
-                return {'success':f"{data['name']} updated successfully"}
-        except Exception as a:
-            return str(a)
-
-
-    @staticmethod
-    def delete_home(id):
-        try:
-            homes = Home.query.filter(Home.id == id,Home.validate == 1).first()
-            if homes is None:
-                return {'error':'Home for deletion not found'}
-
-            compartment = Compartment.query.filter_by(home_id=id,validate=1).first()
-            if compartment:
-                return {'error':f'Home has associated Compartment. It Cannot be deleted'}
-
-            security = Security.query.filter_by(home_id=id,validate=1).first()
-            if security:
-                return {'error':f'Home has associated Security. It Cannot be deleted'}
-
-            sprinkler = HomeSprinkler.query.filter_by(home_id=id,validate=1).first()
-            if sprinkler:
-                return {'error':f'Home has associated Sprinkler. It Cannot be deleted'}
-
-            homes.validate = 0
-            db.session.commit()
-            return {'success':f'Home deleted successfully'}
         except Exception as e:
             return str(e)
 
@@ -629,28 +734,6 @@ class HomeController:
             return str(a)
 
     @staticmethod
-    def List_compartments_by_home_id(home_id):
-        try:
-            result = (
-                db.session.query(Compartment, Home)
-                .join(Home, Compartment.home_id == Home.id)
-                .filter(Compartment.home_id == home_id, Compartment.validate == 1)
-                .all()
-            )
-            if result is not None:
-                return [
-                    {
-                        "compartment_id": compartment.id,
-                        "compartment_name": compartment.name,
-                        "home_id": home.id,
-                        "home_name": home.name,
-                    }
-                    for compartment, home in result
-                ]
-        except Exception as a:
-            return str(a)
-
-    @staticmethod
     def List_deleted_compartments_by_home_id(home_id):
         try:
             result = (
@@ -671,62 +754,6 @@ class HomeController:
                 ]
         except Exception as a:
             return str(a)
-
-    @staticmethod
-    def add_compartment(data):
-        try:
-            home_id = data.get('home_id')
-            home = Home.query.filter_by(id=home_id,validate=1).first()
-            if home is None:
-                return {'error':'Home not found'}
-
-            compartments = Compartment(name=data['name'], home_id=data['home_id'],validate=1)
-            db.session.add(compartments)
-            db.session.commit()
-            return {'success':f"{data['name']} added successfully"}
-        except Exception as a:
-            return str(a)
-
-    @staticmethod
-    def update_compartment(data):
-        try:
-            # home = Home.query.filter_by(id=data['home_id'],validate=1).first()
-            # if home is None:
-            #     return {'error':'Invalid Home Id'}
-
-            compartments = Compartment.query.filter_by(id=data['id'],validate=1).first()
-            if compartments is None:
-                return {'error':'Compartment not found'}
-
-            if compartments is not None:
-                compartments.name = data['name']
-                # compartments.home_id = data['home_id']
-                compartments.validate = 1
-                db.session.commit()
-                return {'success':f"{data['name']} updated successfully"}
-        except Exception as a:
-            return str(a)
-
-    @staticmethod
-    def delete_compartment(id):
-        try:
-            compartment = Compartment.query.filter_by(id=id,validate=1).first()
-            if compartment is None:
-                return {'error':'Compartment not found'}
-
-            compartment_appliances = CompartmentAppliance.query.filter_by(compartment_id=id,validate=1).first()
-            if compartment_appliances is not None:
-                return {'error':f'Compartment has associated Compartment Appliances. It Cannot be deleted'}
-
-            compartment_locks = CompartmentLock.query.filter_by(compartment_id=id,validate=1).first()
-            if compartment_locks is not None:
-                return {'error':f'Compartment has associated Compartment Locks. It Cannot be deleted'}
-
-            compartment.validate = 0
-            db.session.commit()
-            return {'success':f'Compartment deleted successfully'}
-        except Exception as e:
-            return str(e)
 
     @staticmethod
     def backup_deleted_compartment_by_id(id):

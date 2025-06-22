@@ -18,7 +18,10 @@ const ApplianceSchedules = ({ navigation, route }) => {
     const items = route.params?.items || {};
     const [Compartment_Appliance_id, Set_Compartment_Appliance_id] = useState(null);
     const [compartment_id, setCompartmentId] = useState(null);
-    const [dataa, setdataa] = useState([])
+    const [flag, setFalg] = useState(0)
+
+    const [Compartment_ids_list, set_Compartment_Ids_list] = useState([])
+    const [App_catgry, setCatagory] = useState(null)
 
     const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('compartment_appliance_id');
@@ -129,16 +132,21 @@ const ApplianceSchedules = ({ navigation, route }) => {
         }
     }, []);
 
+    useEffect(()=>{},[App_catgry,Compartment_ids_list])
+
     useFocusEffect(
         useCallback(() => {
             // Case 3: Check for new navigation format
             if (route.params?.compartmentId && route.params?.catagory) {
-                const ids = route.params.compartmentId;
-                const category = route.params.catagory;
-                if (Array.isArray(ids)) {
-                    List_Appliance_Schedules_with_Appiance_wise(ids, category);
-                    return;
+                set_Compartment_Ids_list(route.params.compartmentId);
+                setCatagory(route.params.catagory);
+                if (Array.isArray(Compartment_ids_list)) {
+                    if (App_catgry && Compartment_ids_list) {
+                        List_Appliance_Schedules_with_Appiance_wise(Compartment_ids_list, App_catgry);
+                        return;
+                    }
                 }
+                setFalg(1)
             }
 
             // Case 1: items is an object (single appliance)
@@ -166,6 +174,19 @@ const ApplianceSchedules = ({ navigation, route }) => {
 
         }, [items, route.params])
     );
+
+    const pressAddButton = () => {
+        if (flag === 1) {
+            navigation.navigate('AddApplianceSchedule', {
+                compartmentId: Compartment_ids_list,
+                catagory: App_catgry
+                // fromCustomNavigation: true
+            })
+        }
+        else {
+            navigation.navigate('AddApplianceSchedule', { items: items })
+        }
+    }
 
 
     const FlatListData = useCallback(({ item }) => (
@@ -230,7 +251,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddApplianceSchedule', { items })}
+                    onPress={pressAddButton}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>

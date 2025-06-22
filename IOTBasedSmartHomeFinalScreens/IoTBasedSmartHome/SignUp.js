@@ -63,15 +63,17 @@ const SignUp = ({ navigation }) => {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
+
             <View style={[styles.navbar]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="arrow-left" size={24} color="black" />
-                    </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
-                        <Text style={styles.navbarText}>Sign Up</Text>
-                    </View>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-left" size={24} color="black" />
+                </TouchableOpacity>
+                <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                    <Text style={styles.navbarText}>Sign Up</Text>
                 </View>
+            </View>
+
+            <ScrollView contentContainerStyle={[styles.scrollContainer]}>
 
                 <View style={[styles.innerContainer]}>
                     <Image source={require('../Images/Iot4.png')} style={styles.image} />
@@ -105,7 +107,8 @@ const SignUp = ({ navigation }) => {
                         onChangeText={setConpass}
                     />
 
-                    <View style={[styles.Bottombtn,{}]}>
+
+                    <View style={[styles.Bottombtn, {bottom:0}]}>
                         <TouchableOpacity style={styles.button} onPress={SignUp}>
                             <Text style={styles.buttonText}>SignUp</Text>
                         </TouchableOpacity>
@@ -113,7 +116,8 @@ const SignUp = ({ navigation }) => {
 
                 </View>
             </ScrollView>
-        </KeyboardAvoidingView>
+
+        </KeyboardAvoidingView >
 
     )
 }

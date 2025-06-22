@@ -6,6 +6,239 @@ from Controller.HomeController import HomeController
 from Controller.PersonController import PersonController
 from config import app
 
+#-------------- Person --------------
+
+#OK
+@app.route('/login_person',methods = ['POST'])
+def login_person():
+    data = request.get_json()
+    person = PersonController.login_person(data)
+    return jsonify(person)
+
+#OK
+@app.route('/SignUp_Person',methods = ["POST"])
+def signup_person():
+    data = request.get_json()
+    person = PersonController.signup_person(data)
+    return jsonify(person)
+
+#------------ City ----------------
+
+#OK
+@app.route('/ListCities',methods=['GET'])
+def listcities():
+    cities = HomeController.list_cities()
+    return jsonify(cities)
+
+#------------- Place --------------
+#OK
+@app.route('/ListPlacesByCityId/<int:id>',methods = ['GET'])
+def ListPlaceByCityID(id):
+    place = HomeController.List_places_by_city_id(id)
+    return jsonify(place)
+
+#------------- Home ---------------
+
+@app.route('/List_Home_By_Person_Id/<int:person_id>',methods = ['GET'])
+def ListHomeByPersonID(person_id):
+    homes = HomeController.List_homes_by_person_id(person_id)
+    return jsonify(homes)
+
+@app.route('/AddHome',methods = ["POST"])
+def addHome():
+    data = request.get_json()
+    home = HomeController.add_home(data)
+    return jsonify(home)
+
+@app.route('/UpdateHome',methods = ["POST"])
+def updateHome():
+    data = request.get_json()
+    home = HomeController.update_home(data)
+    return jsonify(home)
+
+@app.route('/DeleteHome/<int:id>',methods = ['DELETE'])
+def deleteHome(id):
+    home = HomeController.delete_home(id)
+    return jsonify(home)
+
+#----------------- Compartment ---------------
+
+@app.route('/List_Compartment_By_Home_Id/<int:home_id>',methods = ['GET'])
+def List_Compartment_By_Home_ID(home_id):
+    compartments = HomeController.List_compartments_by_home_id(home_id)
+    return jsonify(compartments)
+
+@app.route('/AddCompartment',methods = ["POST"])
+def addCompartment():
+    data = request.get_json()
+    compartment = HomeController.add_compartment(data)
+    return jsonify(compartment)
+
+@app.route('/UpdateCompartment',methods = ["POST"])
+def updateCompartment():
+    data = request.get_json()
+    compartment = HomeController.update_compartment(data)
+    return jsonify(compartment)
+
+@app.route('/DeleteCompartment/<int:id>',methods = ['DELETE'])
+def deleteCompartment(id):
+    compartment = HomeController.delete_compartment(id)
+    return jsonify(compartment)
+
+#-------------------- Appliances -------------------
+
+@app.route('/ListAppliance',methods=['GET'])
+def listAppliance():
+    appliance = ApplianceController.list_appliance()
+    return jsonify(appliance)
+
+#---------------- Compartment Appliance -----------------
+
+@app.route('/get_compartment_appliance_with_compartment_id/<int:comp_id>',methods = ["GET"])
+def get_compartment_appliance_with_compartment_id(comp_id):
+    appliance = ApplianceController.get_compartment_appliance_with_compartment_id(comp_id)
+    return jsonify(appliance)
+
+@app.route('/get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List', methods=["POST"])
+def get_appliances_by_category_and_compartments():
+    try:
+        data = request.get_json()
+
+        category = data.get("category")
+        compartment_id_list = data.get("compartment_ids")
+
+        if not category or not compartment_id_list:
+            return jsonify({"error": "Both 'category' and 'compartment_ids' are required."}), 400
+
+        result = ApplianceController.get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category, compartment_id_list)
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/Add_Compartment_Appliance',methods = ["POST"])
+def Add_Compartment_Appliance():
+    data = request.get_json()
+    appliance = ApplianceController.AddCompartmentAppliances(data)
+    return jsonify(appliance)
+
+@app.route('/Update_Compartment_Appliance',methods = ["POST"])
+def Update_Compartment_Appliance():
+    data = request.get_json()
+    appliance = ApplianceController.updateCompartmentAppliances(data)
+    return jsonify(appliance)
+
+@app.route('/Delete_Compartment_Appliance/<int:id>',methods = ['DELETE'])
+def Delete_Compartment_Appliance(id):
+    appliance = ApplianceController.deleteCompartmentAppliances(id)
+    return jsonify(appliance)
+
+#----------------- Appliance Schedule -----------------
+@app.route('/list_Appliance_Schedule_By_comaprtment_id/<int:id>', methods = ['GET'])
+def list_appliance_schedule_by_compartment_id(id):
+    schedule = ApplianceController.list_appliance_schedule_by_compartment_id(id)
+    return jsonify(schedule)
+
+@app.route('/Get_Appliance_Schedule_By_table_id/<int:id>/<int:type>', methods = ['GET'])
+def Get_Appliance_Schedule_By_table_id(id,type):
+    schedule = ApplianceController.get_appliance_schedule_by_table_id(id,type)
+    return jsonify(schedule)
+
+@app.route('/List_Appliance_Schedules_with_Appiance_wise', methods = ["POST"])
+def List_Appliance_Schedules_with_Appiance_wise():
+    data = request.get_json()
+    schedule = ApplianceController.List_Appliance_Schedules_with_Appiance_wise(data)
+    return jsonify(schedule)
+
+@app.route('/Add_Appliance_Schedule', methods = ["POST"])
+def Add_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.Add_Appliances_Schedule(data)
+    return jsonify(schedule)
+
+@app.route('/Add_Appliances_Schedule_with_Appliances_wise', methods = ["POST"])
+def Add_Appliances_Schedule_with_Appliances_wise():
+    data = request.get_json()
+    schedule = ApplianceController.Add_Appliances_Schedule_with_Appliances_wise(data)
+    return jsonify(schedule)
+
+@app.route('/update_Appliance_Schedule', methods = ["POST"])
+def update_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.Update_Appliances_Schedule(data)
+    return jsonify(schedule)
+
+@app.route('/update_matching_Appliance_Schedule', methods = ["POST"])
+def update_matching_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.update_matching_schedules(data)
+    return jsonify(schedule)
+
+@app.route('/delete_matching_Appliance_Schedule', methods = ["POST"])
+def delete_matching_Appliance_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.delete_matching_Appliance_Schedule(data)
+    return jsonify(schedule)
+
+@app.route('/delete_Appliance_Schedule/<int:id>/<int:type>', methods = ['DELETE'])
+def delete_Appliance_Schedule(id,type):
+    schedule = ApplianceController.Delete_Appliances_Schedule(id,type)
+    return jsonify(schedule)
+
+#------------- Compartment Locks --------------------
+
+@app.route('/List_Compartment_lock_by_compartment_id/<int:id>',methods=['GET'])
+def List_Compartment_Lock_by_compartment_id(id):
+    lock = ApplianceController.List_Compartment_Lock_By_Compartment_id(id)
+    return jsonify(lock)
+
+@app.route('/Add_Compartment_Lock', methods=['POST'])
+def Add_Compartment_Lock():
+    data = request.get_json()
+    lock = ApplianceController.Add_compartment_lock(data)
+    return jsonify(lock)
+
+@app.route('/update_Compartment_Lock', methods=['POST'])
+def update_Compartment_Lock():
+    data = request.get_json()
+    lock = ApplianceController.Update_Compartment_Lock(data)
+    return jsonify(lock)
+
+@app.route('/delete_Compartment_Lock/<int:id>', methods=['DELETE'])
+def delete_Compartment_Lock(id):
+    lock = ApplianceController.Delete_compartment_lock(id)
+    return jsonify(lock)
+
+#---------------- Compartment Lock Schedule--------------
+
+@app.route('/List_Lock_Schedule_by_compartment_lock_id/<int:id>', methods=['GET'])
+def List_Lock_Schedule_by_compartment_lock_id(id):
+    schedule = ApplianceController.List_lock_schedule_by_compartment_lock_id(id)
+    return jsonify(schedule)
+
+@app.route('/list_Lock_schedule_by_compartment_id/<int:id>', methods = ['GET'])
+def list_Lock_schedule_by_compartment_id(id):
+    schedule = ApplianceController.list_Lock_schedule_by_compartment_id(id)
+    return jsonify(schedule)
+
+@app.route('/Add_Lock_Schedule', methods=['POST'])
+def Add_Lock_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.Add_lock_Schedule(data)
+    return jsonify(schedule)
+
+@app.route('/update_matching_lock_Schedule', methods = ["POST"])
+def update_matching_lock_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.update_matching_Lock_schedules(data)
+    return jsonify(schedule)
+
+@app.route('/delete_matching_lock_Schedule', methods = ["POST"])
+def delete_matching_lock_Schedule():
+    data = request.get_json()
+    schedule = ApplianceController.delete_matching_Lock_Schedule(data)
+    return jsonify(schedule)
+
 
 ############### Person ##############
 
@@ -24,20 +257,6 @@ def getpersondetails(id):
 def getpersonbyname(name):
     persons = PersonController.get_person_by_name(name)
     return jsonify(persons)
-
-#OK
-@app.route('/login_person',methods = ['POST'])
-def login_person():
-    data = request.get_json()
-    person = PersonController.login_person(data)
-    return jsonify(person)
-
-#OK
-@app.route('/SignUp_Person',methods = ["POST"])
-def signup_person():
-    data = request.get_json()
-    person = PersonController.signup_person(data)
-    return jsonify(person)
 
 @app.route('/UpdatePerson',methods = ["POST"])
 def updateperson():
@@ -66,12 +285,6 @@ def backupPersonbyid(id):
     return jsonify(person)
 
 ############################## City ##################################
-
-#OK
-@app.route('/ListCities',methods=['GET'])
-def listcities():
-    cities = HomeController.list_cities()
-    return jsonify(cities)
 
 @app.route('/GetCitiesById/<int:id>',methods=['GET'])
 def getcitiesbyid(id):
@@ -130,12 +343,6 @@ def getPlaceById(id):
 @app.route('/GetPlaceByName/<string:name>',methods=['GET'])
 def getPlaceByName(name):
     place = HomeController.get_place_by_name(name)
-    return jsonify(place)
-
-#OK
-@app.route('/ListPlacesByCityId/<int:id>',methods = ['GET'])
-def ListPlaceByCityID(id):
-    place = HomeController.List_places_by_city_id(id)
     return jsonify(place)
 
 @app.route('/GetDeletedPlaceByCityId/<int:city_id>',methods = ['GET'])
@@ -207,34 +414,11 @@ def getDeletedHomeByName(name):
     homes = HomeController.get_deleted_home_by_name(name)
     return jsonify(homes)
 
-#Ok
-@app.route('/List_Home_By_Person_Id/<int:person_id>',methods = ['GET'])
-def ListHomeByPersonID(person_id):
-    homes = HomeController.List_homes_by_person_id(person_id)
-    return jsonify(homes)
 
 @app.route('/List_deleted_homes_by_person_id/<int:person_id>',methods = ['GET'])
 def List_Deleted_Homes_By_Person_ID(person_id):
     homes = HomeController.List_deleted_homes_by_person_id(person_id)
     return jsonify(homes)
-
-#OK
-@app.route('/AddHome',methods = ["POST"])
-def addHome():
-    data = request.get_json()
-    home = HomeController.add_home(data)
-    return jsonify(home)
-
-@app.route('/UpdateHome',methods = ["POST"])
-def updateHome():
-    data = request.get_json()
-    home = HomeController.update_home(data)
-    return jsonify(home)
-
-@app.route('/DeleteHome/<int:id>',methods = ['DELETE'])
-def deleteHome(id):
-    home = HomeController.delete_home(id)
-    return jsonify(home)
 
 @app.route('/backup_deleted_home_by_id/<int:id>',methods = ['GET'])
 def backupDeletedHomeById(id):
@@ -263,32 +447,10 @@ def getDeletedCompartmentDetails(id):
     compartments = HomeController.get_Deleted_compartment_by_id(id)
     return jsonify(compartments)
 
-@app.route('/List_Compartment_By_Home_Id/<int:home_id>',methods = ['GET'])
-def List_Compartment_By_Home_ID(home_id):
-    compartments = HomeController.List_compartments_by_home_id(home_id)
-    return jsonify(compartments)
-
 @app.route('/List_Deleted_Compartment_By_Home_Id/<int:home_id>',methods = ['GET'])
 def List_Deleted_Compartment_By_Home_ID(home_id):
     compartments = HomeController.List_deleted_compartments_by_home_id(home_id)
     return jsonify(compartments)
-
-@app.route('/AddCompartment',methods = ["POST"])
-def addCompartment():
-    data = request.get_json()
-    compartment = HomeController.add_compartment(data)
-    return jsonify(compartment)
-
-@app.route('/UpdateCompartment',methods = ["POST"])
-def updateCompartment():
-    data = request.get_json()
-    compartment = HomeController.update_compartment(data)
-    return jsonify(compartment)
-
-@app.route('/DeleteCompartment/<int:id>',methods = ['DELETE'])
-def deleteCompartment(id):
-    compartment = HomeController.delete_compartment(id)
-    return jsonify(compartment)
 
 @app.route('/backup_deleted_compartment_by_id/<int:id>',methods = ['GET'])
 def backup_deleted_compartment_by_id(id):
@@ -297,10 +459,6 @@ def backup_deleted_compartment_by_id(id):
 
 ##################### Appliance #####################
 
-@app.route('/ListAppliance',methods=['GET'])
-def listAppliance():
-    appliance = ApplianceController.list_appliance()
-    return jsonify(appliance)
 
 @app.route('/ListDeletedAppliance',methods=['GET'])
 def listDeletedAppliance():
@@ -361,29 +519,6 @@ def Get_deleetd_Compartment_Appliance_Details(id):
     appliance = ApplianceController.get_deleted_compartment_appliance_by_id(id)
     return jsonify(appliance)
 
-@app.route('/get_compartment_appliance_with_compartment_id/<int:comp_id>',methods = ["GET"])
-def get_compartment_appliance_with_compartment_id(comp_id):
-    appliance = ApplianceController.get_compartment_appliance_with_compartment_id(comp_id)
-    return jsonify(appliance)
-
-@app.route('/get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List', methods=["POST"])
-def get_appliances_by_category_and_compartments():
-    try:
-        data = request.get_json()
-
-        category = data.get("category")
-        compartment_id_list = data.get("compartment_ids")
-
-        if not category or not compartment_id_list:
-            return jsonify({"error": "Both 'category' and 'compartment_ids' are required."}), 400
-
-        result = ApplianceController.get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category, compartment_id_list)
-        return jsonify(result)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
 @app.route('/get_deleted_compartment_appliance_with_compartment_id/<int:comp_id>',methods = ["GET"])
 def get_deleted_compartment_appliance_with_compartment_id(comp_id):
     appliance = ApplianceController.get_deleted_compartment_appliance_with_compartment_id(comp_id)
@@ -397,23 +532,6 @@ def get_compartment_appliance_with_compartment_appliance_id(comp_id,appl_id):
 @app.route('/get_deleted_compartment_appliance_with_compartment_and_appliance_id/<int:comp_id>/<int:appl_id>',methods = ["GET"])
 def get_deleted_compartment_appliance_with_compartment_appliance_id(comp_id,appl_id):
     appliance = ApplianceController.get_deleted_compartment_appliance_with_compartment_appliance_id(comp_id,appl_id)
-    return jsonify(appliance)
-
-@app.route('/Add_Compartment_Appliance',methods = ["POST"])
-def Add_Compartment_Appliance():
-    data = request.get_json()
-    appliance = ApplianceController.AddCompartmentAppliances(data)
-    return jsonify(appliance)
-
-@app.route('/Update_Compartment_Appliance',methods = ["POST"])
-def Update_Compartment_Appliance():
-    data = request.get_json()
-    appliance = ApplianceController.updateCompartmentAppliances(data)
-    return jsonify(appliance)
-
-@app.route('/Delete_Compartment_Appliance/<int:id>',methods = ['DELETE'])
-def Delete_Compartment_Appliance(id):
-    appliance = ApplianceController.deleteCompartmentAppliances(id)
     return jsonify(appliance)
 
 @app.route('/backup_deleted_compartment_appliance_by_id/<int:id>',methods = ['GET'])
@@ -438,61 +556,11 @@ def Get_deleted_Appliance_Schedule_Details(id,type):
     schedule = ApplianceController.get_deleted_appliance_schedule_by_id(id,type)
     return jsonify(schedule)
 
-@app.route('/list_Appliance_Schedule_By_comaprtment_id/<int:id>', methods = ['GET'])
-def list_appliance_schedule_by_compartment_id(id):
-    schedule = ApplianceController.list_appliance_schedule_by_compartment_id(id)
-    return jsonify(schedule)
-
-@app.route('/Get_Appliance_Schedule_By_table_id/<int:id>/<int:type>', methods = ['GET'])
-def Get_Appliance_Schedule_By_table_id(id,type):
-    schedule = ApplianceController.get_appliance_schedule_by_table_id(id,type)
-    return jsonify(schedule)
-
 @app.route('/Get_Deleted_Appliance_Schedule_By_table_id/<int:id>/<int:type>', methods = ['GET'])
 def Get_Deleted_Appliance_Schedule_By_table_id(id,type):
     schedule = ApplianceController.get_deleted_appliance_schedule_by_table_id(id,type)
     return jsonify(schedule)
 
-@app.route('/List_Appliance_Schedules_with_Appiance_wise', methods = ["POST"])
-def List_Appliance_Schedules_with_Appiance_wise():
-    data = request.get_json()
-    schedule = ApplianceController.List_Appliance_Schedules_with_Appiance_wise(data)
-    return jsonify(schedule)
-
-@app.route('/Add_Appliance_Schedule', methods = ["POST"])
-def Add_Appliance_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.Add_Appliances_Schedule(data)
-    return jsonify(schedule)
-
-@app.route('/Add_Appliances_Schedule_with_Appliances_wise', methods = ["POST"])
-def Add_Appliances_Schedule_with_Appliances_wise():
-    data = request.get_json()
-    schedule = ApplianceController.Add_Appliances_Schedule_with_Appliances_wise(data)
-    return jsonify(schedule)
-
-@app.route('/update_Appliance_Schedule', methods = ["POST"])
-def update_Appliance_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.Update_Appliances_Schedule(data)
-    return jsonify(schedule)
-
-@app.route('/update_matching_Appliance_Schedule', methods = ["POST"])
-def update_matching_Appliance_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.update_matching_schedules(data)
-    return jsonify(schedule)
-
-@app.route('/delete_matching_Appliance_Schedule', methods = ["POST"])
-def delete_matching_Appliance_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.delete_matching_Appliance_Schedule(data)
-    return jsonify(schedule)
-
-@app.route('/delete_Appliance_Schedule/<int:id>/<int:type>', methods = ['DELETE'])
-def delete_Appliance_Schedule(id,type):
-    schedule = ApplianceController.Delete_Appliances_Schedule(id,type)
-    return jsonify(schedule)
 
 @app.route('/backup_deleted_appliance_schedule_by_id/<int:id>/<int:type>', methods = ['GET'])
 def backup_deleted_appliance_schedule_by_id(id,type):
@@ -649,31 +717,9 @@ def Get_Deleted_Compartment_Lock_by_name(name):
     lock = ApplianceController.Get_deleted_compartment_lock_by_name(name)
     return jsonify(lock)
 
-@app.route('/List_Compartment_lock_by_compartment_id/<int:id>',methods=['GET'])
-def List_Compartment_Lock_by_compartment_id(id):
-    lock = ApplianceController.List_Compartment_Lock_By_Compartment_id(id)
-    return jsonify(lock)
-
 @app.route('/List_deleted_Compartment_lock_by_compartment_id/<int:id>',methods=['GET'])
 def List_deleted_Compartment_Lock_by_compartment_id(id):
     lock = ApplianceController.List_deleted_compartment_lock_by_compartment_id(id)
-    return jsonify(lock)
-
-@app.route('/Add_Compartment_Lock', methods=['POST'])
-def Add_Compartment_Lock():
-    data = request.get_json()
-    lock = ApplianceController.Add_compartment_lock(data)
-    return jsonify(lock)
-
-@app.route('/update_Compartment_Lock', methods=['POST'])
-def update_Compartment_Lock():
-    data = request.get_json()
-    lock = ApplianceController.Update_Compartment_Lock(data)
-    return jsonify(lock)
-
-@app.route('/delete_Compartment_Lock/<int:id>', methods=['DELETE'])
-def delete_Compartment_Lock(id):
-    lock = ApplianceController.Delete_compartment_lock(id)
     return jsonify(lock)
 
 @app.route('/backup_deleted_compartment_lock_by_id/<int:id>', methods=['GET'])
@@ -703,25 +749,9 @@ def Get_Deleted_Lock_Schedule_by_id(id):
     schedule = ApplianceController.Get_deleted_lock_schedule_by_id(id)
     return jsonify(schedule)
 
-@app.route('/List_Lock_Schedule_by_compartment_lock_id/<int:id>', methods=['GET'])
-def List_Lock_Schedule_by_compartment_lock_id(id):
-    schedule = ApplianceController.List_lock_schedule_by_compartment_lock_id(id)
-    return jsonify(schedule)
-
 @app.route('/List_Deleted_Lock_Schedule_by_compartment_lock_id/<int:id>', methods=['GET'])
 def List_Deleted_Lock_Schedule_by_compartment_lock_id(id):
     schedule = ApplianceController.List_deleted_lock_schedule_by_compartment_lock_id(id)
-    return jsonify(schedule)
-
-@app.route('/list_Lock_schedule_by_compartment_id/<int:id>', methods = ['GET'])
-def list_Lock_schedule_by_compartment_id(id):
-    schedule = ApplianceController.list_Lock_schedule_by_compartment_id(id)
-    return jsonify(schedule)
-
-@app.route('/Add_Lock_Schedule', methods=['POST'])
-def Add_Lock_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.Add_lock_Schedule(data)
     return jsonify(schedule)
 
 @app.route('/update_Lock_Schedule', methods=['POST'])
@@ -738,18 +768,6 @@ def delete_Lock_Schedule(id):
 @app.route('/backup_deleted_lock_schedule_by_id/<int:id>', methods=['GET'])
 def backup_deleted_lock_schedule_by_id(id):
     schedule = ApplianceController.backup_deleted_lock_schedule_by_id(id)
-    return jsonify(schedule)
-
-@app.route('/update_matching_lock_Schedule', methods = ["POST"])
-def update_matching_lock_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.update_matching_Lock_schedules(data)
-    return jsonify(schedule)
-
-@app.route('/delete_matching_lock_Schedule', methods = ["POST"])
-def delete_matching_lock_Schedule():
-    data = request.get_json()
-    schedule = ApplianceController.delete_matching_Lock_Schedule(data)
     return jsonify(schedule)
 
 #-------------------------- Lock Scedule Log --------------------------------
@@ -970,17 +988,6 @@ def Backup_sprinkler_Schedule_Log_By_id(id):
 
 #--------------------------- Hardware --------------------------------
 
-# @app.route('/set_relay_state', methods=['POST'])
-# def set_relay_state():
-#     data = request.get_json()
-#     result = HardwareController.set_relay_state(data)
-#     return jsonify(result)
-#
-# @app.route('/get_relay_state', methods=['GET'])
-# def get_relay_state():
-#     res = HardwareController.get_relay_state()
-#     return jsonify(res), 200
-
 @app.route('/set_water_level_state', methods=['POST'])
 def set_water_level_state():
     data = request.get_json()
@@ -1013,6 +1020,17 @@ def check_schedule_update_status():
 def check_lock_schedule_update_status():
     appliance = HardwareController.check_lock_schedule_update_status()
     return jsonify(appliance)
+
+@app.route('/Update_Gas_Cylinder_status_with_Home_ID',methods = ["POST"])
+def Update_Gas_Cylinder_status():
+    data = request.get_json()
+    appliance = HardwareController.updateGasCylinderStatusWith_HomeID(data)
+    return jsonify(appliance)
+
+@app.route('/get_geyser_by_Home_id/<int:id>',methods = ['GET'])
+def get_geyser_by_Home_id(id):
+    homes = HardwareController.get_geyser_by_Home_id(id)
+    return jsonify(homes)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -3,12 +3,13 @@ import {
     Alert, KeyboardAvoidingView, ScrollView, Platform, Button,
     Pressable, ActivityIndicator
 } from 'react-native'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MMKV } from 'react-native-mmkv';
+import { useFocusEffect } from '@react-navigation/native';
 import URL from './Url';
 
 const AddApplianceSchedule = ({ navigation, route }) => {
@@ -20,6 +21,9 @@ const AddApplianceSchedule = ({ navigation, route }) => {
     const [showTimeOffPicker, setShowTimeOffPicker] = useState(false);
     const [loading, setLoading] = useState(false);
     const items = route.params?.items;
+
+    const [Compartment_ids_list, set_Compartment_Ids_list] = useState([])
+    const [App_catgry, setCatagory] = useState(null)
 
     // State for received data
     const [compartmentApplianceId, setCompartmentApplianceId] = useState(null);
@@ -56,33 +60,6 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             setTimeOff(selectedDate);
         }
     };
-
-    // Initialize received data
-    useEffect(() => {
-        const storage = new MMKV();
-
-        const storedCompartmentId = storage.getNumber('compartment_id');
-        const storedApplianceId = storage.getNumber('compartment_appliance_id');
-
-        // Priority: props > storage
-        if (items?.Compartment_Appliance_id) {
-            setCompartmentApplianceId(items.Compartment_Appliance_id);
-        } else if (typeof items === 'number') {
-            setCompartmentId(items);
-        }
-
-        // Fallback if above didn’t set them
-        if (!items) {
-            if (!compartmentId && storedCompartmentId) {
-                setCompartmentId(storedCompartmentId);
-            }
-
-            if (!compartmentApplianceId && storedApplianceId) {
-                setCompartmentApplianceId(storedApplianceId);
-            }
-        }
-    }, []);
-
 
     const addScheduleForSingleAppliance = async () => {
         try {
@@ -183,6 +160,36 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             };
         }
     };
+    
+    const addScheduleFor_AppliancesWise = async () => {
+        try {
+            const payload = {
+                name: name,
+                type: 0, // Assuming default type
+                start_time: formatTime(timeOn),
+                end_time: formatTime(timeOff),
+                days: day,
+                compartment_ids:Compartment_ids_list,
+                category:App_catgry
+            };
+
+            const response = await fetch(`${URL}/Add_Appliances_Schedule_with_Appliances_wise`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                return { success: true, message: result.success || 'Schedule added successfully' };
+            } else {
+                return { success: false, message: result.error || 'Failed to add schedule' };
+            }
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    };
 
     const handleAddSchedule = async () => {
         if (!name) {
@@ -209,12 +216,18 @@ const AddApplianceSchedule = ({ navigation, route }) => {
             let result;
 
             if (compartmentApplianceId && !compartmentId) {
-                // Only one appliance
+
                 result = await addScheduleForSingleAppliance();
+
             } else if (compartmentId) {
-                // Add to all appliances in the compartment
+
                 result = await addScheduleForAllAppliances();
-            } else {
+
+            }
+            else if (Compartment_ids_list && App_catgry && !compartmentApplianceId && !compartmentId){
+                result = await addScheduleFor_AppliancesWise();
+            }
+             else {
                 throw new Error('No appliance or compartment selected');
             }
 
@@ -238,6 +251,29 @@ const AddApplianceSchedule = ({ navigation, route }) => {
         }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            // Case 3: Check for new navigation format
+            if (route.params?.compartmentId && route.params?.catagory) {
+                set_Compartment_Ids_list(route.params.compartmentId);
+                setCatagory(route.params.catagory);
+            }
+
+            // Case 1: items is an object (single appliance)
+            if (typeof items === 'object' && items?.Compartment_Appliance_id) {
+                setCompartmentApplianceId(items.Compartment_Appliance_id);
+                return;
+            }
+
+            // Case 2: items is a number (compartment ID)
+            if (typeof items === 'number') {
+                setCompartmentId(items);
+                return;
+            }
+
+        }, [items, route.params])
+    );
+
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -245,7 +281,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Icon name="arrow-left" size={24} color="black" />
                     </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
+                    <View style={{ flex: 0.90, justifyContent: 'center' }}>
                         <Text style={styles.navbarText}>Add Schedule</Text>
                     </View>
                 </View>
@@ -253,7 +289,7 @@ const AddApplianceSchedule = ({ navigation, route }) => {
                 <View style={styles.innerContainer}>
                     <View style={styles.formContainer}>
                         <TextInput
-                            style={[styles.input, ]}
+                            style={[styles.input,]}
                             placeholder='Schedule Name'
                             placeholderTextColor='gray'
                             value={name}

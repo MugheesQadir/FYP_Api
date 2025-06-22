@@ -3,6 +3,40 @@ from Model.Person import Person
 from config import db
 
 class PersonController:
+
+    @staticmethod
+    def login_person(data):
+        try:
+            p = Person.query.filter_by(email=data['email'], validate=1).first()
+            if p is None:
+                return {'error': 'Person not found'}
+
+            if p.email and p.password == data['password']:
+                return {'id': p.id, 'name': p.name}
+            else:
+                return {'error': 'Invalid Email and password'}
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def signup_person(data):
+        try:
+            persons = Person.query.filter_by(email=data['email'], validate=1).first()
+
+            if persons is None:
+                person = Person(name=data['name'], email=data['email'],
+                                password=data['password'], role=data['role'], validate=1)
+
+                db.session.add(person)
+                db.session.commit()
+                return {'success': f'{data['name']} SignUp Successfully'}
+
+            return {'message': 'Email already exists!'}
+        except Exception as e:
+            return str(e)
+
+#--------------------------------------------------------------------------------
+
     @staticmethod
     def list_person():
         try:
@@ -36,37 +70,6 @@ class PersonController:
 
             return [{'id': p.id, 'name': p.name,'email':p.email,
                      'password': p.password,'role':p.role}]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def login_person(data):
-        try:
-            p = Person.query.filter_by(email = data['email'],validate=1).first()
-            if p is None:
-                return {'error':'Person not found'}
-
-            if p.email and p.password == data['password']:
-                return {'id':p.id,'name':p.name}
-            else:
-                return {'error':'Invalid Email and password'}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def signup_person(data):
-        try:
-            persons = Person.query.filter_by(email=data['email'],validate=1).first()
-
-            if persons is None:
-                person = Person(name=data['name'], email=data['email'],
-                                password=data['password'], role=data['role'], validate=1)
-
-                db.session.add(person)
-                db.session.commit()
-                return {'success':f'{data['name']} SignUp Successfully'}
-
-            return {'message':'Email already exists!'}
         except Exception as e:
             return str(e)
 

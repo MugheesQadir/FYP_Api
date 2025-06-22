@@ -1,45 +1,33 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, Alert ,KeyboardAvoidingView} from 'react-native';
-import React, { useEffect, useState,useCallback } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, KeyboardAvoidingView, Animated } from 'react-native';
+import React, { useState, useCallback, useRef } from 'react';
 import URL from './Url';
 import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { useFocusEffect } from '@react-navigation/native';
 
-
 const WaterLevelState = ({ navigation }) => {
-    const [waterLevel, SetWaterLevel] = useState(0)
-    const [levelDisplay,SetDisplay] = useState('empty')
-    const [imageUrl, setImageUrl] = useState('');
+    const [waterLevel, SetWaterLevel] = useState(20);
+    const [levelDisplay, SetDisplay] = useState('empty');
+    const waterHeight = useRef(new Animated.Value(0)).current; // for smooth height animation
+    const intervalRef = useRef(null);
 
-    const images = {
-        full: require('../Images/full.png'),
-        per80 : require('../Images/80.png'),
-        per50 : require('../Images/50.png'),
-        per30 : require('../Images/30.png'),
-        empty : require('../Images/empty.jpeg'),
-    };    
+    const maxTankHeight = 250; // Height in pixels of the tank (for simulation)
 
     const levelDis = () => {
         if (waterLevel < 6) {
-            SetDisplay('OverFlow');
-            setImageUrl('');
-        } else if(waterLevel >= 6 && waterLevel < 8) {
-            SetDisplay('100%');
-            setImageUrl(images.full);
+            SetDisplay('Level : OverFlow');
+        } else if (waterLevel >= 6 && waterLevel < 8) {
+            SetDisplay('Level : 100%');
         } else if (waterLevel >= 8 && waterLevel < 12) {
-            SetDisplay('80%');
-            setImageUrl(images.per80);
+            SetDisplay('Level : 80%');
         } else if (waterLevel >= 12 && waterLevel < 16) {
-            SetDisplay('50%');
-            setImageUrl(images.per50);
+            SetDisplay('Level : 50%');
         } else if (waterLevel >= 16 && waterLevel < 19) {
-            SetDisplay('30%');
-            setImageUrl(images.per30);
+            SetDisplay('Level : 30%');
         } else if (waterLevel >= 19) {
-            SetDisplay('Empty');
-            setImageUrl(images.empty);
+            SetDisplay('Level : Empty');
         }
-    }
+    };
 
     const Get_water_level_State = async () => {
         try {
@@ -58,48 +46,108 @@ const WaterLevelState = ({ navigation }) => {
     };
 
     useFocusEffect(
+  useCallback(() => {
+    // This runs when screen comes into focus
+    Get_water_level_State();
+
+    intervalRef.current = setInterval(() => {
+      Get_water_level_State();
+    }, 1000);
+
+    return () => {
+      // This runs when screen goes out of focus
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [])
+);
+
+    // When waterLevel changes, animate the blue fill height
+    useFocusEffect(
         useCallback(() => {
-          const interval = setInterval(Get_water_level_State, 200);
-      
-          return () => clearInterval(interval);
-        }, [])
-      );
-      
-      useFocusEffect(
-        useCallback(() => {
-          levelDis();
+            levelDis();
+
+            let levelPercentage = 0;
+
+            if (waterLevel >= 6 && waterLevel <= 19) {
+                levelPercentage = 1 - ((waterLevel - 6) / (19 - 6)); // Inverted so 6 = full, 19 = empty
+            } else if (waterLevel < 6) {
+                levelPercentage = 1; // Overflow = full
+            } else {
+                levelPercentage = 0; // Empty = empty
+            }
+
+            const newHeight = maxTankHeight * levelPercentage;
+
+            Animated.timing(waterHeight, {
+                toValue: newHeight,
+                duration: 500,
+                useNativeDriver: false,
+            }).start();
+
         }, [waterLevel])
-      );
-      
+    );
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container,{flex: 1, alignItems: 'center', backgroundColor: '#f5f5f5'}]}>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={[styles.container, { flex: 1, alignItems: 'center', backgroundColor: '#f5f5f5' }]}>
+            
+            {/* Navbar */}
             <View style={[styles.navbar]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="arrow-left" size={24} color="black" />
-                    </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
-                        <Text style={styles.navbarText}>Water Level</Text>
-                    </View>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-left" size={24} color="black" />
+                </TouchableOpacity>
+                <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                    <Text style={styles.navbarText}>Water Level</Text>
                 </View>
+            </View>
 
-            <Image
-                // source={imageUrl ? imageUrl : require('../Images/empty.jpeg')}
-                source = {imageUrl}
-                style={[styles.image,{width: 300,
-                    height: 350,
-                    borderWidth: 1,
-                    borderRadius: 50,
-                    resizeMode: 'stretch',
-                    marginTop: 45,}]}
-            />
+            {/* Water Tank Simulation - Pure Views No Image */}
+            <View style={localStyles.tank}>
+                <Animated.View style={[localStyles.water, { height: waterHeight }]} />
+            </View>
 
-            <View style={[{backgroundColor: 'orange', width: '98%', margin: 5, marginTop: 10, padding: 15, width: '70%', borderRadius: 10, backgroundColor: '#001F6D', padding: 8 }]}>
-                <Text style={[{fontSize: 22, textAlign: 'center', color: 'black', color: 'white' }]}>
-                    Level : {levelDisplay}</Text>
+            {/* Level Text */}
+            <View style={localStyles.displayBox}>
+                <Text style={localStyles.displayText}>{levelDisplay}</Text>
             </View>
         </KeyboardAvoidingView>
-    )
-}
+    );
+};
 
-export default WaterLevelState
+const localStyles = StyleSheet.create({
+    tank: {
+        width: 150,
+        height: 250, // Total height of the tank
+        borderWidth: 2,
+        borderColor: '#001F6D',
+        borderRadius: 10,
+        overflow: 'hidden',
+        backgroundColor: '#E0E0E0', // Tank background
+        marginTop: 50,
+        justifyContent: 'flex-end' // water rises from bottom
+    },
+    water: {
+        width: '100%',
+        backgroundColor: '#4FC3F7', // Water color (Blue)
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10,
+    },
+    displayBox: {
+        backgroundColor: '#001F6D',
+        width: '70%',
+        borderRadius: 10,
+        padding: 8,
+        marginTop: 20,
+    },
+    displayText: {
+        fontSize: 22,
+        textAlign: 'center',
+        color: 'white',
+    }
+});
+
+export default WaterLevelState;

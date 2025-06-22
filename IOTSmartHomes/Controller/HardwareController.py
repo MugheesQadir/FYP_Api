@@ -1,15 +1,17 @@
 from datetime import datetime
 
+from Model.Geyser import Geyser
 from Model.Appliance import Appliance
 from Model.ApplianceSchedule import ApplianceSchedule
 from Model.Compartment import Compartment
 from Model.CompartmentAppliance import CompartmentAppliance
 from Model.CompartmentLock import CompartmentLock
+from Model.Home import Home
 from Model.LockSchedule import LockSchedule
 from config import db
 
 # relay_state = {"state": 0}
-water_level_state = {"state": 0}
+water_level_state = {"state": 20}
 
 class HardwareController:
     # @staticmethod
@@ -194,3 +196,40 @@ class HardwareController:
                 "error": str(e),
             }
 
+    @staticmethod
+    def updateGasCylinderStatusWith_HomeID(data):
+        try:
+            geyser = Geyser.query.filter_by(home_id=data["home_id"], validate=1).first()
+            if geyser is None:
+                return {'error': f"Geyser source not found"}
+
+            if geyser is not None:
+                geyser.gas_status = data['gas_status']
+                geyser.cylinder_status = data['cylinder_status']
+                db.session.commit()
+                return {'success': f"Geyser source with id {data['home_id']} updated successfully"}
+            else:
+                return {'error': f"Geyser source not found"}
+        except Exception as a:
+            return str(a)
+
+    @staticmethod
+    def get_geyser_by_Home_id(id):
+        try:
+            result = (
+                db.session.query(Geyser, Home)
+                .join(Home, Home.id == Geyser.home_id)
+                .filter(Geyser.home_id == id, Geyser.validate == 1)
+                .first()
+            )
+            if result is None:
+                return {'error': 'Geyser not found'}
+
+            geyser, homes = result
+            if geyser is not None:
+                return {"id": geyser.id, "name": geyser.name,
+                        "gas_status":geyser.gas_status,
+                        "cylinder_status":geyser.cylinder_status}
+
+        except Exception as e:
+            return (str(e))

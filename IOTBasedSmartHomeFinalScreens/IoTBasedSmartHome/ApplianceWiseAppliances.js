@@ -192,7 +192,6 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
         }, [catagory, compartmentId])
     );
 
-
     useEffect(() => {
         if (data.length > 0) {
             const allOn = data.every(item => toggleStates[item.Compartment_Appliance_id]);

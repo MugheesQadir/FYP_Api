@@ -16,7 +16,7 @@ from config import db
 from datetime import datetime
 
 class ApplianceController:
-
+#------------------ Applianes ----------------
     @staticmethod
     def list_appliance():
         try:
@@ -26,179 +26,8 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
-    @staticmethod
-    def list_deleted_appliance():
-        try:
-            appliances = Appliance.query.where(Appliance.validate == 0).all()
-            return [{"id": a.id,  "type": a.type,
-                     "power": a.power, "catagory":a.catagory} for a in appliances]
-        except Exception as e:
-            return str(e)
 
-    @staticmethod
-    def get_appliance_by_id(id):
-        try:
-            appliances = Appliance.query.filter_by(id=id,validate=1).first()
-            if not appliances:
-                return {'error': f'Appliance with id {id} not found'}
-            return [{"id": appliances.id
-                        , "type": appliances.type, "power": appliances.power,
-                     "catagory": appliances.catagory}]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_deleted_appliance_by_id(id):
-        try:
-            appliances = Appliance.query.filter_by(id=id, validate=0).first()
-            if not appliances:
-                return {'error': f'Deleted Appliance with id {id} not found'}
-            return [{"id": appliances.id,"type": appliances.type, "power": appliances.power,
-                     "catagory": appliances.catagory}]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def add_appliance(data):
-        try:
-            appliances = Appliance(type=data['type'], power=data['power'],
-                                   catagory=data['catagory'],validate=1)
-            db.session.add(appliances)
-            db.session.commit()
-            return {'success':f"{data['catagory']} added successfully"}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def update_appliance(data):
-        try:
-            appliances = Appliance.query.filter_by(id=data['id'], validate=1).first()
-            if appliances is None:
-                return {'error':f"Appliance not found"}
-
-            if appliances is not None:
-                appliances.type = data['type']
-                appliances.power = data['power']
-                appliances.catagory = data['catagory']
-                appliances.validate = 1
-                db.session.commit()
-                return {'success':f"{data['catagory']} added successfully"}
-        except Exception as a:
-            return str(a)
-
-    @staticmethod
-    def delete_appliance(id):
-        try:
-            compartment_appliances = CompartmentAppliance.query.filter_by(appliance_id=id,validate=1).first()
-            if compartment_appliances is not None:
-                return {'error':f'Appliance has associated Compartment Appliances. It cannot be deleted'}
-
-            appliances = Appliance.query.filter_by(id=id, validate=1).first()
-            if appliances is None:
-                return {'error':f"Appliance not found"}
-
-            appliances.validate = 0
-            db.session.commit()
-            return {'success':f'Appliance with id {id} deleted successfully'}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def Backup_deleted_appliances_by_id(id):
-        try:
-            appliances = Appliance.query.filter_by(id=id, validate=0).first()
-            if not appliances:
-                return {'error':f"Appliance with id {id} not found"}
-
-            appliances.validate = 1
-
-            db.session.commit()
-            return {'success':f'Appliance with id {id} backed up successfully'}
-        except Exception as e:
-            return str(e)
-
-################# Compartment Appliance ################
-
-    @staticmethod
-    def List_Compartment_Appliance():
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.validate == 1)
-                .all()
-            )
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name":compartmentappliance.name,"port":compartmentappliance.port,
-                     "compartment_id": compartment.id, "compartment_name": compartment.name,
-                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def List_Deleted_Compartment_Appliance():
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.validate == 0)
-                .all()
-            )
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,"port":compartmentappliance.port,
-                     "compartment_id": compartment.id, "compartment_name": compartment.name,
-                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_compartment_appliance_by_id(id):
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.id == id,CompartmentAppliance.validate == 1)
-                .first()
-            )
-            if result is None:
-                return {'error':f"Compartment Appliance not found"}
-            return {
-                "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
-                "name": result.CompartmentAppliance.name,
-                "port": result.CompartmentAppliance.port,
-                     "compartment_name": result.Compartment.name,
-                     "appliance_id":result.Appliance.id,
-                     "appliance_catagory": result.Appliance.catagory
-            }
-        except Exception as e:
-            return str(e)
-
-
-    @staticmethod
-    def get_deleted_compartment_appliance_by_id(id):
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.id == id, CompartmentAppliance.validate == 0)
-                .first()
-            )
-            if result is None:
-                return {'error':f"Compartment Appliance not found"}
-            return {
-                "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
-                "name": CompartmentAppliance.name,"port": result.CompartmentAppliance.port,
-                "compartment_name": result.Compartment.name,
-                "appliance_catagory": result.Appliance.catagory
-            }
-        except Exception as e:
-            return str(e)
+#---------------- Compartment Appliances --------------
 
     @staticmethod
     def get_compartment_appliance_with_compartment_id(compartment_id):
@@ -260,76 +89,6 @@ class ApplianceController:
         except Exception as e:
             return {"error": str(e)}
 
-    @staticmethod
-    def get_deleted_compartment_appliance_with_compartment_id(id):
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.compartment_id == id, CompartmentAppliance.validate == 0)
-                .all()
-            )
-            if result is None:
-                return {'error':f"Compartment Appliance not found"}
-
-            return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,
-                     "port": compartmentappliance.port,
-                     "compartment_id":compartment.id,
-                     "compartment_name": compartment.name,
-                     "appliance_id":appliance.id,
-                     "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_compartment_appliance_with_compartment_appliance_id(compartment_id, appliance_id):
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.compartment_id == compartment_id,
-                        CompartmentAppliance.appliance_id == appliance_id,
-                        CompartmentAppliance.validate == 1)
-                .all()
-            )
-            if result is None:
-                return {'error': f"Compartment Appliance not found"}
-
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,
-                     "port": compartmentappliance.port,
-                     "compartment_name": compartment.name,
-                     "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_deleted_compartment_appliance_with_compartment_appliance_id(compartment_id, appliance_id):
-        try:
-            result = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(CompartmentAppliance.compartment_id == compartment_id,
-                        CompartmentAppliance.appliance_id == appliance_id,
-                        CompartmentAppliance.validate == 0)
-                .all()
-            )
-            if result is None:
-                return {'error': f"Compartment Appliance not found"}
-
-            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,"port":compartmentappliance.port,
-                     "compartment_name": compartment.name,
-                     "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
-        except Exception as e:
-            return str(e)
 
     @staticmethod
     def AddCompartmentAppliances(data):
@@ -401,157 +160,8 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
-    @staticmethod
-    def BackUp_deleted_Compartment_appliances_by_id(id):
-        try:
-            compartment_appliances = CompartmentAppliance.query.filter_by(id=id, validate=0).first()
-            if compartment_appliances is None:
-                return {'error':f"Compartment Appliance not found"}
 
-            compartment_appliances.validate = 1
-            db.session.commit()
-            return {'success':f'Compartment Appliance with id {id} restored successfully'}
-        except Exception as e:
-            return str(e)
-
-# --------------------- Appliance Schedule ------------------------ from here
-
-    @staticmethod
-    def List_appliance_schedule(type):
-        try:
-            if type == 0:
-                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance,Compartment,Appliance)
-                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
-                                     .join(Compartment,CompartmentAppliance.compartment_id == Compartment.id)
-                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                                     .where(ApplianceSchedule.validate == 1, ApplianceSchedule.type == type)
-                                     .all()
-                                     )
-                return [{"id": applianceSchedule.id,
-                         "name":applianceSchedule.name,
-                         "compartment_name": compartment.name,
-                         "appliance_catagory": appliance.catagory,
-                         "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
-                         "end_time" : applianceSchedule.end_time.strftime("%H:%M:%S"),
-                          "days": applianceSchedule.days
-                         }
-                        for applianceSchedule, compartment_appliance , compartment, appliance in applianceSchedule]
-
-            elif type == 1:
-
-                security = (
-                    db.session.query(ApplianceSchedule,Security)
-                    .join(Security, ApplianceSchedule.table_id == Security.id)
-                    .where(ApplianceSchedule.validate == 1,ApplianceSchedule.type == type)
-                    .all()
-                    )
-                return [{"id": applianceSchedule.id,
-                         "name": applianceSchedule.name,
-                         "security_name": security.name,
-                         "start_time": applianceSchedule.start_time,
-                         "end_time": applianceSchedule.end_time,
-                         "days": applianceSchedule.days
-                         }
-                         for applianceSchedule, security in security]
-
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_appliance_schedule_by_id(id, type):
-        try:
-            if type == 0:
-                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
-                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
-                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                                     .where(ApplianceSchedule.validate == 1, ApplianceSchedule.type == type,
-                                            ApplianceSchedule.id == id)
-                                     .first()
-                                     )
-                if applianceSchedule is None:
-                    return  {'error':f'Appliance schedule with id {id} not found'}
-
-                applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
-
-                return {"id": applianceSchedule.id,
-                        "name": applianceSchedule.name,
-                         "compartment_name": compartment.name,
-                         "appliance_catagory": appliance.catagory,
-                         "start_time": applianceSchedule.start_time,
-                         "end_time": applianceSchedule.end_time,
-                         "days": applianceSchedule.days
-                         }
-            elif type == 1:
-                result = (
-                    db.session.query(ApplianceSchedule, Security)
-                    .join(Security, ApplianceSchedule.table_id == Security.id)
-                    .filter(ApplianceSchedule.id == id, ApplianceSchedule.type == type,
-                        ApplianceSchedule.validate == 1)
-                    .first()
-                )
-                if result is None:
-                    return  {'error':f'Security schedule with id {id} not found'}
-
-                applianceSchedules, security = result
-                if result is not None:
-                    return {"id": applianceSchedules.id,
-                            "name": applianceSchedules.name,
-                            "security_name": security.name,
-                            "start_time": applianceSchedules.start_time,
-                            "end_time": applianceSchedules.end_time,
-                            "days": applianceSchedules.days
-                            }
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def get_deleted_appliance_schedule_by_id(id, type):
-        try:
-            if type == 0:
-                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
-                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
-                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                                     .where(ApplianceSchedule.validate == 0, ApplianceSchedule.type == type,
-                                            ApplianceSchedule.id == id)
-                                     .first()
-                                     )
-                if applianceSchedule is None:
-                    return {'error': f'Appliance schedule with id {id} not found'}
-
-                applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
-
-                return {"id": applianceSchedule.id,
-                        "name": applianceSchedule.name,
-                        "compartment_name": compartment.name,
-                        "appliance_catagory": appliance.catagory,
-                        "start_time": applianceSchedule.start_time,
-                        "end_time": applianceSchedule.end_time,
-                        "days": applianceSchedule.days
-                        }
-            elif type == 1:
-                result = (
-                    db.session.query(ApplianceSchedule, Security)
-                    .join(Security, ApplianceSchedule.table_id == Security.id)
-                    .filter(ApplianceSchedule.id == id, ApplianceSchedule.type == type,
-                            ApplianceSchedule.validate == 0)
-                    .first()
-                )
-                if result is None:
-                    return {'error': f'Security schedule with id {id} not found'}
-
-                applianceSchedules, security = result
-                if result is not None:
-                    return {"id": applianceSchedules.id,
-                            "name": applianceSchedules.name,
-                            "security_name": security.name,
-                            "start_time": applianceSchedules.start_time,
-                            "end_time": applianceSchedules.end_time,
-                            "days": applianceSchedules.days
-                            }
-        except Exception as e:
-            return str(e)
+#-------------------- Appliance Schedule ------------------
 
     @staticmethod
     def list_appliance_schedule_by_compartment_id(id):
@@ -616,48 +226,6 @@ class ApplianceController:
             return str(e)
 
     @staticmethod
-    def get_deleted_appliance_schedule_by_table_id(id, type):
-        try:
-            if type == 0:
-                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
-                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
-                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                                     .where(ApplianceSchedule.validate == 0, ApplianceSchedule.type == type,
-                                            ApplianceSchedule.table_id == id)
-                                     .all()
-                                     )
-                return [{"id": applianceSchedule.id,
-                         "name": applianceSchedule.name,
-                         "compartment_name": compartment.name,
-                         "appliance_catagory": appliance.catagory,
-                         "start_time": applianceSchedule.start_time,
-                         "end_time": applianceSchedule.end_time,
-                         "days": applianceSchedule.days
-                         }
-                        for applianceSchedule, compartment_appliance, compartment, appliance in applianceSchedule]
-            elif type == 1:
-                result = (
-                    db.session.query(ApplianceSchedule, Security)
-                    .join(Security, ApplianceSchedule.table_id == Security.id)
-                    .filter(ApplianceSchedule.table_id == id, ApplianceSchedule.type == type,
-                            ApplianceSchedule.validate == 0)
-                    .all()
-                )
-
-                if result is not None:
-                    return [{"id": applianceSchedules.id,
-                             "name": applianceSchedules.name,
-                             "security_name": security.name,
-                             "start_time": applianceSchedules.start_time,
-                             "end_time": applianceSchedules.end_time,
-                             "days": applianceSchedules.days
-                             }
-                            for applianceSchedules, security in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
     def List_Appliance_Schedules_with_Appiance_wise(data):
         try:
             # Validate required fields
@@ -710,6 +278,7 @@ class ApplianceController:
 
         except Exception as e:
             return {"error": str(e)}
+
 
     @staticmethod
     def Add_Appliances_Schedule(data):
@@ -957,6 +526,653 @@ class ApplianceController:
                 return {'success':f"Appliance Schedule with id {id} deleted successfully"}
         except Exception as e:
             return str(e)
+
+#------------------ Compartment Appliances -----------------
+    @staticmethod
+    def List_Compartment_Lock_By_Compartment_id(id):
+        try:
+            result = (
+                      db.session.query(CompartmentLock, Compartment)
+                      .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
+                      .where(CompartmentLock.compartment_id == id, CompartmentLock.validate == 1).all()
+                      )
+            return [
+                {"Compartment_Lock_id": compartmentLock.id,
+                 "name": compartmentLock.name,
+                 "compartment_Name": compartment.name,
+                 "compartment_id": compartment.id,
+                 "status": compartmentLock.status,
+                 "type": compartmentLock.type,
+                 "port": compartmentLock.port
+                 }
+                for compartmentLock, compartment in result
+            ]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def Add_compartment_lock(data):
+        try:
+            compartment = Compartment.query.filter_by(id=data['compartment_id'],validate=1).first()
+            if compartment is None:
+                return {'error':'Compartment not found'}
+
+            compartment_lock = CompartmentLock(name=data['name'], compartment_id=data['compartment_id'],
+                                               status=data['status'], type=data['type'],port=data['port'],validate=1)
+            db.session.add(compartment_lock)
+            db.session.commit()
+            return {'success':f"{compartment_lock.name} added successfully"}
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def Update_Compartment_Lock(data):
+        try:
+            compartment_lock = CompartmentLock.query.filter_by(id=data['id'], validate=1).first()
+            if compartment_lock is None:
+                return {'error':'Compartment Lock not found'}
+
+            compartment = Compartment.query.filter_by(id=data['compartment_id'], validate=1).first()
+            if compartment is None:
+                return {'error':'Compartment not found'}
+
+            compartment_lock.name = data['name']
+            compartment_lock.compartment_id = data['compartment_id']
+            compartment_lock.status = data['status']
+            compartment_lock.type = data['type']
+            compartment_lock.port = data['port']
+
+            db.session.commit()
+            return {'success':f"Compartment Lock with id {compartment_lock.name} updated successfully"}
+
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def Delete_compartment_lock(id):
+        try:
+            compartment_lock = CompartmentLock.query.filter_by(id=id, validate=1).first()
+            if compartment_lock is None:
+                return {'error':'Compartment Lock not found'}
+
+            lock_Schedule = LockSchedule.query.filter_by(compartment_lock_id=id,validate = 1).first()
+            if lock_Schedule is not None:
+                return {'error':'Compartment_lock associated with Lock Schedule'}
+
+            compartment_lock.validate = 0
+            db.session.commit()
+            return {"success":f'Compartment Lock deleted successfully'}
+        except Exception as e:
+            return str(e)
+
+#---------------- Compartment Lock Schedule ----------------
+
+
+
+    @staticmethod
+    def List_lock_schedule_by_compartment_lock_id(id):
+        try:
+            result = (db.session.query(LockSchedule, CompartmentLock)
+                      .join(CompartmentLock, LockSchedule.compartment_lock_id == CompartmentLock.id)
+                      .filter(LockSchedule.compartment_lock_id == id, LockSchedule.validate == 1).all()
+                      )
+            return [
+                {"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days
+                 }
+                for lockschedule, compartment_lock in result
+            ]
+        except Exception as e:
+            return str(e)
+
+
+
+    @staticmethod
+    def list_Lock_schedule_by_compartment_id(id):
+        try:
+            result = (db.session.query(LockSchedule, CompartmentLock, Compartment)
+                                 .join(CompartmentLock, LockSchedule.compartment_lock_id == CompartmentLock.id)
+                                 .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
+                                 .where(LockSchedule.validate == 1, CompartmentLock.compartment_id == id)
+                                 .all()
+                                 )
+            return [{"id": lockschedule.id,
+                 "Compartment_Lock_id": compartment_lock.id,
+                 "name": lockschedule.name,
+                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
+                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
+                 "days": lockschedule.days,
+                 "lock_type":lockschedule.lock_type
+                 }
+                for lockschedule, compartment_lock, compartment in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def Add_lock_Schedule(data):
+        try:
+            compartment = CompartmentLock.query.filter_by(id=data['compartment_lock_id'], validate=1).first()
+            if compartment is None:
+                return {'error':'Compartment Lock not found'}
+
+            lock_schedule = LockSchedule(name=data['name'], lock_type=data['lock_type'],
+                                         start_time=data['start_time'],
+                                         end_time=data['end_time'], days=data['days'],
+                                         compartment_lock_id=data['compartment_lock_id'],
+                                         validate=1)
+            db.session.add(lock_schedule)
+            db.session.commit()
+            return {'success':'Lock Schedule Added SuccessFully'}
+        except Exception as e:
+            return str(e)
+
+
+
+
+    @staticmethod
+    def update_matching_Lock_schedules(data):
+
+        old = data.get('old')
+        new = data.get('new')
+
+        if not old or not new:
+            return {'error': 'Old and new data are required'}
+
+        try:
+            schedules = LockSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days']
+            ).all()
+
+            for schedule in schedules:
+                schedule.name = new['name']
+                schedule.start_time = new['start_time']
+                schedule.end_time = new['end_time']
+                schedule.days = new['days']
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) updated successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
+
+    @staticmethod
+    def delete_matching_Lock_Schedule(data):
+
+        old = data.get('old')
+        try:
+            schedules = LockSchedule.query.filter_by(
+                name=old['name'],
+                start_time=old['start_time'],
+                end_time=old['end_time'],
+                days=old['days'],
+                lock_type=old['lock_type'],
+                validate=old['validate']
+            ).all()
+
+            for schedule in schedules:
+                schedule.validate = 0
+
+            db.session.commit()
+
+            return {'success': f'{len(schedules)} schedule(s) deleted successfully'}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
+
+
+
+#--------------------------------------------
+
+
+    @staticmethod
+    def list_deleted_appliance():
+        try:
+            appliances = Appliance.query.where(Appliance.validate == 0).all()
+            return [{"id": a.id,  "type": a.type,
+                     "power": a.power, "catagory":a.catagory} for a in appliances]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_appliance_by_id(id):
+        try:
+            appliances = Appliance.query.filter_by(id=id,validate=1).first()
+            if not appliances:
+                return {'error': f'Appliance with id {id} not found'}
+            return [{"id": appliances.id
+                        , "type": appliances.type, "power": appliances.power,
+                     "catagory": appliances.catagory}]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_deleted_appliance_by_id(id):
+        try:
+            appliances = Appliance.query.filter_by(id=id, validate=0).first()
+            if not appliances:
+                return {'error': f'Deleted Appliance with id {id} not found'}
+            return [{"id": appliances.id,"type": appliances.type, "power": appliances.power,
+                     "catagory": appliances.catagory}]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def add_appliance(data):
+        try:
+            appliances = Appliance(type=data['type'], power=data['power'],
+                                   catagory=data['catagory'],validate=1)
+            db.session.add(appliances)
+            db.session.commit()
+            return {'success':f"{data['catagory']} added successfully"}
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def update_appliance(data):
+        try:
+            appliances = Appliance.query.filter_by(id=data['id'], validate=1).first()
+            if appliances is None:
+                return {'error':f"Appliance not found"}
+
+            if appliances is not None:
+                appliances.type = data['type']
+                appliances.power = data['power']
+                appliances.catagory = data['catagory']
+                appliances.validate = 1
+                db.session.commit()
+                return {'success':f"{data['catagory']} added successfully"}
+        except Exception as a:
+            return str(a)
+
+    @staticmethod
+    def delete_appliance(id):
+        try:
+            compartment_appliances = CompartmentAppliance.query.filter_by(appliance_id=id,validate=1).first()
+            if compartment_appliances is not None:
+                return {'error':f'Appliance has associated Compartment Appliances. It cannot be deleted'}
+
+            appliances = Appliance.query.filter_by(id=id, validate=1).first()
+            if appliances is None:
+                return {'error':f"Appliance not found"}
+
+            appliances.validate = 0
+            db.session.commit()
+            return {'success':f'Appliance with id {id} deleted successfully'}
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def Backup_deleted_appliances_by_id(id):
+        try:
+            appliances = Appliance.query.filter_by(id=id, validate=0).first()
+            if not appliances:
+                return {'error':f"Appliance with id {id} not found"}
+
+            appliances.validate = 1
+
+            db.session.commit()
+            return {'success':f'Appliance with id {id} backed up successfully'}
+        except Exception as e:
+            return str(e)
+
+################# Compartment Appliance ################
+
+    @staticmethod
+    def List_Compartment_Appliance():
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.validate == 1)
+                .all()
+            )
+            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name":compartmentappliance.name,"port":compartmentappliance.port,
+                     "compartment_id": compartment.id, "compartment_name": compartment.name,
+                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def List_Deleted_Compartment_Appliance():
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.validate == 0)
+                .all()
+            )
+            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,"port":compartmentappliance.port,
+                     "compartment_id": compartment.id, "compartment_name": compartment.name,
+                     "appliance_id": appliance.id, "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_compartment_appliance_by_id(id):
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.id == id,CompartmentAppliance.validate == 1)
+                .first()
+            )
+            if result is None:
+                return {'error':f"Compartment Appliance not found"}
+            return {
+                "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
+                "name": result.CompartmentAppliance.name,
+                "port": result.CompartmentAppliance.port,
+                     "compartment_name": result.Compartment.name,
+                     "appliance_id":result.Appliance.id,
+                     "appliance_catagory": result.Appliance.catagory
+            }
+        except Exception as e:
+            return str(e)
+
+
+    @staticmethod
+    def get_deleted_compartment_appliance_by_id(id):
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.id == id, CompartmentAppliance.validate == 0)
+                .first()
+            )
+            if result is None:
+                return {'error':f"Compartment Appliance not found"}
+            return {
+                "id": result.CompartmentAppliance.id, "status": result.CompartmentAppliance.status,
+                "name": CompartmentAppliance.name,"port": result.CompartmentAppliance.port,
+                "compartment_name": result.Compartment.name,
+                "appliance_catagory": result.Appliance.catagory
+            }
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_deleted_compartment_appliance_with_compartment_id(id):
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.compartment_id == id, CompartmentAppliance.validate == 0)
+                .all()
+            )
+            if result is None:
+                return {'error':f"Compartment Appliance not found"}
+
+            return [{"Compartment_Appliance_id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
+                     "compartment_id":compartment.id,
+                     "compartment_name": compartment.name,
+                     "appliance_id":appliance.id,
+                     "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_compartment_appliance_with_compartment_appliance_id(compartment_id, appliance_id):
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.compartment_id == compartment_id,
+                        CompartmentAppliance.appliance_id == appliance_id,
+                        CompartmentAppliance.validate == 1)
+                .all()
+            )
+            if result is None:
+                return {'error': f"Compartment Appliance not found"}
+
+            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,
+                     "port": compartmentappliance.port,
+                     "compartment_name": compartment.name,
+                     "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_deleted_compartment_appliance_with_compartment_appliance_id(compartment_id, appliance_id):
+        try:
+            result = (
+                db.session.query(CompartmentAppliance, Compartment, Appliance)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(CompartmentAppliance.compartment_id == compartment_id,
+                        CompartmentAppliance.appliance_id == appliance_id,
+                        CompartmentAppliance.validate == 0)
+                .all()
+            )
+            if result is None:
+                return {'error': f"Compartment Appliance not found"}
+
+            return [{"id": compartmentappliance.id, "status": compartmentappliance.status,
+                     "name": compartmentappliance.name,"port":compartmentappliance.port,
+                     "compartment_name": compartment.name,
+                     "appliance_catagory": appliance.catagory}
+                    for compartmentappliance, compartment, appliance in result]
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def BackUp_deleted_Compartment_appliances_by_id(id):
+        try:
+            compartment_appliances = CompartmentAppliance.query.filter_by(id=id, validate=0).first()
+            if compartment_appliances is None:
+                return {'error':f"Compartment Appliance not found"}
+
+            compartment_appliances.validate = 1
+            db.session.commit()
+            return {'success':f'Compartment Appliance with id {id} restored successfully'}
+        except Exception as e:
+            return str(e)
+
+# --------------------- Appliance Schedule ------------------------ from here
+
+    @staticmethod
+    def List_appliance_schedule(type):
+        try:
+            if type == 0:
+                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance,Compartment,Appliance)
+                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+                                     .join(Compartment,CompartmentAppliance.compartment_id == Compartment.id)
+                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                                     .where(ApplianceSchedule.validate == 1, ApplianceSchedule.type == type)
+                                     .all()
+                                     )
+                return [{"id": applianceSchedule.id,
+                         "name":applianceSchedule.name,
+                         "compartment_name": compartment.name,
+                         "appliance_catagory": appliance.catagory,
+                         "start_time" : applianceSchedule.start_time.strftime("%H:%M:%S"),
+                         "end_time" : applianceSchedule.end_time.strftime("%H:%M:%S"),
+                          "days": applianceSchedule.days
+                         }
+                        for applianceSchedule, compartment_appliance , compartment, appliance in applianceSchedule]
+
+            elif type == 1:
+
+                security = (
+                    db.session.query(ApplianceSchedule,Security)
+                    .join(Security, ApplianceSchedule.table_id == Security.id)
+                    .where(ApplianceSchedule.validate == 1,ApplianceSchedule.type == type)
+                    .all()
+                    )
+                return [{"id": applianceSchedule.id,
+                         "name": applianceSchedule.name,
+                         "security_name": security.name,
+                         "start_time": applianceSchedule.start_time,
+                         "end_time": applianceSchedule.end_time,
+                         "days": applianceSchedule.days
+                         }
+                         for applianceSchedule, security in security]
+
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_appliance_schedule_by_id(id, type):
+        try:
+            if type == 0:
+                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
+                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                                     .where(ApplianceSchedule.validate == 1, ApplianceSchedule.type == type,
+                                            ApplianceSchedule.id == id)
+                                     .first()
+                                     )
+                if applianceSchedule is None:
+                    return  {'error':f'Appliance schedule with id {id} not found'}
+
+                applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
+
+                return {"id": applianceSchedule.id,
+                        "name": applianceSchedule.name,
+                         "compartment_name": compartment.name,
+                         "appliance_catagory": appliance.catagory,
+                         "start_time": applianceSchedule.start_time,
+                         "end_time": applianceSchedule.end_time,
+                         "days": applianceSchedule.days
+                         }
+            elif type == 1:
+                result = (
+                    db.session.query(ApplianceSchedule, Security)
+                    .join(Security, ApplianceSchedule.table_id == Security.id)
+                    .filter(ApplianceSchedule.id == id, ApplianceSchedule.type == type,
+                        ApplianceSchedule.validate == 1)
+                    .first()
+                )
+                if result is None:
+                    return  {'error':f'Security schedule with id {id} not found'}
+
+                applianceSchedules, security = result
+                if result is not None:
+                    return {"id": applianceSchedules.id,
+                            "name": applianceSchedules.name,
+                            "security_name": security.name,
+                            "start_time": applianceSchedules.start_time,
+                            "end_time": applianceSchedules.end_time,
+                            "days": applianceSchedules.days
+                            }
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_deleted_appliance_schedule_by_id(id, type):
+        try:
+            if type == 0:
+                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
+                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                                     .where(ApplianceSchedule.validate == 0, ApplianceSchedule.type == type,
+                                            ApplianceSchedule.id == id)
+                                     .first()
+                                     )
+                if applianceSchedule is None:
+                    return {'error': f'Appliance schedule with id {id} not found'}
+
+                applianceSchedule, compartment_appliance, compartment, appliance = applianceSchedule
+
+                return {"id": applianceSchedule.id,
+                        "name": applianceSchedule.name,
+                        "compartment_name": compartment.name,
+                        "appliance_catagory": appliance.catagory,
+                        "start_time": applianceSchedule.start_time,
+                        "end_time": applianceSchedule.end_time,
+                        "days": applianceSchedule.days
+                        }
+            elif type == 1:
+                result = (
+                    db.session.query(ApplianceSchedule, Security)
+                    .join(Security, ApplianceSchedule.table_id == Security.id)
+                    .filter(ApplianceSchedule.id == id, ApplianceSchedule.type == type,
+                            ApplianceSchedule.validate == 0)
+                    .first()
+                )
+                if result is None:
+                    return {'error': f'Security schedule with id {id} not found'}
+
+                applianceSchedules, security = result
+                if result is not None:
+                    return {"id": applianceSchedules.id,
+                            "name": applianceSchedules.name,
+                            "security_name": security.name,
+                            "start_time": applianceSchedules.start_time,
+                            "end_time": applianceSchedules.end_time,
+                            "days": applianceSchedules.days
+                            }
+        except Exception as e:
+            return str(e)
+
+    @staticmethod
+    def get_deleted_appliance_schedule_by_table_id(id, type):
+        try:
+            if type == 0:
+                applianceSchedule = (db.session.query(ApplianceSchedule, CompartmentAppliance, Compartment, Appliance)
+                                     .join(CompartmentAppliance, ApplianceSchedule.table_id == CompartmentAppliance.id)
+                                     .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                                     .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                                     .where(ApplianceSchedule.validate == 0, ApplianceSchedule.type == type,
+                                            ApplianceSchedule.table_id == id)
+                                     .all()
+                                     )
+                return [{"id": applianceSchedule.id,
+                         "name": applianceSchedule.name,
+                         "compartment_name": compartment.name,
+                         "appliance_catagory": appliance.catagory,
+                         "start_time": applianceSchedule.start_time,
+                         "end_time": applianceSchedule.end_time,
+                         "days": applianceSchedule.days
+                         }
+                        for applianceSchedule, compartment_appliance, compartment, appliance in applianceSchedule]
+            elif type == 1:
+                result = (
+                    db.session.query(ApplianceSchedule, Security)
+                    .join(Security, ApplianceSchedule.table_id == Security.id)
+                    .filter(ApplianceSchedule.table_id == id, ApplianceSchedule.type == type,
+                            ApplianceSchedule.validate == 0)
+                    .all()
+                )
+
+                if result is not None:
+                    return [{"id": applianceSchedules.id,
+                             "name": applianceSchedules.name,
+                             "security_name": security.name,
+                             "start_time": applianceSchedules.start_time,
+                             "end_time": applianceSchedules.end_time,
+                             "days": applianceSchedules.days
+                             }
+                            for applianceSchedules, security in result]
+        except Exception as e:
+            return str(e)
+
 
     @staticmethod
     def backup_Deleted_appliance_schedule_by_id(id,type):
@@ -1582,28 +1798,6 @@ class ApplianceController:
             return str(e)
 
     @staticmethod
-    def List_Compartment_Lock_By_Compartment_id(id):
-        try:
-            result = (
-                      db.session.query(CompartmentLock, Compartment)
-                      .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
-                      .where(CompartmentLock.compartment_id == id, CompartmentLock.validate == 1).all()
-                      )
-            return [
-                {"Compartment_Lock_id": compartmentLock.id,
-                 "name": compartmentLock.name,
-                 "compartment_Name": compartment.name,
-                 "compartment_id": compartment.id,
-                 "status": compartmentLock.status,
-                 "type": compartmentLock.type,
-                 "port": compartmentLock.port
-                 }
-                for compartmentLock, compartment in result
-            ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
     def List_deleted_compartment_lock_by_compartment_id(id):
         try:
             result = (
@@ -1623,61 +1817,6 @@ class ApplianceController:
                  }
                 for compartmentLock, compartment in result
             ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def Add_compartment_lock(data):
-        try:
-            compartment = Compartment.query.filter_by(id=data['compartment_id'],validate=1).first()
-            if compartment is None:
-                return {'error':'Compartment not found'}
-
-            compartment_lock = CompartmentLock(name=data['name'], compartment_id=data['compartment_id'],
-                                               status=data['status'], type=data['type'],port=data['port'],validate=1)
-            db.session.add(compartment_lock)
-            db.session.commit()
-            return {'success':f"{compartment_lock.name} added successfully"}
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def Update_Compartment_Lock(data):
-        try:
-            compartment_lock = CompartmentLock.query.filter_by(id=data['id'], validate=1).first()
-            if compartment_lock is None:
-                return {'error':'Compartment Lock not found'}
-
-            compartment = Compartment.query.filter_by(id=data['compartment_id'], validate=1).first()
-            if compartment is None:
-                return {'error':'Compartment not found'}
-
-            compartment_lock.name = data['name']
-            compartment_lock.compartment_id = data['compartment_id']
-            compartment_lock.status = data['status']
-            compartment_lock.type = data['type']
-            compartment_lock.port = data['port']
-
-            db.session.commit()
-            return {'success':f"Compartment Lock with id {compartment_lock.name} updated successfully"}
-
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def Delete_compartment_lock(id):
-        try:
-            compartment_lock = CompartmentLock.query.filter_by(id=id, validate=1).first()
-            if compartment_lock is None:
-                return {'error':'Compartment Lock not found'}
-
-            lock_Schedule = LockSchedule.query.filter_by(compartment_lock_id=id,validate = 1).first()
-            if lock_Schedule is not None:
-                return {'error':'Compartment_lock associated with Lock Schedule'}
-
-            compartment_lock.validate = 0
-            db.session.commit()
-            return {"success":f'Compartment Lock deleted successfully'}
         except Exception as e:
             return str(e)
 
@@ -1784,26 +1923,6 @@ class ApplianceController:
             return str(e)
 
     @staticmethod
-    def List_lock_schedule_by_compartment_lock_id(id):
-        try:
-            result = (db.session.query(LockSchedule, CompartmentLock)
-                      .join(CompartmentLock, LockSchedule.compartment_lock_id == CompartmentLock.id)
-                      .filter(LockSchedule.compartment_lock_id == id, LockSchedule.validate == 1).all()
-                      )
-            return [
-                {"id": lockschedule.id,
-                 "Compartment_Lock_id": compartment_lock.id,
-                 "name": lockschedule.name,
-                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
-                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
-                 "days": lockschedule.days
-                 }
-                for lockschedule, compartment_lock in result
-            ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
     def List_deleted_lock_schedule_by_compartment_lock_id(id):
         try:
             result = (db.session.query(LockSchedule, CompartmentLock)
@@ -1820,45 +1939,6 @@ class ApplianceController:
                  }
                 for lockschedule, compartment_lock in result
             ]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def list_Lock_schedule_by_compartment_id(id):
-        try:
-            result = (db.session.query(LockSchedule, CompartmentLock, Compartment)
-                                 .join(CompartmentLock, LockSchedule.compartment_lock_id == CompartmentLock.id)
-                                 .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
-                                 .where(LockSchedule.validate == 1, CompartmentLock.compartment_id == id)
-                                 .all()
-                                 )
-            return [{"id": lockschedule.id,
-                 "Compartment_Lock_id": compartment_lock.id,
-                 "name": lockschedule.name,
-                 "start_time": lockschedule.start_time.strftime("%H:%M:%S"),
-                 "end_time": lockschedule.end_time.strftime("%H:%M:%S"),
-                 "days": lockschedule.days,
-                 "lock_type":lockschedule.lock_type
-                 }
-                for lockschedule, compartment_lock, compartment in result]
-        except Exception as e:
-            return str(e)
-
-    @staticmethod
-    def Add_lock_Schedule(data):
-        try:
-            compartment = CompartmentLock.query.filter_by(id=data['compartment_lock_id'], validate=1).first()
-            if compartment is None:
-                return {'error':'Compartment Lock not found'}
-
-            lock_schedule = LockSchedule(name=data['name'], lock_type=data['lock_type'],
-                                         start_time=data['start_time'],
-                                         end_time=data['end_time'], days=data['days'],
-                                         compartment_lock_id=data['compartment_lock_id'],
-                                         validate=1)
-            db.session.add(lock_schedule)
-            db.session.commit()
-            return {'success':'Lock Schedule Added SuccessFully'}
         except Exception as e:
             return str(e)
 
@@ -1914,62 +1994,6 @@ class ApplianceController:
             return {'success':'Backup Lock Schedule Log Successfully'}
         except Exception as e:
             return str(e)
-
-    @staticmethod
-    def update_matching_Lock_schedules(data):
-
-        old = data.get('old')
-        new = data.get('new')
-
-        if not old or not new:
-            return {'error': 'Old and new data are required'}
-
-        try:
-            schedules = LockSchedule.query.filter_by(
-                name=old['name'],
-                start_time=old['start_time'],
-                end_time=old['end_time'],
-                days=old['days']
-            ).all()
-
-            for schedule in schedules:
-                schedule.name = new['name']
-                schedule.start_time = new['start_time']
-                schedule.end_time = new['end_time']
-                schedule.days = new['days']
-
-            db.session.commit()
-
-            return {'success': f'{len(schedules)} schedule(s) updated successfully'}
-
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}
-
-    @staticmethod
-    def delete_matching_Lock_Schedule(data):
-
-        old = data.get('old')
-        try:
-            schedules = LockSchedule.query.filter_by(
-                name=old['name'],
-                start_time=old['start_time'],
-                end_time=old['end_time'],
-                days=old['days'],
-                lock_type=old['lock_type'],
-                validate=old['validate']
-            ).all()
-
-            for schedule in schedules:
-                schedule.validate = 0
-
-            db.session.commit()
-
-            return {'success': f'{len(schedules)} schedule(s) deleted successfully'}
-
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}
 
 #---------------------- Lock Schedule Log --------------------------------
 

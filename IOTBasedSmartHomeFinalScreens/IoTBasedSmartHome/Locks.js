@@ -44,19 +44,6 @@ const Locks = ({ navigation, route }) => {
     }
   }, []);
 
-  const check_Lock_schedule_update_status = useCallback(async () => {
-    try {
-      const response = await fetch(`${URL}/check_lock_schedule_update_status`);
-      if (response.ok) {
-        return;
-      } else {
-        console.error('Failed to fetch data');
-      }
-    } catch (error) {
-      console.error('Error fetching data: ', error);
-    }
-  }, []);
-
   const handleToggle = useCallback(async (id, Compartment_Lock_id) => {
     const newStatus = !toggleStates[id];
     setToggleStates(prev => ({ ...prev, [id]: newStatus }));
@@ -143,25 +130,6 @@ const Locks = ({ navigation, route }) => {
       };
     }, [compartmentId])
   );
-
-  useEffect(() => {
-    // Run immediately on app start
-    check_Lock_schedule_update_status();
-
-    // Start the interval (thread)
-    scheduleUpdateIntervalRef.current = setInterval(() => {
-      check_Lock_schedule_update_status();
-    }, 1000); // every 1 sec
-
-    // Cleanup when app unmounts
-    return () => {
-      if (scheduleUpdateIntervalRef.current) {
-        clearInterval(scheduleUpdateIntervalRef.current);
-        scheduleUpdateIntervalRef.current = null;
-        console.log("Global schedule update interval cleared.");
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (data.length > 0) {

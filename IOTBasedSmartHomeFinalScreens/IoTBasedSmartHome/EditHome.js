@@ -51,12 +51,12 @@ const EditHome = ({ navigation, route }) => {
         }
     };
 
-    // const getStorageData = () => {
-    //     const storedId = storage.getNumber('person_id');
-    //     if (storedId !== undefined) {
-    //         setid(storedId);
-    //     }
-    // };
+    const getStorageData = () => {
+        const storedId = storage.getNumber('person_id');
+        if (storedId !== undefined) {
+            setid(storedId);
+        }
+    };
 
     const UpdateHome = async () => {
         if (!name) {
@@ -76,7 +76,7 @@ const EditHome = ({ navigation, route }) => {
             return;
         }
 
-        const payload = { id: home_id, name: name, place_id: place };
+        const payload = { id: home_id, name: name, place_id: place, person_id: id };
 
         try {
             const res = await fetch(`${URL}/UpdateHome`, {
@@ -146,18 +146,14 @@ const EditHome = ({ navigation, route }) => {
     };
 
     useEffect(() => {
-        // if (items?.home_id) {
-        //     setHomeId(items.home_id);  // Set home_id after receiving items
-        // }
-        // if (items?.home_name) {
-        //     setname(items.home_name);  // Set home_name after receiving items
-        // }
-        // getStorageData()
-
-        getCities();
-        if(items){
-            setHomeId(items.home_id)
+        if (items?.home_id) {
+            setHomeId(items.home_id);  // Set home_id after receiving items
         }
+        if (items?.home_name) {
+            setname(items.home_name);  // Set home_name after receiving items
+        }
+        getCities();
+        getStorageData()
     }, []);
 
     useEffect(() => {

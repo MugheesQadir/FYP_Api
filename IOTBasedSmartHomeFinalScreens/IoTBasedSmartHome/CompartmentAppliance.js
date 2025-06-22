@@ -21,7 +21,6 @@ const CompartmentAppliance = ({ navigation, route }) => {
   const [compartmentId, setCompartmentId] = useState(route.params?.items?.compartment_id || null);
   const items = route.params?.items || {};
   const intervalRef = useRef(null);
-  const scheduleUpdateIntervalRef = useRef(null);
 
   const getCompartmentApplianceByCompartmentId = useCallback(async (id) => {
     if (!id) return;
@@ -36,19 +35,6 @@ const CompartmentAppliance = ({ navigation, route }) => {
           initialToggles[item.Compartment_Appliance_id] = item.status === 1;
         });
         setToggleStates(initialToggles);
-      } else {
-        console.error('Failed to fetch data');
-      }
-    } catch (error) {
-      console.error('Error fetching data: ', error);
-    }
-  }, []);
-
-  const check_appliance_schedule_update_status = useCallback(async () => {
-    try {
-      const response = await fetch(`${URL}/check_schedule_update_status`);
-      if (response.ok) {
-        return;
       } else {
         console.error('Failed to fetch data');
       }
@@ -144,25 +130,6 @@ const CompartmentAppliance = ({ navigation, route }) => {
       };
     }, [compartmentId])
   );
-
-  // useEffect(() => {
-  //   // Run immediately on app start
-  //   check_appliance_schedule_update_status();
-
-  //   // Start the interval (thread)
-  //   scheduleUpdateIntervalRef.current = setInterval(() => {
-  //     check_appliance_schedule_update_status();
-  //   }, 1000); // every 1 sec
-
-  //   // Cleanup when app unmounts
-  //   return () => {
-  //     if (scheduleUpdateIntervalRef.current) {
-  //       clearInterval(scheduleUpdateIntervalRef.current);
-  //       scheduleUpdateIntervalRef.current = null;
-  //       console.log("Global schedule update interval cleared.");
-  //     }
-  //   };
-  // }, []);
 
   useEffect(() => {
     if (data.length > 0) {
@@ -272,6 +239,8 @@ const CompartmentAppliance = ({ navigation, route }) => {
         }
 
       </View>
+
+      
       <Pressable
         onPress={() => navigation.navigate('Locks', { items: items })}
         style={({ pressed }) => ({

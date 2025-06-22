@@ -22,7 +22,6 @@ const Compartment = ({ navigation, route }) => {
     const [selectedCompartments, setSelectedCompartments] = useState([]);
     const [categories, setCatagories] = useState([])
 
-
     console.log(selectedCompartments)
     // const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
 
@@ -48,13 +47,13 @@ const Compartment = ({ navigation, route }) => {
         }
     };
 
-
     const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('home_id');
         if (storedId !== undefined) {
             sethomeId(storedId);
         }
     });
+    
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
         setSelectedCompartments([]);
@@ -203,6 +202,66 @@ const Compartment = ({ navigation, route }) => {
                     </View>
                 }
             </View>
+
+            <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-evenly',  // space between the buttons
+            alignItems: 'center',
+            marginVertical: 10,
+        }}>
+            {/* First Button */}
+            <Pressable
+                onPress={() => navigation.navigate('WaterLevelState')}
+                style={({ pressed }) => ({
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? 'transparent' : '#D1D5DB',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: pressed ? 0.15 : 0,
+                    shadowRadius: 1,
+                })}
+            >
+                <Text style={{
+                    color: '#001F6D',
+                    textDecorationLine: 'underline',
+                    fontSize: 17,
+                    fontWeight: '600',
+                    fontStyle: 'italic',
+                    letterSpacing: 0.5,
+                }}>
+                    💧 Water Level
+                </Text>
+            </Pressable>
+
+            {/* Second Button */}
+            <Pressable
+                onPress={() => navigation.navigate('Geyser', { items })}
+                style={({ pressed }) => ({
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? 'transparent' : '#D1D5DB',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: pressed ? 0.15 : 0,
+                    shadowRadius: 1,
+                })}
+            >
+                <Text style={{
+                    color: '#001F6D',
+                    textDecorationLine: 'underline',
+                    fontSize: 17,
+                    fontWeight: '600',
+                    fontStyle: 'italic',
+                    letterSpacing: 0.5,
+                }}>
+                    ♨️ Geyser
+                </Text>
+            </Pressable>
+        </View>
+
             <View style={[styles.Bottombtn, {
                 padding: 18,
                 flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 1.5,
@@ -230,8 +289,8 @@ const Compartment = ({ navigation, route }) => {
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.button, { backgroundColor: '#001F6D', width: '35%', marginEnd: 20 }]}
                     // onPress={() => navigation.navigate('AddCompartment', { items })}
-                    onPress={() => navigation.navigate('AddCompartment', { items:items })}
-                    >
+                    onPress={() => navigation.navigate('AddCompartment', { items: items })}
+                >
                     <Text style={styles.buttonText}>Add</Text>
                 </TouchableOpacity>
             </View>

@@ -16,3 +16,4 @@ class Home(db.Model):
     compartments = db.relationship("Compartment",back_populates="homes")
     securities = db.relationship("Security", back_populates="homes")
     homesprinklers = db.relationship("HomeSprinkler", back_populates="homes")
+    geyser = db.relationship("Geyser", back_populates="homes")

@@ -14,21 +14,21 @@ const storage = new MMKV();
 
 const Home = ({ navigation, route }) => {
     const [data, setData] = useState([]);
-    const [items, setItems] = useState(route.params?.items);
-    const [id, setPersonId] = useState(items?.id || null);
+    const [items, setItems] = useState(route.params?.items || {});
+    const [id, setId] = useState(items?.id || null);
 
-    // const setStorageData = () => {
-    //     if (items?.id) {
-    //         storage.set('person_id', Number(items.id));
-    //     }
-    // };
+    const setStorageData = () => {
+        if (items?.id) {
+            storage.set('person_id', Number(items.id));
+        }
+    };
 
-    // const getStorageData = () => {
-    //     const storedId = storage.getNumber('person_id');
-    //     if (storedId !== undefined) {
-    //         setId(storedId);
-    //     }
-    // };
+    const getStorageData = () => {
+        const storedId = storage.getNumber('person_id');
+        if (storedId !== undefined) {
+            setId(storedId);
+        }
+    };
 
     const getHomeByPersonId = async (personId) => {
         if (!personId) return;
@@ -47,11 +47,8 @@ const Home = ({ navigation, route }) => {
 
     useFocusEffect(
         useCallback(() => {
-            // setStorageData();
-            // getStorageData();
-            if(items){
-                setPersonId(items.id)
-            }
+            setStorageData();
+            getStorageData();
         }, [])
     );
     // ✅ 
@@ -82,34 +79,6 @@ const Home = ({ navigation, route }) => {
                         <Text style={styles.navbarText}>Home</Text>
                     </View>
                 </View>
-
-            <Pressable
-                onPress={() => navigation.navigate('WaterLevelState')}
-                style={({ pressed }) => ({
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    alignSelf: 'flex-start',
-                    marginBottom: 10,
-                    marginLeft: 30,
-                    borderRadius: 8,
-                    backgroundColor: pressed ? '#e6e9f0' : 'transparent',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: pressed ? 0.15 : 0,
-                    shadowRadius: 1,
-                })}
-            >
-                <Text style={{
-                    color: '#001F6D',
-                    textDecorationLine: 'underline',
-                    fontSize: 17,
-                    fontWeight: '600',
-                    fontStyle: 'italic',
-                    letterSpacing: 0.5,
-                }}>
-                    💧 Water Level
-                </Text>
-            </Pressable>
 
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
@@ -146,7 +115,7 @@ const Home = ({ navigation, route }) => {
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddHome', { items:items })}
+                    onPress={() => navigation.navigate('AddHome', { items })}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>

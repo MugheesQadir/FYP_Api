@@ -95,7 +95,7 @@ const Login = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={[styles.Bottombtn, {  }]}>
+                <View style={[styles.Bottombtn, { }]}>
                     <TouchableOpacity style={styles.button} onPress={Login_method}>
                         <Text style={styles.buttonText}>Login</Text>
                     </TouchableOpacity>
