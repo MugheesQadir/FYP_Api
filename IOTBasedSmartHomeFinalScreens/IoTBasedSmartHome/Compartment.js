@@ -213,7 +213,7 @@ const Compartment = ({ navigation, route }) => {
             <Pressable
                 onPress={() => navigation.navigate('WaterLevelState')}
                 style={({ pressed }) => ({
-                    paddingHorizontal: 12,
+                    paddingHorizontal: 8,
                     paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? 'transparent' : '#D1D5DB',
@@ -239,7 +239,7 @@ const Compartment = ({ navigation, route }) => {
             <Pressable
                 onPress={() => navigation.navigate('Geyser', { items })}
                 style={({ pressed }) => ({
-                    paddingHorizontal: 12,
+                    paddingHorizontal: 8,
                     paddingVertical: 6,
                     borderRadius: 8,
                     backgroundColor: pressed ? 'transparent' : '#D1D5DB',
@@ -258,6 +258,32 @@ const Compartment = ({ navigation, route }) => {
                     letterSpacing: 0.5,
                 }}>
                     ♨️ Geyser
+                </Text>
+            </Pressable>
+
+            {/* Second Button */}
+            <Pressable
+                onPress={() => navigation.navigate('Temperature')}
+                style={({ pressed }) => ({
+                    paddingHorizontal: 8,
+                    paddingVertical: 6,
+                    borderRadius: 8,
+                    backgroundColor: pressed ? 'transparent' : '#D1D5DB',
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: pressed ? 0.15 : 0,
+                    shadowRadius: 1,
+                })}
+            >
+                <Text style={{
+                    color: '#001F6D',
+                    textDecorationLine: 'underline',
+                    fontSize: 17,
+                    fontWeight: '600',
+                    fontStyle: 'italic',
+                    letterSpacing: 0.5,
+                }}>
+                    Temperature
                 </Text>
             </Pressable>
         </View>

@@ -12,6 +12,8 @@ from config import db
 
 # relay_state = {"state": 0}
 water_level_state = {"state": 20}
+temperature_level_state = {"state": 50}
+Ignitor_state = {"state": 0}
 
 class HardwareController:
 
@@ -28,6 +30,34 @@ class HardwareController:
     @staticmethod
     def get_water_level_state():
         return {"state": water_level_state["state"]}
+
+    @staticmethod
+    def get_Ignitor_state():
+        return {"state": Ignitor_state["state"]}
+
+    @staticmethod
+    def set_Ignitor_state(data):
+        try:
+            if "state" in data:  # Validate state (0 or 1)
+                Ignitor_state["state"] = data["state"]
+                return {"message": "ignitor state updated", "current_state": Ignitor_state["state"]}
+            return {"error": "Invalid state."}
+        except Exception as e:
+            return {"error": f"An error occurred: {str(e)}"}
+
+    @staticmethod
+    def set_temperature_level_state(data):
+        try:
+            if "state" in data:  # Validate state (0 or 1)
+                temperature_level_state["state"] = data["state"]
+                return {"message": "Temperature level state updated", "current_state": temperature_level_state["state"]}
+            return {"error": "Invalid state."}
+        except Exception as e:
+            return {"error": f"An error occurred: {str(e)}"}
+
+    @staticmethod
+    def get_temperature_level_state():
+        return {"state": temperature_level_state["state"]}
 
     @staticmethod
     def updateCompartmentAppliancesStatus(data):

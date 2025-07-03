@@ -46,23 +46,23 @@ const WaterLevelState = ({ navigation }) => {
     };
 
     useFocusEffect(
-  useCallback(() => {
-    // This runs when screen comes into focus
-    Get_water_level_State();
+        useCallback(() => {
+            // This runs when screen comes into focus
+            Get_water_level_State();
 
-    intervalRef.current = setInterval(() => {
-      Get_water_level_State();
-    }, 1000);
+            intervalRef.current = setInterval(() => {
+                Get_water_level_State();
+            }, 1000);
 
-    return () => {
-      // This runs when screen goes out of focus
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [])
-);
+            return () => {
+                // This runs when screen goes out of focus
+                if (intervalRef.current) {
+                    clearInterval(intervalRef.current);
+                    intervalRef.current = null;
+                }
+            };
+        }, [])
+    );
 
     // When waterLevel changes, animate the blue fill height
     useFocusEffect(
@@ -94,7 +94,7 @@ const WaterLevelState = ({ navigation }) => {
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={[styles.container, { flex: 1, alignItems: 'center', backgroundColor: '#f5f5f5' }]}>
-            
+
             {/* Navbar */}
             <View style={[styles.navbar]}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -111,7 +111,7 @@ const WaterLevelState = ({ navigation }) => {
             </View>
 
             {/* Level Text */}
-            <View style={[styles.button,{marginTop:20}]}>
+            <View style={[styles.button, { marginTop: 20 }]}>
                 <Text style={styles.buttonText}>{levelDisplay}</Text>
             </View>
         </KeyboardAvoidingView>

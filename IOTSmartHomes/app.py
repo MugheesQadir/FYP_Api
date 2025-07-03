@@ -252,6 +252,28 @@ def get_water_level_state():
     res = HardwareController.get_water_level_state()
     return jsonify(res), 200
 
+@app.route('/set_Ignitor_state', methods=['POST'])
+def set_Ignitor_state():
+    data = request.get_json()
+    result = HardwareController.set_Ignitor_state(data)
+    return jsonify(result) ,200
+
+@app.route('/get_Ignitor_state', methods=['GET'])
+def get_Ignitor_state():
+    res = HardwareController.get_Ignitor_state()
+    return jsonify(res), 200
+
+@app.route('/set_temperature_level_state', methods=['POST'])
+def set_temperature_level_state():
+    data = request.get_json()
+    result = HardwareController.set_temperature_level_state(data)
+    return jsonify(result) ,200
+
+@app.route('/get_temperature_level_state', methods=['GET'])
+def get_temperature_level_state():
+    res = HardwareController.get_temperature_level_state()
+    return jsonify(res), 200
+
 @app.route('/Update_Compartment_Appliance_status',methods = ["POST"])
 def Update_Compartment_Appliance_status():
     data = request.get_json()

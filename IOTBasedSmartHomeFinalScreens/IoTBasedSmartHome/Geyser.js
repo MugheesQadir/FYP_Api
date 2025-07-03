@@ -37,6 +37,26 @@ const Geyser = ({ navigation, route }) => {
     }
   }, []);
 
+  const AddHome = async () => {
+        const payload = { state:1 };
+        try {
+            const res = await fetch(`${URL}/set_Ignitor_state`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+            const data = await res.json()
+            if (res.ok) {
+                Alert.alert('Successfull', data.success || 'Ignitor ON Boss');
+            } else {
+                Alert.alert('Failed', data.error || 'Server error occurred');
+            }
+        } catch (error) {
+            Alert.alert('Error', error.message);
+        }
+    };
+
   const updateStatus = async (newGasStatus, newCylinderStatus) => {
     const payload = {
       home_id: home_id,
@@ -95,7 +115,7 @@ const Geyser = ({ navigation, route }) => {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <View style={styles.navbar}>
+      <View style={[styles.navbar]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
@@ -155,6 +175,19 @@ const Geyser = ({ navigation, route }) => {
           />
         </View>
       </View>
+      <Pressable 
+      onPress={AddHome}
+      style={[styles.Bottombtn, {
+        padding: 100,
+        flexDirection: 'row', justifyContent: 'space-evenly', borderWidth: 2,
+        borderColor: '#002255', borderRadius: 12, outlineColor: '#B0B7C3', outlineWidth: 1,
+        outlineStyle: 'solid', backgroundColor: '#8E99AB', top: 370, flex: 0
+        
+      }]}>
+        
+        <Text style={[styles.listText, { color: 'black' }]}>Ignitor</Text>
+
+      </Pressable>
     </KeyboardAvoidingView>
   );
 };
