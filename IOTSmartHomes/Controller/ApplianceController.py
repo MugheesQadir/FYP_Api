@@ -50,7 +50,8 @@ class ApplianceController:
                      "compartment_id":compartment.id,
                      "compartment_name": compartment.name,
                      "appliance_id":appliance.id,
-                     "appliance_catagory": appliance.catagory}
+                     "appliance_catagory": appliance.catagory,
+                     "appliance_power":appliance.power}
                     for compartmentappliance, compartment, appliance in result]
         except Exception as e:
             return str(e)
@@ -176,8 +177,10 @@ class ApplianceController:
             }
 
             query = (
-                db.session.query(CompartmentApplianceLog, CompartmentAppliance)
+                db.session.query(CompartmentApplianceLog, CompartmentAppliance,Compartment,Appliance)
                 .join(CompartmentAppliance, CompartmentApplianceLog.compartment_appliance_id == CompartmentAppliance.id)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
                 .where(
                     CompartmentApplianceLog.compartment_appliance_id == id,
                     CompartmentApplianceLog.end_time != None,
@@ -189,9 +192,49 @@ class ApplianceController:
                      "end_time":ComAppLog.end_time.strftime("%H:%M:%S"),
                      "duration_minutes":ComAppLog.duration_minutes,
                      "date":ComAppLog.date.strftime("%Y-%m-%d"),
-                     "day_":day_map.get(ComAppLog.day_, "Invalid")} for ComAppLog, ComApp in query]
+                     "day_":day_map.get(ComAppLog.day_, "Invalid"),
+                     "messagee": ComAppLog.messagee,
+                     "consumption":ComAppLog.consumption,
+                     "power":App.power} for ComAppLog, ComApp, Com, App in query]
         except Exception as e:
-             return str(e)
+             return (str(e))
+
+    @staticmethod
+    def list_compartment_appliance_logs_by_compartment_id(id):
+        try:
+            day_map = {
+            1: "Monday",
+            2: "Tuesday",
+            3: "Wednesday",
+            4: "Thursday",
+            5: "Friday",
+            6: "Saturday",
+            7: "Sunday"
+            }
+
+            query = (
+            db.session.query(CompartmentApplianceLog, CompartmentAppliance, Compartment, Appliance)
+            .join(CompartmentAppliance, CompartmentAppliance.compartment_id == Compartment.id)
+            .join(CompartmentApplianceLog, CompartmentApplianceLog.compartment_appliance_id == CompartmentAppliance.id)
+            .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+            .where(
+                CompartmentAppliance.compartment_id == id,
+                CompartmentApplianceLog.end_time != None,
+                CompartmentApplianceLog.validate == 1
+                  )
+            )
+            return [{"id": ComAppLog.id, "name": ComApp.name,
+                 "start_time": ComAppLog.start_time.strftime("%H:%M:%S"),
+                 "end_time": ComAppLog.end_time.strftime("%H:%M:%S"),
+                 "duration_minutes": ComAppLog.duration_minutes,
+                 "date": ComAppLog.date.strftime("%Y-%m-%d"),
+                 "day_": day_map.get(ComAppLog.day_, "Invalid"),
+                     "messagee":ComAppLog.messagee,
+                     "consumption": ComAppLog.consumption,
+                 "power": App.power,
+                     "compartment_appliance_id":ComApp.id} for ComAppLog, ComApp, Com, App in query]
+        except Exception as e:
+            return str(e)
 
 
 

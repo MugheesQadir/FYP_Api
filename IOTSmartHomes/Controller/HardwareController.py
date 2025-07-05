@@ -63,11 +63,11 @@ class HardwareController:
     def get_temperature_level_state():
         return {"state": temperature_level_state["state"]}
 
-
     @staticmethod
     def updateCompartmentAppliancesStatus(data):
         try:
             appliance = CompartmentAppliance.query.filter_by(id=data["id"], validate=1).first()
+            appliancees = Appliance.query.filter_by(id=appliance.appliance_id, validate = 1).first()
             if not appliance:
                 return {'error': f"Compartment Appliance not found"}
 
@@ -101,6 +101,8 @@ class HardwareController:
                     latest_log.end_time = now
                     duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
                     latest_log.duration_minutes = duration
+                    latest_log.messagee = "Remotely Off"
+                    latest_log.consumption = int((duration * appliancees.power)/60)
 
             db.session.commit()
             return {'success': f"Status and logs updated for appliance ID {data['id']}"}

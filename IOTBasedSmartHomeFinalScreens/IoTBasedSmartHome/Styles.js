@@ -312,7 +312,7 @@ sectionHeader: {
 },
 sectionHeaderText: {
   fontWeight: '600',
-  fontSize: 16,
+  fontSize: 15,
   color: '#1A1A1A',
   letterSpacing: 0.3,
 },

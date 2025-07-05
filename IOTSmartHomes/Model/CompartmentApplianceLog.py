@@ -11,6 +11,8 @@ class CompartmentApplianceLog(db.Model):
     date = db.Column(db.Date, nullable=False)
     validate = db.Column(db.Integer, nullable=False)
     day_ = db.Column(db.Integer, nullable=False)
+    messagee = db.Column(db.String(50),nullable=False)
+    consumption = db.Column(db.Integer, nullable=True)
 
     compartment_appliance_id = db.Column(db.Integer, db.ForeignKey('CompartmentAppliance.id'), nullable=False)
 

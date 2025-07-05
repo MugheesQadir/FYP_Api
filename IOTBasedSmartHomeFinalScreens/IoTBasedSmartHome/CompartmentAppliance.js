@@ -149,7 +149,15 @@ const CompartmentAppliance = ({ navigation, route }) => {
       },]}
         onPress={() => navigation.navigate('ApplianceSchedules', { items: item })}
       >
+        <View style={{}}>
+        {item.appliance_power > 500 && (
+          <Text style={{ color: 'white', fontSize: 13, marginBottom: 6 }}>
+            Best Time : 9Am to 5PM
+          </Text>
+        )}
+        
         <Text style={[styles.listText]}>{item.name}</Text>
+        </View>
         <TouchableOpacity
           onPress={() => navigation.navigate('EditCompartmentAppliances', { items: item })}
         >

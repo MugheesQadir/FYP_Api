@@ -44,7 +44,8 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                 grouped[item.date] = {
                     title: item.date,
                     data: [],
-                    total_duration: 0
+                    total_duration: 0,
+                    power: 0
                 };
             }
 
@@ -52,14 +53,13 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
 
             const duration = parseInt(item.duration_minutes) || 0;
             grouped[item.date].total_duration += duration;
+
+            const consumptions = parseInt(item.consumption) || 0;
+            grouped[item.date].power += consumptions;
         });
 
         return Object.values(grouped);
     }
-
-
-
-
 
     const list_compartment_appliance_logs_by_compartment_appliance_id = useCallback(async (id) => {
         if (!id) return;
@@ -74,12 +74,47 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
         }
     }, []);
 
+    const list_compartment_appliance_logs_by_compartment_id = useCallback(async (id) => {
+        if (!id) return;
+        try {
+            const response = await fetch(`${URL}/list_compartment_appliance_logs_by_compartment_id/${id}`);
+            if (response.ok) {
+                const result = await response.json();
+                setData(result);
+            }
+        } catch (error) {
+            console.error('Error fetching table_id:', error);
+        }
+    }, []);
+
     useFocusEffect(
         useCallback(() => {
-            //list_compartment_appliance_logs_by_compartment_id()
-            console.log("Api call");
-            if (items?.Compartment_Appliance_id) list_compartment_appliance_logs_by_compartment_appliance_id(items?.Compartment_Appliance_id);
-        }, [])
+            // Case 3: Check for new navigation format
+            if (route.params?.compartmentId && route.params?.catagory) {
+                set_Compartment_Ids_list(route.params.compartmentId);
+                setCatagory(route.params.catagory);
+                if (Array.isArray(Compartment_ids_list)) {
+                    if (App_catgry && Compartment_ids_list) {
+                        List_Appliance_Schedules_with_Appiance_wise(Compartment_ids_list, App_catgry);
+                        return;
+                    }
+                }
+                setFalg(1)
+            }
+
+            // Case 1: items is an object (single appliance)
+            if (typeof items === 'object' && items?.Compartment_Appliance_id) {
+                list_compartment_appliance_logs_by_compartment_appliance_id(items.Compartment_Appliance_id);
+                return;
+            }
+
+            // Case 2: items is a number (compartment ID)
+            if (typeof items === 'number') {
+                list_compartment_appliance_logs_by_compartment_id(items);
+                return;
+            }
+
+        }, [items, route.params])
     );
 
     const scrollToDate = (targetDate) => {
@@ -122,16 +157,12 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                         <Text style={styles.logheaderText}>Duration (min)</Text>
                         {/* <Text style={styles.logheaderText}>Date</Text> */}
                         <Text style={styles.logheaderText}>Day</Text>
+                        <Text style={styles.logheaderText}>Message</Text>
+                        <Text style={styles.logheaderText}>Consumption</Text>
                     </View>
 
                     {data.length > 0 ?
-
-                        // <FlatList
-                        //     data={data}
-                        //     renderItem={renderItem}
-                        //     keyExtractor={(item) => item.id.toString()}
-                        // />
-
+                    
                         <SectionList
                             ref={sectionListRef}
                             sections={groupByDate(data)}
@@ -144,12 +175,23 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                                     <Text style={styles.logcell}>{item.duration_minutes}</Text>
                                     {/* <Text style={styles.logcell}>{item.date}</Text> */}
                                     <Text style={styles.logcell}>{item.day_}</Text>
+                                    <Text style={styles.logcell}>{item.messagee}</Text>
+                                    <Text style={styles.logcell}>{item.consumption}</Text>
                                 </View>
                             )}
                             renderSectionHeader={({ section }) => (
-                                <View style={styles.sectionHeader}>
+                                <View style={[styles.sectionHeader, { flexDirection: 'row' , justifyContent:'space-evenly'}]}>
                                     <Text style={styles.sectionHeaderText}>
-                                        📅 {section.title}   |   🧾 {section.data.length} Frequency   |   ⏱️ {section.total_duration} mints ON
+                                     |   {section.title}  |
+                                    </Text>
+                                    <Text style={styles.sectionHeaderText}>
+                                        |   {section.data.length} Frequency   |
+                                    </Text>
+                                    <Text style={styles.sectionHeaderText}>
+                                        |   {section.total_duration} mints ON   |
+                                    </Text>
+                                    <Text style={[styles.sectionHeaderText]}>
+                                        |   Power: {Math.round(section.power)} KW   |
                                     </Text>
                                 </View>
                             )}
