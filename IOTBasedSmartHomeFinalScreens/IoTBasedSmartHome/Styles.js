@@ -272,7 +272,102 @@ CheckBoxsimulatedBorder: {
     width: 0,
     backgroundColor: '#e0e0e0',
     left: 0,
+
 },
+//////////////////  Log
+// logrow: {
+//     flexDirection: 'row',
+//     borderBottomWidth: 1,
+//     borderColor: '#ccc',
+//     paddingVertical: 8,
+//   },
+//   logheader: {
+//     backgroundColor: '#002255',
+//     borderTopWidth: 1,
+//   },
+//   logcell: {
+//     flex: 1,
+//     color:'black',
+//     paddingHorizontal: 4,
+//     fontSize: 12,
+//   },
+
+sectionHeader: {
+  backgroundColor: '#B0B7C3',
+  paddingVertical: 12,
+  paddingHorizontal: 18,
+  marginTop: 12,
+  marginHorizontal: 10,
+  borderRadius: 12,
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.08,
+  shadowRadius: 4,
+  elevation: 3,
+  borderWidth: 1,
+  borderColor: '#001F6D',
+},
+sectionHeaderText: {
+  fontWeight: '600',
+  fontSize: 16,
+  color: '#1A1A1A',
+  letterSpacing: 0.3,
+},
+
+
+
+logcontainer: {
+  padding: 10,
+  backgroundColor: '#f0f4f8',
+},
+
+scrollWrapper: {
+  flex: 1,
+},
+
+logrow: {
+  flexDirection: 'row',
+  paddingVertical: 12,
+  backgroundColor: '#fff',
+  marginBottom: 8,
+  borderRadius: 8,
+  elevation: 2, // Android shadow
+  shadowColor: '#000', // iOS shadow
+  shadowOffset: { width: 0, height: 1 },
+  shadowOpacity: 0.1,
+  shadowRadius: 2,
+  marginHorizontal: 6,
+},
+
+logheader: {
+  flexDirection: 'row',
+  backgroundColor: '#002255',
+  paddingVertical: 12,
+  borderRadius: 8,
+  marginBottom: 10,
+  marginHorizontal: 6,
+},
+
+logcell: {
+  minWidth: 90,
+  textAlign: 'center',
+  color: '#333',
+  fontSize: 13,
+  paddingHorizontal: 5,
+},
+
+logheaderText: {
+  minWidth: 90,
+  textAlign: 'center',
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 13,
+  paddingHorizontal: 5,
+},
+
 });
 
 export default styles;

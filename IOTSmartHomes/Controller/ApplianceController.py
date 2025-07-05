@@ -4,6 +4,7 @@ from Model.ApplianceSchedule import ApplianceSchedule
 from Model.ApplianceScheduleLog import ApplianceScheduleLog
 from Model.Compartment import Compartment
 from Model.CompartmentAppliance import CompartmentAppliance
+from Model.CompartmentApplianceLog import CompartmentApplianceLog
 from Model.CompartmentLock import CompartmentLock
 from Model.Home import Home
 from Model.HomeSprinkler import HomeSprinkler
@@ -159,6 +160,40 @@ class ApplianceController:
             return {'success':f'Compartment Appliance with id {id} deleted successfully'}
         except Exception as e:
             return str(e)
+
+#----------- ---- Compartment Appliance Log --------------
+    @staticmethod
+    def list_compartment_appliance_logs_by_compartment_appliance_id(id):
+        try:
+            day_map = {
+                1: "Monday",
+                2: "Tuesday",
+                3: "Wednesday",
+                4: "Thursday",
+                5: "Friday",
+                6: "Saturday",
+                7: "Sunday"
+            }
+
+            query = (
+                db.session.query(CompartmentApplianceLog, CompartmentAppliance)
+                .join(CompartmentAppliance, CompartmentApplianceLog.compartment_appliance_id == CompartmentAppliance.id)
+                .where(
+                    CompartmentApplianceLog.compartment_appliance_id == id,
+                    CompartmentApplianceLog.end_time != None,
+                    CompartmentApplianceLog.validate == 1
+                )
+            )
+            return [{"id": ComAppLog.id,"name":ComApp.name ,
+                     "start_time":ComAppLog.start_time.strftime("%H:%M:%S"),
+                     "end_time":ComAppLog.end_time.strftime("%H:%M:%S"),
+                     "duration_minutes":ComAppLog.duration_minutes,
+                     "date":ComAppLog.date.strftime("%Y-%m-%d"),
+                     "day_":day_map.get(ComAppLog.day_, "Invalid")} for ComAppLog, ComApp in query]
+        except Exception as e:
+             return str(e)
+
+
 
 
 #-------------------- Appliance Schedule ------------------

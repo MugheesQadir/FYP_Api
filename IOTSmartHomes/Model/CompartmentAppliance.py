@@ -16,3 +16,5 @@ class CompartmentAppliance(db.Model):
 
     compartments=db.relationship('Compartment',back_populates='compartment_appliances')
     appliances = db.relationship('Appliance',  back_populates='compartment_appliances')
+
+    compartment_appliance_logs = db.relationship('CompartmentApplianceLog', back_populates='compartment_appliances')

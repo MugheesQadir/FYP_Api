@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from Model.CompartmentApplianceLog import CompartmentApplianceLog
 from Model.Geyser import Geyser
 from Model.Appliance import Appliance
 from Model.ApplianceSchedule import ApplianceSchedule
@@ -35,6 +36,7 @@ class HardwareController:
     def get_Ignitor_state():
         return {"state": Ignitor_state["state"]}
 
+
     @staticmethod
     def set_Ignitor_state(data):
         try:
@@ -44,6 +46,7 @@ class HardwareController:
             return {"error": "Invalid state."}
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}"}
+
 
     @staticmethod
     def set_temperature_level_state(data):
@@ -55,25 +58,57 @@ class HardwareController:
         except Exception as e:
             return {"error": f"An error occurred: {str(e)}"}
 
+
     @staticmethod
     def get_temperature_level_state():
         return {"state": temperature_level_state["state"]}
 
+
     @staticmethod
     def updateCompartmentAppliancesStatus(data):
         try:
-            compartment_appliances = CompartmentAppliance.query.filter_by(id=data["id"], validate=1).first()
-            if compartment_appliances is None:
+            appliance = CompartmentAppliance.query.filter_by(id=data["id"], validate=1).first()
+            if not appliance:
                 return {'error': f"Compartment Appliance not found"}
 
-            if compartment_appliances is not None:
-                compartment_appliances.status = data['status']
-                db.session.commit()
-                return {'success': f"Compartment Appliance with id {data['id']} updated successfully"}
-            else:
-                return {'error': f"Compartment Appliance not found"}
-        except Exception as a:
-            return str(a)
+            appliance.status = data["status"]
+            db.session.commit()
+
+            now = datetime.now()
+
+            if data["status"] == 1:
+                day_of_week = now.isoweekday()
+
+                new_log = CompartmentApplianceLog(
+                    compartment_appliance_id=data["id"],
+                    start_time=now,
+                    end_time=None,
+                    duration_minutes=None,
+                    date=now.date(),
+                    day_=day_of_week,
+                    validate=1
+                )
+                db.session.add(new_log)
+
+            elif data["status"] == 0:
+                latest_log = CompartmentApplianceLog.query.filter_by(
+                    compartment_appliance_id=data["id"],
+                    end_time=None,
+                    validate=1
+                ).order_by(CompartmentApplianceLog.start_time.desc()).first()
+
+                if latest_log:
+                    latest_log.end_time = now
+                    duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                    latest_log.duration_minutes = duration
+
+            db.session.commit()
+            return {'success': f"Status and logs updated for appliance ID {data['id']}"}
+
+        except Exception as e:
+            db.session.rollback()
+            return {'error': str(e)}
+
 
     @staticmethod
     def updateCompartmentLockStatus(data):

@@ -133,6 +133,12 @@ def Delete_Compartment_Appliance(id):
     appliance = ApplianceController.deleteCompartmentAppliances(id)
     return jsonify(appliance)
 
+#------------- Compartment Appliance Log -------------
+@app.route('/list_compartment_appliance_logs_by_compartment_appliance_id/<int:id>',methods=['GET'])
+def list_compartment_appliance_logs_by_compartment_appliance_id(id):
+    appliance = ApplianceController.list_compartment_appliance_logs_by_compartment_appliance_id(id)
+    return jsonify(appliance)
+
 #----------------- Appliance Schedule -----------------
 @app.route('/list_Appliance_Schedule_By_comaprtment_id/<int:id>', methods = ['GET'])
 def list_appliance_schedule_by_compartment_id(id):

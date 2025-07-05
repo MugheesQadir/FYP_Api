@@ -29,6 +29,7 @@ import ApplianceWiseAppliances from './IoTBasedSmartHome/ApplianceWiseAppliances
 import URL from './IoTBasedSmartHome/Url';
 import Geyser from './IoTBasedSmartHome/Geyser';
 import Temperature from './IoTBasedSmartHome/Temperature';
+import CompartmentApplianceRecord from './IoTBasedSmartHome/CompartmentApplianceRecord';
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -104,6 +105,7 @@ const App = () => {
         <Stack.Screen name='CompartmentAppliance' component={CompartmentAppliance} />
         <Stack.Screen name='AddCompartmentAppliances' component={AddCompartmentAppliances} />
         <Stack.Screen name='EditCompartmentAppliances' component={EditCompartmentAppliances} />
+        <Stack.Screen name='CompartmentApplianceRecord' component={CompartmentApplianceRecord}/>
         <Stack.Screen name='ApplianceSchedules' component={ApplianceSchedules} />
         <Stack.Screen name='AddApplianceSchedule' component={AddApplianceSchedule} />
         <Stack.Screen name='EditApplianceSchedule' component={EditApplianceSchedule} />
@@ -117,6 +119,7 @@ const App = () => {
         <Stack.Screen name='ApplianceWiseAppliances' component={ApplianceWiseAppliances} />
         <Stack.Screen name='Geyser' component={Geyser}/>
         <Stack.Screen name='Temperature' component={Temperature}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   );

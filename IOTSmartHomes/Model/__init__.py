@@ -5,6 +5,7 @@ from Model import Home
 from Model import Compartment
 from Model import Appliance
 from Model import CompartmentAppliance
+from Model import CompartmentApplianceLog
 from Model import Security
 from Model import ApplianceSchedule
 from Model import ApplianceScheduleLog
@@ -15,3 +16,4 @@ from Model import CompartmentLock
 from Model import LockSchedule
 from Model import LockScheduleLog
 from Model import Geyser
+

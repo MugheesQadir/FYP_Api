@@ -23,6 +23,8 @@ const ApplianceSchedules = ({ navigation, route }) => {
     const [Compartment_ids_list, set_Compartment_Ids_list] = useState([])
     const [App_catgry, setCatagory] = useState(null)
 
+    const [menuVisible, setMenuVisible] = useState(false);
+
     const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('compartment_appliance_id');
         const storedComId = storage.getNumber('compartment_id');
@@ -111,7 +113,7 @@ const ApplianceSchedules = ({ navigation, route }) => {
         }
     }, []);
 
-    useEffect(()=>{},[App_catgry,Compartment_ids_list])
+    useEffect(() => { }, [App_catgry, Compartment_ids_list])
 
     useFocusEffect(
         useCallback(() => {
@@ -189,9 +191,13 @@ const ApplianceSchedules = ({ navigation, route }) => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Icon name="arrow-left" size={24} color="black" />
                 </TouchableOpacity>
-                <View style={{ flex: 0.90, justifyContent: 'center' }}>
+                <View style={{ flex: 1, justifyContent: 'center' }}>
                     <Text style={styles.navbarText}>Schedules</Text>
                 </View>
+
+                <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+                    <Icon name="more-vertical" size={24} color="black" />
+                </TouchableOpacity>
             </View>
 
             <View style={{ flex: 1 }}>
@@ -225,7 +231,38 @@ const ApplianceSchedules = ({ navigation, route }) => {
                         </View>
                     </View>
                 }
-
+                {/* 3 Dots Menu Modal */}
+                {menuVisible && (
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 25,
+                            backgroundColor: 'white',
+                            elevation: 5,
+                            borderRadius: 8,
+                            borderColor:'#002255',
+                            borderWidth:2,
+                            outlineColor:'white',
+                            outlineWidth:1,
+                            paddingVertical: 20,
+                            paddingHorizontal: 25,
+                            zIndex: 999
+                        }}
+                        onPress={() => {
+                            setMenuVisible(false);
+                            navigation.navigate('CompartmentApplianceRecord', { items: items })
+                        }}
+                    >
+                        <TouchableOpacity onPress={() => {
+                            setMenuVisible(false);
+                            navigation.navigate('CompartmentApplianceRecord', { items: items })
+                        }}>
+                            <Text style={{ fontSize: 16, paddingVertical: 6 }}>Records</Text>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                )}
 
                 {/* Floating Button */}
                 <Pressable
