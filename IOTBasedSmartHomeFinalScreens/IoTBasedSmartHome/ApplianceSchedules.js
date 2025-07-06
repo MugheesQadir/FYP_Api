@@ -169,6 +169,19 @@ const ApplianceSchedules = ({ navigation, route }) => {
         }
     }
 
+    const pressRecordButton = () => {
+        if (flag === 1) {
+            navigation.navigate('CompartmentApplianceRecord', {
+                compartmentId: Compartment_ids_list,
+                catagory: App_catgry
+                // fromCustomNavigation: true
+            })
+        }
+        else {
+            navigation.navigate('CompartmentApplianceRecord', { items: items })
+        }
+    }
+
 
     const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]}
@@ -252,12 +265,12 @@ const ApplianceSchedules = ({ navigation, route }) => {
                         }}
                         onPress={() => {
                             setMenuVisible(false);
-                            navigation.navigate('CompartmentApplianceRecord', { items: items })
+                            pressRecordButton()
                         }}
                     >
                         <TouchableOpacity onPress={() => {
                             setMenuVisible(false);
-                            navigation.navigate('CompartmentApplianceRecord', { items: items })
+                            pressRecordButton()
                         }}>
                             <Text style={{ fontSize: 16, paddingVertical: 6 }}>Records</Text>
                         </TouchableOpacity>

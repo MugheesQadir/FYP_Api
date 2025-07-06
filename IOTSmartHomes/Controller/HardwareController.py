@@ -1,4 +1,6 @@
-from datetime import datetime
+import math
+from collections import defaultdict
+from datetime import datetime, time
 
 from Model.CompartmentApplianceLog import CompartmentApplianceLog
 from Model.Geyser import Geyser
@@ -15,6 +17,7 @@ from config import db
 water_level_state = {"state": 20}
 temperature_level_state = {"state": 50}
 Ignitor_state = {"state": 0}
+panic_alert_state = {"state":0}
 
 class HardwareController:
 
@@ -99,7 +102,9 @@ class HardwareController:
 
                 if latest_log:
                     latest_log.end_time = now
-                    duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                    # duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                    duration_seconds = (latest_log.end_time - latest_log.start_time).total_seconds()
+                    duration = max(1, math.ceil(duration_seconds / 60))
                     latest_log.duration_minutes = duration
                     latest_log.messagee = "Remotely Off"
                     latest_log.consumption = int((duration * appliancees.power)/60)
@@ -141,6 +146,7 @@ class HardwareController:
 
             for sched in schedules:
                 appliance = CompartmentAppliance.query.get(sched.table_id)
+                appliancees = Appliance.query.filter_by(id=appliance.appliance_id, validate=1).first()
                 if not appliance:
                     continue
 
@@ -154,6 +160,7 @@ class HardwareController:
 
                 start_time = sched.start_time.strftime('%H:%M')
                 end_time = sched.end_time.strftime('%H:%M')
+                now = datetime.now()
 
                 # Start time condition
                 if start_time == current_time:
@@ -168,6 +175,19 @@ class HardwareController:
                             "schedule_id": sched.id
                         })
 
+                        day_of_week = now.isoweekday()
+
+                        new_log = CompartmentApplianceLog(
+                            compartment_appliance_id=appliance.id,
+                            start_time=now,
+                            end_time=None,
+                            duration_minutes=None,
+                            date=now.date(),
+                            day_=day_of_week,
+                            validate=1
+                        )
+                        db.session.add(new_log)
+
                 # End time condition
                 elif end_time == current_time:
                     if appliance.status != 0:
@@ -181,6 +201,22 @@ class HardwareController:
                             "schedule_id": sched.id
                         })
 
+                        latest_log = CompartmentApplianceLog.query.filter_by(
+                            compartment_appliance_id=appliance.id,
+                            end_time=None,
+                            validate=1
+                        ).order_by(CompartmentApplianceLog.start_time.desc()).first()
+
+                        if latest_log:
+                            latest_log.end_time = now
+                            # duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                            duration_seconds = (latest_log.end_time - latest_log.start_time).total_seconds()
+                            duration = max(1, math.ceil(duration_seconds / 60))
+                            latest_log.duration_minutes = duration
+                            latest_log.messagee = "Schedule Off"
+                            latest_log.consumption = int((duration * appliancees.power) / 60)
+
+            db.session.commit()
             return {
                 "success": "checked",
                 "updated": updated
@@ -287,3 +323,98 @@ class HardwareController:
 
         except Exception as e:
             return (str(e))
+
+    @staticmethod
+    def auto_Off_On_High_Load(threshold=100):  # watt-hour
+        try:
+            now = datetime.now()
+            active_logs = CompartmentApplianceLog.query.filter_by(end_time=None).all()
+            turned_off_list = []
+
+            for log in active_logs:
+                comApp = CompartmentAppliance.query.get(log.compartment_appliance_id)
+                if comApp:
+                    App = Appliance.query.get(comApp.appliance_id)
+                    power = App.power  # in watts
+                    duration_minutes = (now - log.start_time).seconds // 60
+
+                    # Calculate consumption: power (W) * time (min) / 60 => Wh
+                    consumption = (power * duration_minutes) / 60.0
+
+                    if consumption >= threshold:
+                        # Update log
+                        log.end_time = now
+                        log.duration_minutes = duration_minutes
+                        log.consumption = consumption
+                        log.messagee = "Over Consumption"
+
+                        # Update status
+                        comApp.status = 0
+
+                        db.session.commit()
+
+                        turned_off_list.append({
+                            "compartment_appliance_id": comApp.id,
+                            "power": power,
+                            "duration_minutes": duration_minutes,
+                            "consumption": round(consumption, 2),
+                            "turned_off_at": now.strftime('%Y-%m-%d %H:%M:%S')
+                        })
+
+            # ✅ Only return message if any appliance was turned off
+            if turned_off_list:
+                return {
+                    "success": "Appliances turned off due to over-consumption.",
+                    "turned_off": turned_off_list
+                }
+
+            # ❌ Otherwise, return nothing (empty response)
+            return {}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def check_peak_time_Alert_and_suggest_best_Time():
+        try:
+            now = datetime.now().time()
+
+            # Peak hours: 9:00 AM – 12:00 PM and 4:00 PM – --:00 PM
+            morning_start = time(9, 0)
+            morning_end = time(12, 0)
+            evening_start = time(16, 0)
+            evening_end = time(23, 0)
+
+            if (morning_start <= now <= morning_end) or (evening_start <= now <= evening_end):
+                return {
+                    "warning": " this is peak hours in Wapda! Light is very expensive. so you want to try to on your appliance afet the peak our. OK.",
+                    "Now time": now.strftime("%H:%M")
+                }
+
+            return {}  # No warning outside peak hours
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
+    def set_panic_alert_state(data):
+        try:
+            if "state" in data:  # Validate state (0 or 1)
+                panic_alert_state["state"] = data["state"]
+                return {"message": "Panic Alert state updated", "current_state": panic_alert_state["state"]}
+            return {"error": "Invalid state."}
+        except Exception as e:
+            return {"error": f"An error occurred: {str(e)}"}
+
+    @staticmethod
+    def get_panic_alert_state():
+        state = panic_alert_state["state"]
+        panic_alert_state["state"] = 0
+        if state == 1:
+            return {"state": state}
+        else:
+            return {}
+
+
+
+

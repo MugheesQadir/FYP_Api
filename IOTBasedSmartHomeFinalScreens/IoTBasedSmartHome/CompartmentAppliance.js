@@ -45,10 +45,13 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
   const handleToggle = useCallback(async (id, Compartment_Appliance_id) => {
     const newStatus = !toggleStates[id];
+    if(newStatus){
+      check_peak_time_Alert_and_suggest_best_Time()
+    }
     setToggleStates(prev => ({ ...prev, [id]: newStatus }));
 
     const payload = { id: Compartment_Appliance_id, status: newStatus ? 1 : 0 };
-
+    
     try {
       const res = await fetch(`${URL}/Update_Compartment_Appliance_status`, {
         method: 'POST',
@@ -69,6 +72,9 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
   const handleSelectAll = useCallback(async () => {
     const newSelectAll = !selectAll;
+    if(newSelectAll){      
+    check_peak_time_Alert_and_suggest_best_Time()
+    }
     setSelectAll(newSelectAll);
 
     const updatedToggles = {};
@@ -150,11 +156,11 @@ const CompartmentAppliance = ({ navigation, route }) => {
         onPress={() => navigation.navigate('ApplianceSchedules', { items: item })}
       >
         <View style={{}}>
-        {item.appliance_power > 500 && (
+        {/* {item.appliance_power > 500 && (
           <Text style={{ color: 'white', fontSize: 13, marginBottom: 6 }}>
             Best Time : 9Am to 5PM
           </Text>
-        )}
+        )} */}
         
         <Text style={[styles.listText]}>{item.name}</Text>
         </View>
@@ -184,6 +190,32 @@ const CompartmentAppliance = ({ navigation, route }) => {
       </View>
     </View>
   ), [toggleStates]);
+
+  const check_peak_time_Alert_and_suggest_best_Time = useCallback(async () => {
+  try {
+    const response = await fetch(`${URL}/check_peak_time_Alert_and_suggest_best_Time`);
+    if (response.ok) {
+      const result = await response.json();
+
+      // Check if warning message exists
+      if (result.warning) {
+        Alert.alert(
+          '⚡ Peak Hour Alert',
+          `${result.warning}\nCurrent Time : ${result["Now time"]}`
+        );
+      }
+
+      // Optionally return the result if needed outside
+      return result;
+
+    } else {
+      console.error('❌ Failed to fetch data');
+    }
+  } catch (error) {
+    console.error('🔥 Error fetching data:', error);
+  }
+}, []);
+
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>

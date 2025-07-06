@@ -144,6 +144,13 @@ def list_compartment_appliance_logs_by_compartment_id(id):
     appliance = ApplianceController.list_compartment_appliance_logs_by_compartment_id(id)
     return jsonify(appliance)
 
+@app.route('/List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list', methods=["POST"])
+def List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list():
+    data = request.get_json()
+    logs = ApplianceController.List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list(data)
+    return jsonify(logs)
+
+
 #----------------- Appliance Schedule -----------------
 @app.route('/list_Appliance_Schedule_By_comaprtment_id/<int:id>', methods = ['GET'])
 def list_appliance_schedule_by_compartment_id(id):
@@ -317,6 +324,30 @@ def Update_Gas_Cylinder_status():
 def get_geyser_by_Home_id(id):
     homes = HardwareController.get_geyser_by_Home_id(id)
     return jsonify(homes)
+
+@app.route('/auto_Off_On_High_Load',methods = ['GET'])
+def auto_Off_On_High_Load():
+    homes = HardwareController.auto_Off_On_High_Load()
+    return jsonify(homes)
+
+@app.route('/check_peak_time_Alert_and_suggest_best_Time',methods = ['GET'])
+def check_peak_time_Alert_and_suggest_best_Time():
+    homes = HardwareController.check_peak_time_Alert_and_suggest_best_Time()
+    return jsonify(homes)
+
+@app.route('/set_panic_alert_state', methods=['POST'])
+def set_panic_alert_state():
+    data = request.get_json()
+    result = HardwareController.set_panic_alert_state(data)
+    return jsonify(result) ,200
+
+@app.route('/get_panic_alert_state', methods=['GET'])
+def get_panic_alert_state():
+    res = HardwareController.get_panic_alert_state()
+    return jsonify(res), 200
+
+#------------------ Panic Button Pressed ---------------------
+
 
 
 #--------------------- Total Api Used -------------------------

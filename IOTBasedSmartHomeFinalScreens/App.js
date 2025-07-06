@@ -34,6 +34,7 @@ import CompartmentApplianceRecord from './IoTBasedSmartHome/CompartmentAppliance
 const App = () => {
   const Stack = createNativeStackNavigator();
   const scheduleUpdateIntervalRef = useRef(null);
+  const autoHighLoadIntervalRef = useRef(null);
 
   const check_appliance_schedule_update_status = useCallback(async () => {
     try {
@@ -61,26 +62,51 @@ const App = () => {
     }
   }, []);
 
+  const auto_Off_On_High_Load = useCallback(async () => {
+    try {
+      const response = await fetch(`${URL}/auto_Off_On_High_Load`);
+      if (response.ok) {
+        return;
+      } else {
+        console.error('Failed to fetch data');
+      }
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  }, []);
+
   useEffect(() => {
-      // Run immediately on app start
-      check_appliance_schedule_update_status();
-      check_Lock_schedule_update_status()
-  
-      // Start the interval (thread)
-      scheduleUpdateIntervalRef.current = setInterval(() => {
-        check_appliance_schedule_update_status();
-        check_Lock_schedule_update_status()
-      }, 1000); // every 1 sec
-  
-      // Cleanup when app unmounts
-      return () => {
-        if (scheduleUpdateIntervalRef.current) {
-          clearInterval(scheduleUpdateIntervalRef.current);
-          scheduleUpdateIntervalRef.current = null;
-          console.log("Global schedule update interval cleared.");
-        }
-      };
-    }, []);
+  // Run immediately on app start
+  check_appliance_schedule_update_status();
+  check_Lock_schedule_update_status();
+  auto_Off_On_High_Load(); // run once at start too (optional)
+
+  // Start 1-second interval for schedule checks
+  scheduleUpdateIntervalRef.current = setInterval(() => {
+    check_appliance_schedule_update_status();
+    check_Lock_schedule_update_status();
+  }, 1000); // every 1 sec
+
+  // Start 10-minute interval for auto high load shutdown
+  autoHighLoadIntervalRef.current = setInterval(() => {
+    auto_Off_On_High_Load(); // your custom logic
+  }, 10 * 60 * 1000); // every 10 minutes
+
+  // Cleanup when component unmounts
+  return () => {
+    if (scheduleUpdateIntervalRef.current) {
+      clearInterval(scheduleUpdateIntervalRef.current);
+      scheduleUpdateIntervalRef.current = null;
+      console.log("Global schedule update interval cleared.");
+    }
+    if (autoHighLoadIntervalRef.current) {
+      clearInterval(autoHighLoadIntervalRef.current);
+      autoHighLoadIntervalRef.current = null;
+      console.log("Auto High Load interval cleared.");
+    }
+  };
+}, []);
+
 
   // useEffect(() => {
   //   // ✅ Background Service start hogi app ke start hote hi

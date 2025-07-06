@@ -236,8 +236,77 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
+    @staticmethod
+    def List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list(data):
+        try:
+            # ✅ Validate inputs
+            required_fields = ['category', 'compartment_ids']
+            for field in required_fields:
+                if field not in data:
+                    return {'error': f'Missing field: {field}'}
 
+            category = data['category']
+            compartment_ids = data['compartment_ids']
 
+            # ✅ Day mapping
+            day_map = {
+                1: "Monday",
+                2: "Tuesday",
+                3: "Wednesday",
+                4: "Thursday",
+                5: "Friday",
+                6: "Saturday",
+                7: "Sunday"
+                }
+
+            # ✅ Base Query
+            query = (
+                db.session.query(CompartmentApplianceLog, CompartmentAppliance, Compartment, Appliance)
+                .join(CompartmentAppliance,
+                      CompartmentApplianceLog.compartment_appliance_id == CompartmentAppliance.id)
+                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+                .filter(
+                    CompartmentAppliance.compartment_id.in_(compartment_ids),
+                    CompartmentApplianceLog.end_time != None,
+                    CompartmentApplianceLog.validate == 1,
+                    CompartmentAppliance.validate == 1,
+                    Appliance.validate == 1
+                )
+            )
+
+            # ✅ Category Filter (Only apply if not 'All')
+            if category != "All":
+                query = query.filter(Appliance.catagory == category)
+
+            logs = query.all()
+
+            if not logs:
+                return []
+
+            # ✅ Format Response
+            result = []
+            for log, comp_app, compartment, appliance in logs:
+                result.append({
+                    "id": log.id,
+                    "name": comp_app.name,
+                    "start_time": log.start_time.strftime("%H:%M:%S"),
+                    "end_time": log.end_time.strftime("%H:%M:%S"),
+                    "duration_minutes": log.duration_minutes,
+                    "date": log.date.strftime("%Y-%m-%d"),
+                    "day_": day_map.get(log.day_, "Invalid"),
+                    "messagee": log.messagee,
+                    "consumption": log.consumption,
+                    "power": appliance.power,
+                    "compartment_appliance_id": comp_app.id,
+                    "compartment": compartment.name,
+                    "category": appliance.catagory
+                })
+
+            return result
+
+        except Exception as e:
+            return {"error": str(e)}
 
 #-------------------- Appliance Schedule ------------------
 

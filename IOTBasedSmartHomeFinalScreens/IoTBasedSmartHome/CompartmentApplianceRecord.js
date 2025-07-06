@@ -19,17 +19,24 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
     const items = route.params?.items || {};
     const sectionListRef = useRef(null);
 
+    const [Compartment_Appliance_id, Set_Compartment_Appliance_id] = useState(null);
+    const [compartment_id, setCompartmentId] = useState(null);
+    const [flag, setFalg] = useState(0)
+    
+    const [Compartment_ids_list, set_Compartment_Ids_list] = useState([])
+    const [App_catgry, setCatagory] = useState(null)
 
-    const renderItem = ({ item }) => (
-        <View style={styles.logrow}>
-            <Text style={styles.logcell}>{item.name}</Text>
-            <Text style={styles.logcell}>{item.start_time}</Text>
-            <Text style={styles.logcell}>{item.end_time}</Text>
-            <Text style={styles.logcell}>{item.duration_minutes}</Text>
-            <Text style={styles.logcell}>{item.date.split('T')[0]}</Text>
-            <Text style={styles.logcell}>{item.day_}</Text>
-        </View>
-    );
+
+    // const renderItem = ({ item }) => (
+    //     <View style={[styles.logrow,{justifyContent:'space-evenly'}]}>
+    //         <Text style={styles.logcell}>{item.name}</Text>
+    //         <Text style={styles.logcell}>{item.start_time}</Text>
+    //         <Text style={styles.logcell}>{item.end_time}</Text>
+    //         <Text style={styles.logcell}>{item.duration_minutes}</Text>
+    //         <Text style={styles.logcell}>{item.date.split('T')[0]}</Text>
+    //         <Text style={styles.logcell}>{item.day_}</Text>
+    //     </View>
+    // );
 
     function groupByDate(logs) {
         if (!Array.isArray(logs)) {
@@ -87,6 +94,47 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
         }
     }, []);
 
+    const List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list = useCallback(async (compartment_ids, category) => {
+        if (!compartment_ids || !Array.isArray(compartment_ids) || compartment_ids.length === 0) return;
+
+        try {
+            const response = await fetch(`${URL}/List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    category: category,
+                    compartment_ids: compartment_ids,
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                // if (Array.isArray(result)) {
+                //     const uniqueData = result.filter(
+                //         (item, index, self) =>
+                //             index === self.findIndex((t) =>
+                //                 t.name === item.name &&
+                //                 t.start_time === item.start_time &&
+                //                 t.end_time === item.end_time &&
+                //                 t.days === item.days &&
+                //                 t.type === item.type
+                //             )
+                //     );
+                    setData(result);
+            } else {
+                    console.warn("Unexpected response format:", result);
+                    setData([]); // clear list or handle UI gracefully
+                }
+
+        } catch (error) {
+            console.error('Error fetching appliance schedules:', error);
+        }
+    }, []);
+    
+
     useFocusEffect(
         useCallback(() => {
             // Case 3: Check for new navigation format
@@ -95,7 +143,7 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                 setCatagory(route.params.catagory);
                 if (Array.isArray(Compartment_ids_list)) {
                     if (App_catgry && Compartment_ids_list) {
-                        List_Appliance_Schedules_with_Appiance_wise(Compartment_ids_list, App_catgry);
+                        List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list(Compartment_ids_list, App_catgry);
                         return;
                     }
                 }
@@ -150,7 +198,7 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
 
             <ScrollView horizontal style={styles.scrollWrapper}>
                 <View style={[styles.logcontainer]}>
-                    <View style={[styles.logrow, styles.logheader]}>
+                    <View style={[styles.logrow, styles.logheader,{justifyContent:'space-evenly'}]}>
                         <Text style={styles.logheaderText}>Name</Text>
                         <Text style={styles.logheaderText}>Start Time</Text>
                         <Text style={styles.logheaderText}>End Time</Text>
@@ -168,7 +216,7 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                             sections={groupByDate(data)}
                             keyExtractor={(item, index) => item.id.toString() + index}
                             renderItem={({ item }) => (
-                                <View style={styles.logrow}>
+                                <View style={[styles.logrow,{justifyContent:'space-evenly'}]}>
                                     <Text style={styles.logcell}>{item.name}</Text>
                                     <Text style={styles.logcell}>{item.start_time}</Text>
                                     <Text style={styles.logcell}>{item.end_time}</Text>
