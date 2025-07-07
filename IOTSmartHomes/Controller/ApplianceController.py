@@ -6,6 +6,7 @@ from Model.Compartment import Compartment
 from Model.CompartmentAppliance import CompartmentAppliance
 from Model.CompartmentApplianceLog import CompartmentApplianceLog
 from Model.CompartmentLock import CompartmentLock
+from Model.CompartmentLockLog import CompartmentLockLog
 from Model.Home import Home
 from Model.HomeSprinkler import HomeSprinkler
 from Model.LockSchedule import LockSchedule
@@ -749,6 +750,79 @@ class ApplianceController:
             compartment_lock.validate = 0
             db.session.commit()
             return {"success":f'Compartment Lock deleted successfully'}
+        except Exception as e:
+            return str(e)
+
+#----------- ---- Compartment Appliance Log --------------
+    @staticmethod
+    def list_compartment_locks_logs_by_compartment_lock_id(id):
+        try:
+            day_map = {
+                1: "Monday",
+                2: "Tuesday",
+                3: "Wednesday",
+                4: "Thursday",
+                5: "Friday",
+                6: "Saturday",
+                7: "Sunday"
+            }
+
+            query = (
+                db.session.query(CompartmentLockLog, CompartmentLock,Compartment)
+                .join(CompartmentLock, CompartmentLockLog.compartment_lock_id == CompartmentLock.id)
+                .join(Compartment, CompartmentLock.compartment_id == Compartment.id)
+                .where(
+                    CompartmentLockLog.compartment_lock_id == id,
+                    CompartmentLockLog.end_time != None,
+                    CompartmentLockLog.validate == 1
+                )
+            )
+            return [{"id": ComlockLog.id,
+                     "start_time":ComlockLog.start_time.strftime("%H:%M:%S"),
+                     "end_time":ComlockLog.end_time.strftime("%H:%M:%S"),
+                     "duration_minutes":ComlockLog.duration_minutes,
+                     "date":ComlockLog.date.strftime("%Y-%m-%d"),
+                     "day_":day_map.get(ComlockLog.day_, "Invalid"),
+                     "messagee": ComlockLog.messagee,
+                     "consumption":ComlockLog.consumption,
+                     "name":ComLock.name
+                     } for ComlockLog, ComLock, Com in query]
+        except Exception as e:
+             return (str(e))
+
+    @staticmethod
+    def list_compartment_Locks_logs_by_compartment_id(id):
+        try:
+            day_map = {
+            1: "Monday",
+            2: "Tuesday",
+            3: "Wednesday",
+            4: "Thursday",
+            5: "Friday",
+            6: "Saturday",
+            7: "Sunday"
+            }
+
+            query = (
+            db.session.query(CompartmentLockLog, CompartmentLock, Compartment)
+            .join(CompartmentLock, CompartmentLock.compartment_id == Compartment.id)
+            .join(CompartmentLockLog, CompartmentLockLog.compartment_lock_id == CompartmentLock.id)
+            .where(
+                CompartmentLock.compartment_id == id,
+                CompartmentLockLog.end_time != None,
+                CompartmentLockLog.validate == 1
+                  )
+            )
+            return [{"id": ComlockLog.id,
+                     "start_time": ComlockLog.start_time.strftime("%H:%M:%S"),
+                     "end_time": ComlockLog.end_time.strftime("%H:%M:%S"),
+                     "duration_minutes": ComlockLog.duration_minutes,
+                     "date": ComlockLog.date.strftime("%Y-%m-%d"),
+                     "day_": day_map.get(ComlockLog.day_, "Invalid"),
+                     "messagee": ComlockLog.messagee,
+                     "consumption": ComlockLog.consumption,
+                     "name":ComLock.name
+                     } for ComlockLog, ComLock, Com in query]
         except Exception as e:
             return str(e)
 

@@ -14,3 +14,5 @@ class CompartmentLock(db.Model):
 
     compartments = db.relationship('Compartment', back_populates='compartmentlocks')
     lockschedules = db.relationship("LockSchedule",back_populates="compartmentlocks")
+
+    compartment_lock_logs = db.relationship('CompartmentLockLog', back_populates='compartment_locks')

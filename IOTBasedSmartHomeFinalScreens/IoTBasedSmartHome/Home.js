@@ -59,7 +59,7 @@ const Home = ({ navigation, route }) => {
     );
 
     const FlatListData = ({ item }) => (
-        <Pressable style={[styles.listItem]} onPress={() => navigation.navigate('Compartment', { items: item })}>
+        <Pressable style={[styles.listItem]} onPress={() => navigation.navigate('DashBoard', { items: item })}>
             <Text style={styles.listText}>{item.home_name}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('EditHome', { items: item })}>
                 <View style={styles.infoIcon}>
@@ -72,8 +72,8 @@ const Home = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
             <View style={[styles.navbar]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="arrow-left" size={24} color="black" />
+                    <TouchableOpacity >
+                        <Icon name="arrow-left" size={24} color="transparent" />
                     </TouchableOpacity>
                     <View style={{ flex: 0.90,justifyContent:'center' }}>
                         <Text style={styles.navbarText}>Home</Text>

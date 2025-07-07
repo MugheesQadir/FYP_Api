@@ -3,6 +3,7 @@ from collections import defaultdict
 from datetime import datetime, time
 
 from Model.CompartmentApplianceLog import CompartmentApplianceLog
+from Model.CompartmentLockLog import CompartmentLockLog
 from Model.Geyser import Geyser
 from Model.Appliance import Appliance
 from Model.ApplianceSchedule import ApplianceSchedule
@@ -18,6 +19,7 @@ water_level_state = {"state": 20}
 temperature_level_state = {"state": 50}
 Ignitor_state = {"state": 0}
 panic_alert_state = {"state":0}
+gas_detect = {"state":0}
 
 class HardwareController:
 
@@ -123,11 +125,44 @@ class HardwareController:
             compartment_lock = CompartmentLock.query.filter_by(id=data["id"], validate=1).first()
             if compartment_lock is None:
                 return {'error': f"Compartment Lock not found"}
+            now = datetime.now()
 
             if compartment_lock is not None:
                 compartment_lock.status = data['status']
                 db.session.commit()
-                return {'success': f"Compartment Lock with id {data['id']} updated successfully"}
+
+                if data["status"] == 1:
+                    day_of_week = now.isoweekday()
+
+                    new_log = CompartmentLockLog(
+                        compartment_lock_id=data["id"],
+                        start_time=now,
+                        end_time=None,
+                        duration_minutes=None,
+                        date=now.date(),
+                        day_=day_of_week,
+                        validate=1
+                    )
+                    db.session.add(new_log)
+
+                elif data["status"] == 0:
+                    latest_log = CompartmentLockLog.query.filter_by(
+                        compartment_lock_id=data["id"],
+                        end_time=None,
+                        validate=1
+                    ).order_by(CompartmentLockLog.start_time.desc()).first()
+
+                    if latest_log:
+                        latest_log.end_time = now
+                        # duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                        duration_seconds = (latest_log.end_time - latest_log.start_time).total_seconds()
+                        duration = max(1, math.ceil(duration_seconds / 60))
+                        latest_log.duration_minutes = duration
+                        latest_log.messagee = "Remotely Off"
+                        latest_log.consumption = int((duration * 70) / 60)
+
+                db.session.commit()
+                return {'success': f"Status and logs updated for appliance ID {data['id']}"}
             else:
                 return {'error': f"Compartment Lock not found"}
         except Exception as a:
@@ -251,6 +286,7 @@ class HardwareController:
                 start_time = sched.start_time.strftime('%H:%M')
                 end_time = sched.end_time.strftime('%H:%M')
 
+                now = datetime.now()
                 # Start time condition
                 if start_time == current_time:
                     if locks.status != 1:
@@ -263,6 +299,19 @@ class HardwareController:
                             "name": locks.name,
                             "schedule_id": sched.id
                         })
+
+                        day_of_week = now.isoweekday()
+
+                        new_log = CompartmentLockLog(
+                            compartment_lock_id=locks.id,
+                            start_time=now,
+                            end_time=None,
+                            duration_minutes=None,
+                            date=now.date(),
+                            day_=day_of_week,
+                            validate=1
+                        )
+                        db.session.add(new_log)
 
                 # End time condition
                 elif end_time == current_time:
@@ -277,10 +326,27 @@ class HardwareController:
                             "schedule_id": sched.id
                         })
 
+                        latest_log = CompartmentLockLog.query.filter_by(
+                            compartment_lock_id=locks.id,
+                            end_time=None,
+                            validate=1
+                        ).order_by(CompartmentLockLog.start_time.desc()).first()
+
+                        if latest_log:
+                            latest_log.end_time = now
+                            # duration = int((latest_log.end_time - latest_log.start_time).total_seconds() / 60)
+                            duration_seconds = (latest_log.end_time - latest_log.start_time).total_seconds()
+                            duration = max(1, math.ceil(duration_seconds / 60))
+                            latest_log.duration_minutes = duration
+                            latest_log.messagee = "Schedule Off"
+                            latest_log.consumption = int((duration * 70) / 60)
+
+            db.session.commit()
             return {
                 "success": "checked",
-                "updated":updated
+                "updated": updated
             }
+
         except Exception as e:
             return {
                 "error": str(e),
@@ -375,12 +441,59 @@ class HardwareController:
             return {"error": str(e)}
 
     @staticmethod
+    def auto_Off_Locks_On_High_Load(threshold=100):  # watt-hour
+        try:
+            now = datetime.now()
+            active_logs = CompartmentLockLog.query.filter_by(end_time=None).all()
+            turned_off_list = []
+
+            for log in active_logs:
+                comApp = CompartmentLock.query.get(log.compartment_lock_id)
+                if comApp:
+                    duration_minutes = (now - log.start_time).seconds // 60
+
+                    # Calculate consumption: power (W) * time (min) / 60 => Wh
+                    consumption = (70 * duration_minutes) / 60.0
+
+                    if consumption >= threshold:
+                        # Update log
+                        log.end_time = now
+                        log.duration_minutes = duration_minutes
+                        log.consumption = consumption
+                        log.messagee = "Over Consumption"
+
+                        # Update status
+                        comApp.status = 0
+
+                        db.session.commit()
+
+                        turned_off_list.append({
+                            "compartment_lock_id": comApp.id,
+                            "duration_minutes": duration_minutes,
+                            "consumption": round(consumption, 2),
+                            "turned_off_at": now.strftime('%Y-%m-%d %H:%M:%S')
+                        })
+
+            # ✅ Only return message if any appliance was turned off
+            if turned_off_list:
+                return {
+                    "success": "Locks turned off due to over-consumption.",
+                    "turned_off": turned_off_list
+                }
+
+            # ❌ Otherwise, return nothing (empty response)
+            return {}
+
+        except Exception as e:
+            return {"error": str(e)}
+
+    @staticmethod
     def check_peak_time_Alert_and_suggest_best_Time():
         try:
             now = datetime.now().time()
 
             # Peak hours: 9:00 AM – 12:00 PM and 4:00 PM – --:00 PM
-            morning_start = time(9, 0)
+            morning_start = time(1, 0)
             morning_end = time(12, 0)
             evening_start = time(16, 0)
             evening_end = time(23, 0)

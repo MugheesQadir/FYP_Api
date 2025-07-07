@@ -18,6 +18,7 @@ const LockSchedules = ({ navigation, route }) => {
     const items = route.params?.items || {};
     const [Compartment_Lock_id, Set_Compartment_Lock_id] = useState(null);
     const [compartment_id, setCompartmentId] = useState(null);
+    const [menuVisible, setMenuVisible] = useState(false);
 
     const setStorageData = useCallback(() => {
         if (items?.Compartment_Lock_id) {
@@ -79,7 +80,7 @@ const LockSchedules = ({ navigation, route }) => {
                 setStorageData();
                 Set_Compartment_Lock_id(items.Compartment_Lock_id);
                 List_Lock_Schedule_by_compartment_lock_id(items.Compartment_Lock_id);
-            } 
+            }
             if (typeof items === 'number') {
                 setStorageData()
                 setCompartmentId(items);
@@ -89,7 +90,7 @@ const LockSchedules = ({ navigation, route }) => {
                 getStorageData();
                 if (Compartment_Lock_id) {
                     List_Lock_Schedule_by_compartment_lock_id(Compartment_Lock_id);
-                } 
+                }
                 if (compartment_id) {
                     list_Lock_schedule_by_compartment_id(compartment_id);
                 }
@@ -97,13 +98,26 @@ const LockSchedules = ({ navigation, route }) => {
         }, [Compartment_Lock_id, compartment_id, items])
     );
 
+    // const pressRecordButton = () => {
+    //     if (flag === 1) {
+    //         navigation.navigate('CompartmentApplianceRecord', {
+    //             compartmentId: Compartment_ids_list,
+    //             catagory: App_catgry
+    //             // fromCustomNavigation: true
+    //         })
+    //     }
+    //     else {
+    //         navigation.navigate('CompartmentApplianceRecord', { items: items })
+    //     }
+    // }
+
     const FlatListData = useCallback(({ item }) => (
         <Pressable style={[styles.listItem]}
         //  onPress={() => navigation.navigate('CompartmentAppliance', { items: item })}
         >
             <Text style={styles.listText}>{item.name}</Text>
             <TouchableOpacity
-            onPress={() => navigation.navigate('EditLockSchedule', { items: item })}
+                onPress={() => navigation.navigate('EditLockSchedule', { items: item })}
             >
                 <View style={styles.infoIcon}>
                     <Text style={styles.infoText}>i</Text>
@@ -115,13 +129,17 @@ const LockSchedules = ({ navigation, route }) => {
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
             <View style={[styles.navbar]}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Icon name="arrow-left" size={24} color="black" />
-                    </TouchableOpacity>
-                    <View style={{ flex: 0.90,justifyContent:'center' }}>
-                        <Text style={styles.navbarText}>Schedules</Text>
-                    </View>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-left" size={24} color="black" />
+                </TouchableOpacity>
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <Text style={styles.navbarText}>Schedules</Text>
                 </View>
+
+                <TouchableOpacity onPress={() => setMenuVisible(!menuVisible)}>
+                    <Icon name="more-vertical" size={24} color="black" />
+                </TouchableOpacity>
+            </View>
 
             <View style={{ flex: 1 }}>
                 {data.length > 0 ?
@@ -155,11 +173,44 @@ const LockSchedules = ({ navigation, route }) => {
                     </View>
                 }
 
+                {/* 3 Dots Menu Modal */}
+                {menuVisible && (
+                    <TouchableOpacity
+                        activeOpacity={1}
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 25,
+                            backgroundColor: 'white',
+                            elevation: 5,
+                            borderRadius: 8,
+                            borderColor: '#002255',
+                            borderWidth: 2,
+                            outlineColor: 'white',
+                            outlineWidth: 1,
+                            paddingVertical: 20,
+                            paddingHorizontal: 25,
+                            zIndex: 999
+                        }}
+                        onPress={() => {
+                            setMenuVisible(false);
+                            navigation.navigate('CompartmentLockRecord', { items: items })
+                        }}
+                    >
+                        <TouchableOpacity onPress={() => {
+                            setMenuVisible(false);
+                           navigation.navigate('CompartmentLockRecord', { items: items })
+                        }}>
+                            <Text style={{ fontSize: 16, paddingVertical: 6 }}>Records</Text>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                )}
+
 
                 {/* Floating Button */}
                 <Pressable
                     style={styles.floatingButton}
-                    onPress={() => navigation.navigate('AddLockSchedule', { items:items })}
+                    onPress={() => navigation.navigate('AddLockSchedule', { items: items })}
                 >
                     <Text style={styles.floatingButtonText}>+</Text>
                 </Pressable>

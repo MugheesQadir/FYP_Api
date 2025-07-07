@@ -274,24 +274,6 @@ CheckBoxsimulatedBorder: {
     left: 0,
 
 },
-//////////////////  Log
-// logrow: {
-//     flexDirection: 'row',
-//     borderBottomWidth: 1,
-//     borderColor: '#ccc',
-//     paddingVertical: 8,
-//   },
-//   logheader: {
-//     backgroundColor: '#002255',
-//     borderTopWidth: 1,
-//   },
-//   logcell: {
-//     flex: 1,
-//     color:'black',
-//     paddingHorizontal: 4,
-//     fontSize: 12,
-//   },
-
 sectionHeader: {
   backgroundColor: '#B0B7C3',
   paddingVertical: 12,

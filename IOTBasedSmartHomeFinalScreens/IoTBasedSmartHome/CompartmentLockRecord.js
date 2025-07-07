@@ -14,17 +14,10 @@ import CompartmentAppliance from './CompartmentAppliance';
 
 const storage = new MMKV();
 
-const CompartmentApplianceRecord = ({ navigation, route }) => {
+const CompartmentLockRecord = ({ navigation, route }) => {
     const [data, setData] = useState([]);
     const items = route.params?.items || {};
-    const sectionListRef = useRef(null);
-
-    const [Compartment_Appliance_id, Set_Compartment_Appliance_id] = useState(null);
-    const [compartment_id, setCompartmentId] = useState(null);
-    const [flag, setFalg] = useState(0)
-    
-    const [Compartment_ids_list, set_Compartment_Ids_list] = useState([])
-    const [App_catgry, setCatagory] = useState(null)
+    const sectionListRef = useRef(null);    
 
     function groupByDate(logs) {
         if (!Array.isArray(logs)) {
@@ -56,10 +49,10 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
         return Object.values(grouped);
     }
 
-    const list_compartment_appliance_logs_by_compartment_appliance_id = useCallback(async (id) => {
+    const list_compartment_locks_logs_by_compartment_lock_id = useCallback(async (id) => {
         if (!id) return;
         try {
-            const response = await fetch(`${URL}/list_compartment_appliance_logs_by_compartment_appliance_id/${id}`);
+            const response = await fetch(`${URL}/list_compartment_locks_logs_by_compartment_lock_id/${id}`);
             if (response.ok) {
                 const result = await response.json();
                 setData(result);
@@ -69,10 +62,10 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
         }
     }, []);
 
-    const list_compartment_appliance_logs_by_compartment_id = useCallback(async (id) => {
+    const list_compartment_Locks_logs_by_compartment_id = useCallback(async (id) => {
         if (!id) return;
         try {
-            const response = await fetch(`${URL}/list_compartment_appliance_logs_by_compartment_id/${id}`);
+            const response = await fetch(`${URL}/list_compartment_Locks_logs_by_compartment_id/${id}`);
             if (response.ok) {
                 const result = await response.json();
                 setData(result);
@@ -81,72 +74,19 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
             console.error('Error fetching table_id:', error);
         }
     }, []);
-
-    const List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list = useCallback(async (compartment_ids, category) => {
-        if (!compartment_ids || !Array.isArray(compartment_ids) || compartment_ids.length === 0) return;
-
-        try {
-            const response = await fetch(`${URL}/List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    category: category,
-                    compartment_ids: compartment_ids,
-                })
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-
-                // if (Array.isArray(result)) {
-                //     const uniqueData = result.filter(
-                //         (item, index, self) =>
-                //             index === self.findIndex((t) =>
-                //                 t.name === item.name &&
-                //                 t.start_time === item.start_time &&
-                //                 t.end_time === item.end_time &&
-                //                 t.days === item.days &&
-                //                 t.type === item.type
-                //             )
-                //     );
-                    setData(result);
-            } else {
-                    console.warn("Unexpected response format:", result);
-                    setData([]); // clear list or handle UI gracefully
-                }
-
-        } catch (error) {
-            console.error('Error fetching appliance schedules:', error);
-        }
-    }, []);
-    
 
     useFocusEffect(
         useCallback(() => {
-            // Case 3: Check for new navigation format
-            if (route.params?.compartmentId && route.params?.catagory) {
-                set_Compartment_Ids_list(route.params.compartmentId);
-                setCatagory(route.params.catagory);
-                if (Array.isArray(Compartment_ids_list)) {
-                    if (App_catgry && Compartment_ids_list) {
-                        List_Compartment_appliance_Log_By_Category_And_Compartment_ids_list(Compartment_ids_list, App_catgry);
-                        return;
-                    }
-                }
-                setFalg(1)
-            }
-
+            
             // Case 1: items is an object (single appliance)
-            if (typeof items === 'object' && items?.Compartment_Appliance_id) {
-                list_compartment_appliance_logs_by_compartment_appliance_id(items.Compartment_Appliance_id);
+            if (typeof items === 'object' && items?.Compartment_Lock_id) {
+                list_compartment_locks_logs_by_compartment_lock_id(items.Compartment_Lock_id);
                 return;
             }
 
             // Case 2: items is a number (compartment ID)
             if (typeof items === 'number') {
-                list_compartment_appliance_logs_by_compartment_id(items);
+                list_compartment_Locks_logs_by_compartment_id(items);
                 return;
             }
 
@@ -163,8 +103,6 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
         }
     };
 
-
-
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
             <View style={[styles.navbar]}>
@@ -179,6 +117,7 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
                     <Icon name="more-vertical" size={24} color="black" />
                 </TouchableOpacity>
             </View>
+            
             {/* <TouchableOpacity onPress={() => scrollToDate("2025-07-05")}>
                 <Text style={{ color: 'blue', padding: 10 }}>Jump to 2025-07-04</Text>
             </TouchableOpacity> */}
@@ -260,4 +199,4 @@ const CompartmentApplianceRecord = ({ navigation, route }) => {
     );
 };
 
-export default CompartmentApplianceRecord;
+export default CompartmentLockRecord;

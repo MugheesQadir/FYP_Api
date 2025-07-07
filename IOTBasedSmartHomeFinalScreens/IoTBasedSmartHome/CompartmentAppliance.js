@@ -11,6 +11,7 @@ import styles from './Styles';
 import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import URL from './Url';
+import EmergencyAlert from './EmergencyAlert';
 
 const storage = new MMKV();
 
@@ -21,6 +22,9 @@ const CompartmentAppliance = ({ navigation, route }) => {
   const [compartmentId, setCompartmentId] = useState(route.params?.items?.compartment_id || null);
   const items = route.params?.items || {};
   const intervalRef = useRef(null);
+  const [msg,setmasg] = useState('')
+
+  const [emergencyVisible, setEmergencyVisible] = useState(false);
 
   const getCompartmentApplianceByCompartmentId = useCallback(async (id) => {
     if (!id) return;
@@ -45,13 +49,13 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
   const handleToggle = useCallback(async (id, Compartment_Appliance_id) => {
     const newStatus = !toggleStates[id];
-    if(newStatus){
+    if (newStatus) {
       check_peak_time_Alert_and_suggest_best_Time()
     }
     setToggleStates(prev => ({ ...prev, [id]: newStatus }));
 
     const payload = { id: Compartment_Appliance_id, status: newStatus ? 1 : 0 };
-    
+
     try {
       const res = await fetch(`${URL}/Update_Compartment_Appliance_status`, {
         method: 'POST',
@@ -72,8 +76,8 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
   const handleSelectAll = useCallback(async () => {
     const newSelectAll = !selectAll;
-    if(newSelectAll){      
-    check_peak_time_Alert_and_suggest_best_Time()
+    if (newSelectAll) {
+      check_peak_time_Alert_and_suggest_best_Time()
     }
     setSelectAll(newSelectAll);
 
@@ -117,17 +121,17 @@ const CompartmentAppliance = ({ navigation, route }) => {
       if (storedId) setCompartmentId(storedId);
     }, [items?.compartment_id])
   );
-  
+
   useFocusEffect(
     useCallback(() => {
       if (!compartmentId) return;
 
       getCompartmentApplianceByCompartmentId(compartmentId);
-  
+
       intervalRef.current = setInterval(() => {
         getCompartmentApplianceByCompartmentId(compartmentId);
       }, 1000);
-  
+
       return () => {
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
@@ -156,13 +160,13 @@ const CompartmentAppliance = ({ navigation, route }) => {
         onPress={() => navigation.navigate('ApplianceSchedules', { items: item })}
       >
         <View style={{}}>
-        {/* {item.appliance_power > 500 && (
+          {/* {item.appliance_power > 500 && (
           <Text style={{ color: 'white', fontSize: 13, marginBottom: 6 }}>
             Best Time : 9Am to 5PM
           </Text>
         )} */}
-        
-        <Text style={[styles.listText]}>{item.name}</Text>
+
+          <Text style={[styles.listText]}>{item.name}</Text>
         </View>
         <TouchableOpacity
           onPress={() => navigation.navigate('EditCompartmentAppliances', { items: item })}
@@ -192,29 +196,31 @@ const CompartmentAppliance = ({ navigation, route }) => {
   ), [toggleStates]);
 
   const check_peak_time_Alert_and_suggest_best_Time = useCallback(async () => {
-  try {
-    const response = await fetch(`${URL}/check_peak_time_Alert_and_suggest_best_Time`);
-    if (response.ok) {
-      const result = await response.json();
+    try {
+      const response = await fetch(`${URL}/check_peak_time_Alert_and_suggest_best_Time`);
+      if (response.ok) {
+        const result = await response.json();
 
-      // Check if warning message exists
-      if (result.warning) {
-        Alert.alert(
-          '⚡ Peak Hour Alert',
-          `${result.warning}\nCurrent Time : ${result["Now time"]}`
-        );
+        // Check if warning message exists
+        if (result.warning) {
+          // Alert.alert(
+          //   '⚡ Peak Hour Alert',
+          //   `${result.warning}\nCurrent Time : ${result["Now time"]}`
+          // );
+          setmasg(result.warning)
+          setEmergencyVisible(true)
+        }
+
+        // Optionally return the result if needed outside
+        return result;
+
+      } else {
+        console.error('❌ Failed to fetch data');
       }
-
-      // Optionally return the result if needed outside
-      return result;
-
-    } else {
-      console.error('❌ Failed to fetch data');
+    } catch (error) {
+      console.error('🔥 Error fetching data:', error);
     }
-  } catch (error) {
-    console.error('🔥 Error fetching data:', error);
-  }
-}, []);
+  }, []);
 
 
   return (
@@ -280,7 +286,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
 
       </View>
 
-      
+
       <Pressable
         onPress={() => navigation.navigate('Locks', { items: items })}
         style={({ pressed }) => ({
@@ -318,11 +324,17 @@ const CompartmentAppliance = ({ navigation, route }) => {
           onPress={() => navigation.navigate('ApplianceSchedules', { items: compartmentId })}>
           <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, {  width: '35%', marginEnd: 20 }]}
+        <TouchableOpacity style={[styles.button, { width: '35%', marginEnd: 20 }]}
           onPress={() => navigation.navigate('AddCompartmentAppliances', { items })}>
           <Text style={styles.buttonText}>Add</Text>
         </TouchableOpacity>
       </View>
+      <EmergencyAlert
+        visible={emergencyVisible}
+        onClose={() => setEmergencyVisible(false)}
+        title='⚡PEAK HOUR ALERT'
+        message={msg}
+      />
     </KeyboardAvoidingView>
   );
 }

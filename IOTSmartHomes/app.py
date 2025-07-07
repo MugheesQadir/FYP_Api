@@ -3,7 +3,9 @@ from flask import jsonify,request
 from Controller.ApplianceController import ApplianceController
 from Controller.HardwareController import HardwareController
 from Controller.HomeController import HomeController
+from Controller.LogMaintainController import LogMaintainController
 from Controller.PersonController import PersonController
+from Model.MainLog import MainLog
 from config import app
 
 #-------------- Person --------------
@@ -227,6 +229,18 @@ def delete_Compartment_Lock(id):
     lock = ApplianceController.Delete_compartment_lock(id)
     return jsonify(lock)
 
+#------------------ Compartment Lock Log ---------------
+
+@app.route('/list_compartment_locks_logs_by_compartment_lock_id/<int:id>',methods=['GET'])
+def list_compartment_locks_logs_by_compartment_lock_id(id):
+    appliance = ApplianceController.list_compartment_locks_logs_by_compartment_lock_id(id)
+    return jsonify(appliance)
+
+@app.route('/list_compartment_Locks_logs_by_compartment_id/<int:id>',methods=['GET'])
+def list_compartment_Locks_logs_by_compartment_id(id):
+    appliance = ApplianceController.list_compartment_Locks_logs_by_compartment_id(id)
+    return jsonify(appliance)
+
 #---------------- Compartment Lock Schedule--------------
 
 @app.route('/List_Lock_Schedule_by_compartment_lock_id/<int:id>', methods=['GET'])
@@ -330,6 +344,11 @@ def auto_Off_On_High_Load():
     homes = HardwareController.auto_Off_On_High_Load()
     return jsonify(homes)
 
+@app.route('/auto_Off_Locks_On_High_Load',methods = ['GET'])
+def auto_Off_Locks_On_High_Load():
+    homes = HardwareController.auto_Off_Locks_On_High_Load()
+    return jsonify(homes)
+
 @app.route('/check_peak_time_Alert_and_suggest_best_Time',methods = ['GET'])
 def check_peak_time_Alert_and_suggest_best_Time():
     homes = HardwareController.check_peak_time_Alert_and_suggest_best_Time()
@@ -348,6 +367,27 @@ def get_panic_alert_state():
 
 #------------------ Panic Button Pressed ---------------------
 
+@app.route('/ListMainLog',methods=['GET'])
+def ListMainLog():
+    persons = LogMaintainController.list_mainLog()
+    return jsonify(persons)
+
+@app.route('/add_mainLog_by_home_id', methods=['POST'])
+def add_mainLog_by_home_id():
+    data = request.get_json()
+    result = LogMaintainController.add_mainLog_by_home_id(data)
+    return jsonify(result) ,200
+
+@app.route('/list_main_logs_by_home_id/<int:id>',methods=['GET'])
+def list_main_logs_by_home_id(id):
+    appliance = LogMaintainController.list_main_logs_by_home_id(id)
+    return jsonify(appliance)
+
+@app.route('/panic_button_pressed_turn_off_all_appliances_locks_by_home_id', methods=['POST'])
+def panic_button_pressed_turn_off_all_appliances_locks_by_home_id():
+    data = request.get_json()
+    result = LogMaintainController.panic_button_pressed_turn_off_all_appliances_locks_by_home_id(data)
+    return jsonify(result) ,200
 
 
 #--------------------- Total Api Used -------------------------
