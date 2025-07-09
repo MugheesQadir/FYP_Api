@@ -41,7 +41,7 @@ const DashBoard = ({ navigation, route }) => {
         { id: 2, title: 'Water Level', icon: 'droplet', screen: 'WaterLevelState' },
         { id: 3, title: 'Temperature', icon: 'thermometer', screen: 'Temperature' },
         { id: 4, title: 'Geyser', icon: 'sun', screen: 'Geyser' },
-        { id: 5, title: 'Panic Button', icon: 'alert-triangle' }
+        // { id: 5, title: 'Panic Button', icon: 'alert-triangle' }
     ];
 
     const handleNavigate = (screen) => {

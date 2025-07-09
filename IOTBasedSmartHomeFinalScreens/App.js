@@ -87,11 +87,6 @@ const App = () => {
     }
   }, []);
 
-  <EmergencyAlert
-    visible={emergencyVisible}
-    onClose={() => setEmergencyVisible(false)}
-  />
-
   const auto_Off_On_High_Load = useCallback(async () => {
     try {
       const response = await fetch(`${URL}/auto_Off_On_High_Load`);
@@ -181,16 +176,16 @@ const App = () => {
           <Stack.Screen name='Geyser' component={Geyser} />
           <Stack.Screen name='Temperature' component={Temperature} />
           <Stack.Screen name='EmergencyAlert' component={EmergencyAlert} />
-          <Stack.Screen name='LogRecord' component={LogRecord}/>
+          <Stack.Screen name='LogRecord' component={LogRecord} />
 
         </Stack.Navigator>
       </NavigationContainer>
       <EmergencyAlert
-      visible={emergencyVisible}
-      onClose={() => setEmergencyVisible(false)}
-      title='EMERGENCY ALERT'
-      message='🚨 Emergency Nafiz has been triggered!'
-    />
+        visible={emergencyVisible}
+        onClose={() => setEmergencyVisible(false)}
+        title='EMERGENCY ALERT'
+        message='🚨 Emergency Nafiz has been triggered!'
+      />
     </>
   );
 };

@@ -25,11 +25,15 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
         route.params?.selectedCategory || storage.getString('selectedCategory')
     );
 
+    const [power, setPower] = useState(
+        route.params?.selectedpower || storage.getString('selectedpower')
+    );
+
     const items = route.params?.items || {};
     const intervalRef = useRef(null);
 
-    const get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List = useCallback(async (catagoory, compartmentIdd) => {
-        if (!catagoory || !compartmentIdd || compartmentIdd.length === 0) return;
+    const get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List = useCallback(async (catagoory, compartmentIdd, powwer) => {
+        if (!catagoory || !compartmentIdd || compartmentIdd.length === 0 || !powwer) return;
 
         try {
             const response = await fetch(`${URL}/get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List`, {
@@ -40,6 +44,7 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
                 body: JSON.stringify({
                     category: catagoory,
                     compartment_ids: compartmentIdd,
+                    power:powwer
                 }),
             });
 
@@ -202,14 +207,14 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
             const fetchAndSchedule = async () => {
                 if (!isMounted) return;
 
-                await get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(catagory, compartmentId);
+                await get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(catagory, compartmentId,power);
 
                 if (isMounted) {
                     timeoutId = setTimeout(fetchAndSchedule, 3000); // call every 3 seconds instead of 200ms
                 }
             };
 
-            if (catagory && compartmentId && Array.isArray(compartmentId) && compartmentId.length > 0) {
+            if (catagory && compartmentId && power && Array.isArray(compartmentId) && compartmentId.length > 0) {
                 fetchAndSchedule();
             } else {
                 console.log("No compartments or category selected");
@@ -220,7 +225,7 @@ const ApplianceWiseAppliances = ({ navigation, route }) => {
                 isMounted = false;
                 clearTimeout(timeoutId);
             };
-        }, [catagory, compartmentId])
+        }, [catagory, compartmentId, power])
     );
 
     useEffect(() => {

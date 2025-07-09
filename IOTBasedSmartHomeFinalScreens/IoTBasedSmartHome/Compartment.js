@@ -1,7 +1,7 @@
 import {
     Text, View, TouchableOpacity, Pressable,
     KeyboardAvoidingView, Platform, FlatList,
-    Alert, ScrollView
+    Alert, ScrollView, TextInput
 } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Styles';
@@ -21,6 +21,14 @@ const Compartment = ({ navigation, route }) => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedCompartments, setSelectedCompartments] = useState([]);
     const [categories, setCatagories] = useState([])
+    const [powers, setpowerss] = useState([])
+    const [selectedpower, setSelectedpower] = useState('All');
+    const [isChecked, setIsChecked] = useState(false);
+    const [sortMode, setSortMode] = useState('all'); // 'all' or 'activeOnly'
+    const [searchText, setSearchText] = useState('');
+    const [allAppliances, setAllAppliances] = useState([]);
+
+
 
     console.log(selectedCompartments)
     // const categories = ['All', 'Lights', 'Fans', 'Tap valve', 'Light', 'Fan', 'Tap_valvee'];
@@ -31,21 +39,48 @@ const Compartment = ({ navigation, route }) => {
         }
     });
 
+    // const getAppliances = async () => {
+    //     const url = `${URL}/ListAppliance`;
+    //     try {
+    //         const response = await fetch(url);
+    //         if (response.ok) {
+    //             const result = await response.json(); // result is an array of appliances
+    //             const uniqueCategories = ['All', ...new Set(result.map(item => item.catagory))];
+    //             const uniquepower = ['All', ...new Set(result.map(item => item.power,item=>item.catagory))];
+    //             setCatagories(uniqueCategories);
+    //             setpowerss(uniquepower)
+    //         } else {
+    //             console.error('Failed to fetch Appliances');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching data: ', error);
+    //     }
+    // };
+
     const getAppliances = async () => {
-        const url = `${URL}/ListAppliance`;
-        try {
-            const response = await fetch(url);
-            if (response.ok) {
-                const result = await response.json(); // result is an array of appliances
-                const uniqueCategories = ['All', ...new Set(result.map(item => item.catagory))];
-                setCatagories(uniqueCategories);
-            } else {
-                console.error('Failed to fetch Appliances');
-            }
-        } catch (error) {
-            console.error('Error fetching data: ', error);
+    const url = `${URL}/ListAppliance`;
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            const result = await response.json();
+            const uniqueCategories = ['All', ...new Set(result.map(item => item.catagory))];
+            
+            setCatagories(uniqueCategories);
+            setAllAppliances(result);
+
+            // ✅ Show all powers by default (on initial load)
+            const allPowers = ['All', ...new Set(result.map(item => item.power))].sort((a, b) => a - b);
+            setpowerss(allPowers);
+
+        } else {
+            console.error('Failed to fetch Appliances');
         }
-    };
+    } catch (error) {
+        console.error('Error fetching data: ', error);
+    }
+};
+
+
 
     const getStorageData = useCallback(() => {
         const storedId = storage.getNumber('home_id');
@@ -53,11 +88,36 @@ const Compartment = ({ navigation, route }) => {
             sethomeId(storedId);
         }
     });
-    
+
+    // const handleCategorySelect = (category) => {
+    //     setSelectedCategory(category);
+    //     setSelectedCompartments([]);
+    // };
+
     const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
+    setSelectedCategory(category);
+    setSelectedCompartments([]);
+    setSelectedpower('All');
+
+    if (category === 'All') {
+        // ✅ Get powers from all appliances
+        const allPowers = [...new Set(allAppliances.map(item => item.power))].sort((a, b) => a - b);
+        setpowerss(['All', ...allPowers]);
+    } else {
+        // ✅ Get powers from selected category only
+        const filtered = allAppliances.filter(item => item.catagory === category);
+        const uniquePowers = [...new Set(filtered.map(item => item.power))];
+        setpowerss(['All', ...uniquePowers]);
+    }
+};
+
+
+
+    const handlePowerSelect = (power) => {
+        setSelectedpower(power);
         setSelectedCompartments([]);
     };
+
 
     const handleCompartmentSelect = (compartmentId) => {
         setSelectedCompartments(prev => {
@@ -69,10 +129,38 @@ const Compartment = ({ navigation, route }) => {
         });
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            if (home_id) {
+                if (sortMode === 'activeOnly') {
+                    get_compartments_with_active_appliances(home_id);
+                } else {
+                    getCompartmentByHomeId(home_id);
+                }
+            }
+        }, [home_id, sortMode])
+    );
+
+
     const getCompartmentByHomeId = useCallback(async (home_id) => {
         if (!home_id) return;
         try {
             const response = await fetch(`${URL}/List_Compartment_By_Home_Id/${home_id}`);
+            if (response.ok) {
+                const result = await response.json();
+                setData(result);
+            } else {
+                console.error('Failed to fetch data');
+            }
+        } catch (error) {
+            console.error('Error fetching data: ', error);
+        }
+    });
+
+    const get_compartments_with_active_appliances = useCallback(async (home_id) => {
+        if (!home_id) return;
+        try {
+            const response = await fetch(`${URL}/get_compartments_with_active_appliances/${home_id}`);
             if (response.ok) {
                 const result = await response.json();
                 setData(result);
@@ -94,8 +182,14 @@ const Compartment = ({ navigation, route }) => {
     // ✅ 
     useFocusEffect(
         useCallback(() => {
-            if (home_id) getCompartmentByHomeId(home_id);
-        }, [home_id])
+            // if (home_id) getCompartmentByHomeId(home_id);
+            if (isChecked) {
+                if (home_id) get_compartments_with_active_appliances(home_id);
+            }
+            else {
+                if (home_id) getCompartmentByHomeId(home_id);
+            }
+        }, [])
     );
 
     const FlatListData = useCallback(({ item }) => (
@@ -131,6 +225,18 @@ const Compartment = ({ navigation, route }) => {
         </View>
     ), [selectedCompartments]);
 
+    // const toggleCheckbox = () => {
+    //     var val = !isChecked;
+    //     setIsChecked(val);
+    //     if (val) {
+    //         if (home_id) get_compartments_with_active_appliances(home_id);
+    //     }
+    //     else {
+    //         if (home_id) getCompartmentByHomeId(home_id);
+    //     }
+
+    // };
+
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
             <View style={[styles.navbar]}>
@@ -142,7 +248,49 @@ const Compartment = ({ navigation, route }) => {
                 </View>
             </View>
 
+            {/* <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+                <TextInput
+                    placeholder="Search compartment..."
+                    value={searchText}
+                    onChangeText={setSearchText}
+                    style={{
+                        height: 45,
+                        borderColor: '#001F6D',
+                        borderWidth: 1.2,
+                        borderRadius: 10,
+                        paddingHorizontal: 15,
+                        fontSize: 16,
+                        backgroundColor: 'white',
+                        color: 'black'
+                    }}
+                    placeholderTextColor="#777"
+                />
+            </View> */}
+
             <View style={styles.section}>
+                {/* <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginHorizontal: 0, marginTop: 0 }}>
+                    <Text style={{ fontSize: 16, color: 'black' }}>abc</Text>
+                    <Checkbox
+                        status={isChecked ? 'checked' : 'unchecked'}
+                        onPress={toggleCheckbox}
+                        color="#001F6D"
+                        uncheckedColor="#B0B7C3"
+                    />
+
+                </View> */}
+                <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center', margin: 10 }}>
+                    <TouchableOpacity onPress={() => setSortMode('all')}
+                        style={{ marginLeft: 50, flexDirection: 'row', justifyContent: 'flex-start' }}>
+                        <Text style={{ fontSize: 16 }}>OFF</Text>
+                        <Icon name="arrow-down" size={22} color={sortMode === 'all' ? '#001F6D' : 'gray'} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setSortMode('activeOnly')}
+                        style={{ marginLeft: 100, flexDirection: 'row', justifyContent: 'flex-end' }}>
+                        <Text style={{ fontSize: 16 }}>ON</Text>
+                        <Icon name="arrow-up" size={22} color={sortMode === 'activeOnly' ? '#001F6D' : 'gray'} />
+                    </TouchableOpacity>
+                </View>
+
                 <Text style={styles.sectionTitle}>Appliances</Text>
                 <ScrollView
                     horizontal
@@ -167,21 +315,95 @@ const Compartment = ({ navigation, route }) => {
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
+
+                <Text style={styles.sectionTitle}>Power</Text>
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.categoriesContainer}
+                >
+                    {powers.map((power) => (
+                        <TouchableOpacity
+                            key={power}
+                            style={[
+                                styles.categoryButton,
+                                selectedpower === power && styles.selectedCategory
+                            ]}
+                            onPress={() => handlePowerSelect(power)}
+                        >
+                            <Text style={[
+                                styles.categoryText,
+                                selectedpower === power && styles.selectedCategoryText
+                            ]}>
+                                {power}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </View>
 
             <View style={{ flex: 7 }}>
                 <Text style={{ marginLeft: 25, bottom: 8, fontSize: 15, fontWeight: '600', fontStyle: 'italic' }}>{items.home_name}</Text>
-                {data.length > 0 ?
+                {/* {data.length > 0 ?
+                    // <FlatList
+                    //     data={data}
+                    //     // keyExtractor={(item) => item.Compartment_Appliance_id.toString()}
+                    //     renderItem={FlatListData}
+                    //     contentContainerStyle={{ paddingBottom: 100 }}
+                    //     initialNumToRender={5}
+                    //     maxToRenderPerBatch={10}
+                    //     windowSize={5}
+                    //     removeClippedSubviews={true}
+                    // />
                     <FlatList
-                        data={data}
-                        // keyExtractor={(item) => item.Compartment_Appliance_id.toString()}
+                        data={data.filter(item =>
+                            item.compartment_name.toLowerCase().includes(searchText.toLowerCase())
+                        )}
                         renderItem={FlatListData}
                         contentContainerStyle={{ paddingBottom: 100 }}
                         initialNumToRender={5}
                         maxToRenderPerBatch={10}
                         windowSize={5}
                         removeClippedSubviews={true}
-                    />
+                    /> */}
+
+                {data.length > 0 ? (
+                    <>
+                        {/* 👇 Search Input Here */}
+                        <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+                            <TextInput
+                                placeholder="Search compartment..."
+                                value={searchText}
+                                onChangeText={setSearchText}
+                                style={{
+                                    height: 45,
+                                    borderColor: '#001F6D',
+                                    borderWidth: 1.2,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 15,
+                                    fontSize: 16,
+                                    backgroundColor: 'white',
+                                    color: 'black'
+                                }}
+                                placeholderTextColor="#777"
+                            />
+                        </View>
+
+                        {/* FlatList rendering filtered results */}
+                        <FlatList
+                            data={data.filter(item =>
+                                item.compartment_name.toLowerCase().includes(searchText.toLowerCase())
+                            )}
+                            renderItem={FlatListData}
+                            contentContainerStyle={{ paddingBottom: 100 }}
+                            initialNumToRender={5}
+                            maxToRenderPerBatch={10}
+                            windowSize={5}
+                            removeClippedSubviews={true}
+                        />
+                    </>
+                )
+
                     :
                     <View>
                         <View style={[styles.listItem]}>
@@ -204,12 +426,12 @@ const Compartment = ({ navigation, route }) => {
             </View>
 
             <View style={{
-            flexDirection: 'row',
-            justifyContent: 'space-evenly',  // space between the buttons
-            alignItems: 'center',
-            marginVertical: 10,
-        }}>
-        </View>
+                flexDirection: 'row',
+                justifyContent: 'space-evenly',  // space between the buttons
+                alignItems: 'center',
+                marginVertical: 10,
+            }}>
+            </View>
 
             <View style={[styles.Bottombtn, {
                 padding: 18,
@@ -225,10 +447,12 @@ const Compartment = ({ navigation, route }) => {
                             // Save values to MMKV storage before navigating
                             storage.set('selectedCompartments', JSON.stringify(selectedCompartments));
                             storage.set('selectedCategory', selectedCategory);
+                            storage.set('selectedpower',selectedpower)
 
                             // Navigate and pass the data
                             navigation.navigate('ApplianceWiseAppliances', {
                                 selectedCategory,
+                                selectedpower,
                                 selectedCompartments
                             });
                         }
@@ -236,7 +460,7 @@ const Compartment = ({ navigation, route }) => {
                 >
                     <Text style={[styles.buttonText, { fontSize: 17 }]}>Schedule</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.button, {  width: '35%', marginEnd: 20 }]}
+                <TouchableOpacity style={[styles.button, { width: '35%', marginEnd: 20 }]}
                     // onPress={() => navigation.navigate('AddCompartment', { items })}
                     onPress={() => navigation.navigate('AddCompartment', { items: items })}
                 >

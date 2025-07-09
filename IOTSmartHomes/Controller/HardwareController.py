@@ -39,7 +39,12 @@ class HardwareController:
 
     @staticmethod
     def get_Ignitor_state():
-        return {"state": Ignitor_state["state"]}
+        if Ignitor_state["state"] == 1:
+            value = Ignitor_state["state"]
+            Ignitor_state["state"] = 0
+            return {"state": value}
+        else :
+            return {"state": Ignitor_state["state"]}
 
 
     @staticmethod
@@ -391,11 +396,21 @@ class HardwareController:
             return (str(e))
 
     @staticmethod
-    def auto_Off_On_High_Load(threshold=100):  # watt-hour
+    def auto_Off_On_High_Load():
         try:
             now = datetime.now()
             active_logs = CompartmentApplianceLog.query.filter_by(end_time=None).all()
             turned_off_list = []
+
+            # Define tiered thresholds based on appliance power
+            THRESHOLDS = {
+                '100': {'max_power': 100, 'threshold': 50},  # 50 Wh threshold for <=100W devices
+                '500': {'max_power': 500, 'threshold': 200},  # 200 Wh threshold for 101-500W devices
+                '1000': {'max_power': 1000, 'threshold': 300},  # 300 Wh threshold for 101-500W devices
+                '2000': {'max_power': 2000, 'threshold': 400},  # 400 Wh threshold for 101-500W devices
+                'high': {'max_power': float('inf'), 'threshold': 500}  # 500 Wh threshold for >500W devices
+
+            }
 
             for log in active_logs:
                 comApp = CompartmentAppliance.query.get(log.compartment_appliance_id)
@@ -407,12 +422,25 @@ class HardwareController:
                     # Calculate consumption: power (W) * time (min) / 60 => Wh
                     consumption = (power * duration_minutes) / 60.0
 
+                    # Determine which threshold to use based on appliance power
+                    threshold = None
+                    if power <= THRESHOLDS['100']['max_power']:
+                        threshold = THRESHOLDS['100']['threshold']
+                    elif power <= THRESHOLDS['500']['max_power']:
+                        threshold = THRESHOLDS['500']['threshold']
+                    elif power <= THRESHOLDS['1000']['max_power']:
+                        threshold = THRESHOLDS['1000']['threshold']
+                    elif power <= THRESHOLDS['2000']['max_power']:
+                        threshold = THRESHOLDS['2000']['threshold']
+                    else:
+                        threshold = THRESHOLDS['high']['threshold']
+
                     if consumption >= threshold:
                         # Update log
                         log.end_time = now
                         log.duration_minutes = duration_minutes
                         log.consumption = consumption
-                        log.messagee = "Over Consumption"
+                        log.messagee = f"Over Consumption (Threshold: {threshold}Wh)"
 
                         # Update status
                         comApp.status = 0
@@ -424,6 +452,7 @@ class HardwareController:
                             "power": power,
                             "duration_minutes": duration_minutes,
                             "consumption": round(consumption, 2),
+                            "threshold": threshold,
                             "turned_off_at": now.strftime('%Y-%m-%d %H:%M:%S')
                         })
 
@@ -431,7 +460,8 @@ class HardwareController:
             if turned_off_list:
                 return {
                     "success": "Appliances turned off due to over-consumption.",
-                    "turned_off": turned_off_list
+                    "turned_off": turned_off_list,
+                    "thresholds_used": THRESHOLDS
                 }
 
             # ❌ Otherwise, return nothing (empty response)

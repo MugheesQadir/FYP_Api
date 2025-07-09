@@ -9,7 +9,6 @@ import Icon from 'react-native-vector-icons/Feather';
 import { MMKV } from 'react-native-mmkv';
 import { useFocusEffect } from '@react-navigation/native';
 import URL from './Url';
-import CompartmentAppliance from './CompartmentAppliance';
 
 
 const storage = new MMKV();

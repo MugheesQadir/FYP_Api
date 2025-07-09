@@ -1,7 +1,7 @@
 import {
   Text, View, TouchableOpacity, Pressable,
   KeyboardAvoidingView, Platform, FlatList,
-  Switch,
+  Switch,TextInput,
   Alert,
   StyleSheet,
 } from 'react-native';
@@ -22,7 +22,10 @@ const CompartmentAppliance = ({ navigation, route }) => {
   const [compartmentId, setCompartmentId] = useState(route.params?.items?.compartment_id || null);
   const items = route.params?.items || {};
   const intervalRef = useRef(null);
-  const [msg,setmasg] = useState('')
+  const [msg, setmasg] = useState('')
+  const [sortMode, setSortMode] = useState('all'); // 'all' or 'activeOnly'
+  const [searchText, setSearchText] = useState('');
+
 
   const [emergencyVisible, setEmergencyVisible] = useState(false);
 
@@ -32,20 +35,29 @@ const CompartmentAppliance = ({ navigation, route }) => {
       const response = await fetch(`${URL}/get_compartment_appliance_with_compartment_id/${id}`);
       if (response.ok) {
         const result = await response.json();
-        setData(result);
 
+        // Sort data if 'activeOnly' mode
+        const sortedData = sortMode === 'activeOnly'
+          ? [...result].sort((a, b) => b.status - a.status)
+          : result;
+
+        setData(sortedData);
+
+        // Update switches
         const initialToggles = {};
-        result.forEach(item => {
+        sortedData.forEach(item => {
           initialToggles[item.Compartment_Appliance_id] = item.status === 1;
         });
         setToggleStates(initialToggles);
+
       } else {
         console.error('Failed to fetch data');
       }
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
-  }, []);
+  }, [sortMode]);
+
 
   const handleToggle = useCallback(async (id, Compartment_Appliance_id) => {
     const newStatus = !toggleStates[id];
@@ -122,24 +134,24 @@ const CompartmentAppliance = ({ navigation, route }) => {
     }, [items?.compartment_id])
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!compartmentId) return;
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     if (!compartmentId) return;
 
-      getCompartmentApplianceByCompartmentId(compartmentId);
+  //     getCompartmentApplianceByCompartmentId(compartmentId);
 
-      intervalRef.current = setInterval(() => {
-        getCompartmentApplianceByCompartmentId(compartmentId);
-      }, 1000);
+  //     intervalRef.current = setInterval(() => {
+  //       getCompartmentApplianceByCompartmentId(compartmentId);
+  //     }, 1000);
 
-      return () => {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      };
-    }, [compartmentId])
-  );
+  //     return () => {
+  //       if (intervalRef.current) {
+  //         clearInterval(intervalRef.current);
+  //         intervalRef.current = null;
+  //       }
+  //     };
+  //   }, [compartmentId])
+  // );
 
   useEffect(() => {
     if (data.length > 0) {
@@ -222,6 +234,11 @@ const CompartmentAppliance = ({ navigation, route }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (compartmentId) {
+      getCompartmentApplianceByCompartmentId(compartmentId);
+    }
+  }, [sortMode]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container]}>
@@ -233,6 +250,25 @@ const CompartmentAppliance = ({ navigation, route }) => {
           <Text style={styles.navbarText}>Appliances</Text>
         </View>
       </View>
+
+      <View style={{ flexDirection: 'row', width: '100%', alignItems: 'center', margin: 10 }}>
+        <TouchableOpacity
+          onPress={() => setSortMode('all')}
+          style={{ marginLeft: 50, flexDirection: 'row', justifyContent: 'flex-start' }}
+        >
+          <Text style={{ fontSize: 16 }}>OFF</Text>
+          <Icon name="arrow-down" size={22} color={sortMode === 'all' ? '#001F6D' : 'gray'} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setSortMode('activeOnly')}
+          style={{ marginLeft: 100, flexDirection: 'row', justifyContent: 'flex-end' }}
+        >
+          <Text style={{ fontSize: 16 }}>ON</Text>
+          <Icon name="arrow-up" size={22} color={sortMode === 'activeOnly' ? '#001F6D' : 'gray'} />
+        </TouchableOpacity>
+      </View>
+
 
       <View style={{ marginBottom: 10, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center' }}>
         <Text style={{ fontSize: 15, fontWeight: '600', fontStyle: 'italic' }}>{items.compartment_name}</Text>
@@ -254,7 +290,7 @@ const CompartmentAppliance = ({ navigation, route }) => {
       </View>
 
       <View style={{ flex: 7, position: 'relative' }}>
-        {data.length > 0 ?
+        {/* {data.length > 0 ?
           <FlatList
             data={data}
             renderItem={FlatListData}
@@ -263,7 +299,43 @@ const CompartmentAppliance = ({ navigation, route }) => {
             maxToRenderPerBatch={10}
             windowSize={5}
             removeClippedSubviews={true}
-          />
+          /> */}
+        {data.length > 0 ? (
+          <>
+            {/* 👇 Search Input Here */}
+            <View style={{ paddingHorizontal: 20, marginBottom: 10 }}>
+              <TextInput
+                placeholder="Search Appliances..."
+                value={searchText}
+                onChangeText={setSearchText}
+                style={{
+                  height: 45,
+                  borderColor: '#001F6D',
+                  borderWidth: 1.2,
+                  borderRadius: 10,
+                  paddingHorizontal: 15,
+                  fontSize: 16,
+                  backgroundColor: 'white',
+                  color: 'black'
+                }}
+                placeholderTextColor="#777"
+              />
+            </View>
+
+            {/* FlatList rendering filtered results */}
+            <FlatList
+              data={data.filter(item =>
+                item.name.toLowerCase().includes(searchText.toLowerCase())
+              )}
+              renderItem={FlatListData}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              initialNumToRender={5}
+              maxToRenderPerBatch={10}
+              windowSize={5}
+              removeClippedSubviews={true}
+            />
+          </>
+        )
           :
           <View>
             <View style={[styles.listItem]}>

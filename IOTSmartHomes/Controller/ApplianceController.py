@@ -57,41 +57,95 @@ class ApplianceController:
         except Exception as e:
             return str(e)
 
-    @staticmethod
-    def get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category,compartment_id_list):
-        try:
-            query = (
-                db.session.query(CompartmentAppliance, Compartment, Appliance)
-                .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
-                .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
-                .filter(
-                    CompartmentAppliance.compartment_id.in_(compartment_id_list),
-                    CompartmentAppliance.validate == 1
-                )
-            )
+    # @staticmethod
+    # def get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category,compartment_id_list, power):
+    #     try:
+    #         query = (
+    #             db.session.query(CompartmentAppliance, Compartment, Appliance)
+    #             .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+    #             .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+    #             .filter(
+    #                 CompartmentAppliance.compartment_id.in_(compartment_id_list),
+    #                 CompartmentAppliance.validate == 1
+    #             )
+    #         )
+    #
+    #         # ✅ Only apply category filter if it's not "All"
+    #         if category.lower() != "all":
+    #             query = query.filter(Appliance.catagory == category and Appliance.power == power)
+    #
+    #         result = query.all()
+    #
+    #         if not result:
+    #             return []
+    #
+    #         return [{"Compartment_Appliance_id": compartmentappliance.id,
+    #                  "status": compartmentappliance.status,
+    #                  "name": compartmentappliance.name,
+    #                  "port": compartmentappliance.port,
+    #                  "compartment_id": compartment.id,
+    #                  "compartment_name": compartment.name,
+    #                  "appliance_id": appliance.id,
+    #                  "appliance_catagory": appliance.catagory}
+    #                 for compartmentappliance, compartment, appliance in result]
+    #
+    #     except Exception as e:
+    #         return {"error": str(e)}
 
-            # ✅ Only apply category filter if it's not "All"
+
+    @staticmethod
+    def get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category, power,
+                                                                                                compartment_id_list):
+        try:
+            # Step 1: Build base appliance query
+            appliance_query = db.session.query(Appliance.id)
+
             if category.lower() != "all":
-                query = query.filter(Appliance.catagory == category)
+                appliance_query = appliance_query.filter(Appliance.catagory == category)
+
+            if str(power).lower() != "all":
+                try:
+                    appliance_query = appliance_query.filter(Appliance.power == int(power))
+                except ValueError:
+                    return {"error": "Invalid power value. Must be an integer or 'All'."}
+
+        # Step 2: Fetch all matched appliance IDs
+            matched_appliance_ids = [row[0] for row in appliance_query.all()]
+
+            if not matched_appliance_ids:
+                return []  # No appliance matched
+
+        # Step 3: Now query CompartmentAppliance based on those appliance IDs and compartment IDs
+            query = (
+            db.session.query(CompartmentAppliance, Compartment, Appliance)
+            .join(Compartment, CompartmentAppliance.compartment_id == Compartment.id)
+            .join(Appliance, CompartmentAppliance.appliance_id == Appliance.id)
+            .filter(
+                CompartmentAppliance.compartment_id.in_(compartment_id_list),
+                CompartmentAppliance.appliance_id.in_(matched_appliance_ids),
+                CompartmentAppliance.validate == 1
+            )
+            )
 
             result = query.all()
 
             if not result:
                 return []
 
-            return [{"Compartment_Appliance_id": compartmentappliance.id,
-                     "status": compartmentappliance.status,
-                     "name": compartmentappliance.name,
-                     "port": compartmentappliance.port,
-                     "compartment_id": compartment.id,
-                     "compartment_name": compartment.name,
-                     "appliance_id": appliance.id,
-                     "appliance_catagory": appliance.catagory}
-                    for compartmentappliance, compartment, appliance in result]
+            return [{
+            "Compartment_Appliance_id": compartmentappliance.id,
+            "status": compartmentappliance.status,
+            "name": compartmentappliance.name,
+            "port": compartmentappliance.port,
+            "compartment_id": compartment.id,
+            "compartment_name": compartment.name,
+            "appliance_id": appliance.id,
+            "appliance_catagory": appliance.catagory,
+            "appliance_power": appliance.power
+        } for compartmentappliance, compartment, appliance in result]
 
         except Exception as e:
             return {"error": str(e)}
-
 
     @staticmethod
     def AddCompartmentAppliances(data):

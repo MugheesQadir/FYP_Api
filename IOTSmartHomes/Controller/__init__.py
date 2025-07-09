@@ -2,3 +2,5 @@ from Controller.PersonController import PersonController
 from Controller.HomeController import HomeController
 from Controller.ApplianceController import ApplianceController
 from Controller.HardwareController import HardwareController
+from Controller.LogMaintainController import LogMaintainController
+from Controller.FYPTaskController import FYPTaskController

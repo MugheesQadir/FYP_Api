@@ -1,5 +1,6 @@
 from flask import jsonify,request
 
+from Controller import FYPTaskController
 from Controller.ApplianceController import ApplianceController
 from Controller.HardwareController import HardwareController
 from Controller.HomeController import HomeController
@@ -70,6 +71,7 @@ def List_Compartment_By_Home_ID(home_id):
     compartments = HomeController.List_compartments_by_home_id(home_id)
     return jsonify(compartments)
 
+
 @app.route('/AddCompartment',methods = ["POST"])
 def addCompartment():
     data = request.get_json()
@@ -107,12 +109,13 @@ def get_appliances_by_category_and_compartments():
         data = request.get_json()
 
         category = data.get("category")
+        power = data.get("power")
         compartment_id_list = data.get("compartment_ids")
 
-        if not category or not compartment_id_list:
-            return jsonify({"error": "Both 'category' and 'compartment_ids' are required."}), 400
+        if not category or not compartment_id_list or not power:
+            return jsonify({"error": "'category' and 'compartment_ids' and 'power' are required."}), 400
 
-        result = ApplianceController.get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category, compartment_id_list)
+        result = ApplianceController.get_compartment_appliances_for_appliance_wise_scheduling_by_category_and_compartments_ki_List(category,power, compartment_id_list)
         return jsonify(result)
 
     except Exception as e:
@@ -388,6 +391,13 @@ def panic_button_pressed_turn_off_all_appliances_locks_by_home_id():
     data = request.get_json()
     result = LogMaintainController.panic_button_pressed_turn_off_all_appliances_locks_by_home_id(data)
     return jsonify(result) ,200
+
+#------------------- FYP Task Controller ---------------------
+
+@app.route('/get_compartments_with_active_appliances/<int:home_id>',methods = ['GET'])
+def get_compartments_with_active_appliances(home_id):
+    compartments = FYPTaskController.get_compartments_with_active_appliances(home_id)
+    return jsonify(compartments)
 
 
 #--------------------- Total Api Used -------------------------
