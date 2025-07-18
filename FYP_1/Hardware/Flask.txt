@@ -1,0 +1,28 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Global variable to hold the relay state
+relay_state = {"state": 0}  # Default state is OFF
+
+# Endpoint to set the relay state
+@app.route('/set_relay_state', methods=['POST'])
+def set_relay_state():
+    global relay_state
+    try:
+        data = request.json
+        if "state" in data and data["state"] in [0, 1]:  # Validate state (0 or 1)
+            relay_state["state"] = data["state"]
+            return jsonify({"message": "Relay state updated", "current_state": relay_state["state"]}), 200
+        return jsonify({"error": "Invalid state. Must be 0 or 1."}), 400
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+# Endpoint to get the current relay state
+@app.route('/get_relay_state', methods=['GET'])
+def get_relay_state():
+    return jsonify({"state": relay_state["state"]}), 200
+
+# Run the Flask app
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)

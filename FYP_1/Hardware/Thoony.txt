@@ -1,0 +1,118 @@
+import urequests
+import network
+from machine import Pin
+import time
+
+# Wi-Fi credentials
+SSID = "Quaid-e-Azam"
+PASSWORD = "123123123"
+
+# Flask server URLs
+FLASK_URL_GET = "http://192.168.220.116:5000/get_relay_state"
+FLASK_URL_SET = "http://192.168.220.116:5000/set_relay_state"
+
+# GPIO pin setup
+RELAY_PIN = 1
+relay = Pin(RELAY_PIN, Pin.OUT)
+
+BUTTON_PIN = 2
+button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_DOWN)
+
+# Variables to track states
+previous_button_state = 0
+
+# Connect to Wi-Fi
+def connect_to_wifi():
+    station = network.WLAN(network.STA_IF)
+    station.active(True)
+    station.connect(SSID, PASSWORD)
+    timeout = 15
+    while not station.isconnected() and timeout > 0:
+        print("Connecting to Wi-Fi...")
+        time.sleep(1)
+        timeout -= 1
+    if station.isconnected():
+        print("Connected to Wi-Fi")
+        print("IP Address:", station.ifconfig()[0])
+    else:
+        print("Failed to connect to Wi-Fi")
+        raise Exception("Wi-Fi connection failed")
+
+# Fetch relay state from Flask server
+def fetch_relay_state():
+    try:
+        print("")
+        print("Fetching relay state from server...")
+        response = urequests.get(FLASK_URL_GET)
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("state", 0)
+        else:
+            print(f"Failed to fetch relay state. HTTP status: {response.status_code}")
+    except Exception as e:
+        print(f"Error fetching relay state: {e}")
+    return 0
+
+# Send relay state to Flask server
+def send_relay_state(state):
+    try:
+        print("")
+        print(f"Sending relay state {state} to server...")
+        data = {"state": state}
+        response = urequests.post(FLASK_URL_SET, json=data)
+        if response.status_code == 200:
+            print(f"Relay state successfully updated to {state} on server.")
+        else:
+            print(f"Failed to update relay state. HTTP status: {response.status_code}")
+    except Exception as e:
+        print(f"Error sending relay state: {e}")
+
+# Main logic
+def main():
+    global previous_button_state
+
+    connect_to_wifi()
+
+    while True:
+        button_state = button.value()
+        flask_state = fetch_relay_state()
+
+        # Case 1: Button ON
+        if button_state == 1:
+            if previous_button_state != button_state:                
+                send_relay_state(1)
+                relay.value(1)
+                print("Button ON: Relay and Flask updated to 1.")
+
+        # Case 2: Button OFF
+        elif button_state == 0:
+            if previous_button_state != button_state:                
+                send_relay_state(0)
+                relay.value(0)
+                print("Button OFF: Relay and Flask updated to 0.")
+
+        # Case 3: Flask turns ON
+        if flask_state == 1 and button_state == 0:
+            relay.value(1)
+            print("Flask ON: Relay updated to 1.")
+
+        # Case 4: Flask turns OFF
+        elif flask_state == 0 and button_state == 0:
+            relay.value(0)
+            print("Flask OFF: Relay updated to 0.")
+                        
+        elif flask_state == 1 and button_state == 1:
+            relay.value(1)
+            print("Flask ON: Relay updated to 1.")
+            
+
+        # Update previous button state
+        previous_button_state = button_state        
+
+# Run the main program
+try:
+    main()
+    time.sleep(0.2)  # Loop delay 200 mili seconds
+except Exception as e:
+    print(f"An error occurred: {e}")
+
